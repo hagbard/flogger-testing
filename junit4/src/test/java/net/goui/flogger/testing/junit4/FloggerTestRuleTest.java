@@ -2,12 +2,11 @@ package net.goui.flogger.testing.junit4;
 
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.flogger.FluentLogger;
-import java.util.logging.Level;
+import net.goui.flogger.testing.core.truth.LogSubject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,24 +24,15 @@ public class FloggerTestRuleTest {
     logger.atInfo().log("Message: <other>");
     logger.atFine().log("Message: bar");
 
-    logs.assertLog(0).hasLevelAbove(INFO);
+    logs.assertLog(0).levelIsAbove(INFO);
 
-    logs.assertLog(1).hasLevelCompatibleWith(INFO);
-    logs.assertLog(1).message().matches(".*other.*");
+    logs.assertLog(1).levelIsCompatibleWith(INFO);
+    logs.assertLog(1).messageMatches("ot[th]er");
 
-    logs.assertLog(2).hasLevelBelow(INFO);
+    logs.assertLog(2).levelIsBelow(INFO);
 
-    logs.assertLogs().atOrAbove(WARNING).allMessagesContain("foo");
-    logs.assertLogs().noMessagesMatch(".*error.*");
-    logs.assertLogs().someMessageMatches(".*(foo|bar).*").times(2);
-
-
-//    logs.assertLogs().every().messageMatches(".*foo.*");
-//
-//    logs.assertLogs().atOrAbove(INFO).every().messageMatches(".*foo.*");
-//    logs.assertLogs().atOrAbove(INFO).some().messageMatches(".*foo.*");
-//    logs.assertLogs().atOrAbove(INFO).no().messageMatches(".*foo.*");
-//    logs.assertLogs().atOrAbove(INFO).atLeast(2).messageMatches(".*foo.*");
-//    logs.assertLogs().atOrAbove(INFO).times(2).messageMatches(".*foo.*");
+    logs.assertLogs().everyLog().atOrAboveLevel(WARNING).messageContains("foo");
+    logs.assertLogs().noLog().messageContains("error");
+    logs.assertLogs().anyLog().messageMatches("foo|bar");
   }
 }

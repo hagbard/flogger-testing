@@ -1,16 +1,19 @@
 package net.goui.flogger.testing.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.context.LogLevelMap;
 import com.google.common.flogger.context.ScopedLoggingContext.LoggingContextCloseable;
 import com.google.common.flogger.context.ScopedLoggingContexts;
-import com.google.common.truth.Truth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
+import net.goui.flogger.testing.core.truth.LogEntry;
+import net.goui.flogger.testing.core.truth.LogEntrySubject;
+import net.goui.flogger.testing.core.truth.LogSubject;
 
 public class TestApi {
   private final ImmutableMap<String, ? extends Level> levelMap;
@@ -21,14 +24,16 @@ public class TestApi {
     this.interceptor = interceptor.orElseGet(this::loadBestInterceptor);
   }
 
-  public LogSubject assertLog(int n) {
-    return Truth.assertWithMessage("log(%s)", n)
-        .about(LogSubject.logs())
-        .that(interceptor.getLogs().get(n));
+  public LogEntrySubject assertLog(int n) {
+    return LogSubject.assertThat(logged()).log(n);
   }
 
-  public LogStreamSubject assertLogs() {
-    return LogStreamSubject.assertThat(interceptor.getLogs());
+  public LogSubject assertLogs() {
+    return LogSubject.assertThat(logged());
+  }
+
+  private ImmutableList<LogEntry> logged() {
+    return interceptor.getLogs();
   }
 
   protected final ApiHook install() {

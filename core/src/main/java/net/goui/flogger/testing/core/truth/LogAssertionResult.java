@@ -1,4 +1,4 @@
-package net.goui.flogger.testing.core.test;
+package net.goui.flogger.testing.core.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

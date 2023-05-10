@@ -4,35 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/google-java-format.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/CapturedLog.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/JdkLogInterceptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogStreamSubject.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogSubject.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/core/AppTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit4/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit4/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit5/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit5/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/core/App.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/core/AppTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/App.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/org/example/AppTest.java" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Delete rubbish.">
+      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntrySubject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLog.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/CapturedLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/JdkLogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogStreamSubject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogSubject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/LogAssertion.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/LogAssertionResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertionResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/LogEntry.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/LogEntrySubject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/ScopedLog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/test/ScopedLogSubject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,8 +32,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -71,7 +61,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.48390806",
-    "settings.editor.selected.configurable": "reference.projectsettings.compiler.annotationProcessors"
+    "settings.editor.selected.configurable": "project.propCompiler"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -80,6 +70,9 @@
     </key>
     <key name="MoveInnerDialog.RECENTS_KEY">
       <recent name="net.goui.flogger.testing.core" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing.core.test" />
     </key>
   </component>
   <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
@@ -130,7 +123,27 @@
       <option name="presentableId" value="Default" />
       <updated>1683560147132</updated>
     </task>
+    <task id="LOCAL-00001" summary="Maybe new idea...">
+      <created>1683720537348</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1683720537348</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Delete rubbish.">
+      <created>1683720556997</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1683720556997</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Maybe new idea..." />
+    <MESSAGE value="Delete rubbish." />
+    <option name="LAST_COMMIT_MESSAGE" value="Delete rubbish." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

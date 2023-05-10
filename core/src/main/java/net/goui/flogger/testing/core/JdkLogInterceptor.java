@@ -2,14 +2,14 @@ package net.goui.flogger.testing.core;
 
 import com.google.common.collect.ImmutableList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import net.goui.flogger.testing.core.truth.LogEntry;
 
 public class JdkLogInterceptor implements LogInterceptor {
-  private final ConcurrentLinkedQueue<CapturedLog> logs = new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
 
   @Override
   public Recorder attachTo(String loggerName, Level level) {
@@ -21,7 +21,7 @@ public class JdkLogInterceptor implements LogInterceptor {
   }
 
   @Override
-  public ImmutableList<CapturedLog> getLogs() {
+  public ImmutableList<LogEntry> getLogs() {
     return ImmutableList.copyOf(logs);
   }
 
@@ -30,7 +30,7 @@ public class JdkLogInterceptor implements LogInterceptor {
     public void publish(LogRecord record) {
       Level level = record.getLevel();
       logs.add(
-          CapturedLog.of(
+          LogEntry.of(
               l -> Integer.compare(level.intValue(), l.intValue()),
               level.getName(),
               record.getMessage()));

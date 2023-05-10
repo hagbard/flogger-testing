@@ -1,24 +1,22 @@
-package net.goui.flogger.testing.core;
+package net.goui.flogger.testing.core.truth;
 
 import com.google.auto.value.AutoValue;
-import java.util.Comparator;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 
 @AutoValue
-public abstract class CapturedLog {
+public abstract class LogEntry {
   public enum LevelCheck { ABOVE, COMPATIBLE, BELOW }
 
   public interface LevelTester {
     int test(Level level);
   }
 
-  static CapturedLog of(LevelTester levelTester, String levelName, String message) {
-    return new AutoValue_CapturedLog(levelTester, levelName, message);
+  public static LogEntry of(LevelTester levelTester, String levelName, String message) {
+    return new AutoValue_LogEntry(levelTester, levelName, message);
   }
 
   abstract LevelTester levelTester();
-  abstract String levelName();
+  public abstract String levelName();
 
   public abstract String getMessage();
 
