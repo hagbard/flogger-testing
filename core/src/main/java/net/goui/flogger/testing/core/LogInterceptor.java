@@ -9,8 +9,6 @@ public interface LogInterceptor {
 
   ImmutableList<LogEntry> getLogs();
 
-
-
   interface Recorder extends AutoCloseable {
     @Override
     void close();

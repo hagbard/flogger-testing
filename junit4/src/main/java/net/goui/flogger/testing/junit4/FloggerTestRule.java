@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
+import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.TestApi;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -54,11 +55,16 @@ public class FloggerTestRule extends TestApi implements TestRule {
   }
 
   public static FloggerTestRule using(Map<String, ? extends Level> levelMap) {
-    return new FloggerTestRule(levelMap);
+    return new FloggerTestRule(levelMap, Optional.empty());
   }
 
-  private FloggerTestRule(Map<String, ? extends Level> levelMap) {
-    super(levelMap, Optional.empty());
+  private FloggerTestRule(
+      Map<String, ? extends Level> levelMap, Optional<LogInterceptor> interceptor) {
+    super(levelMap, interceptor);
+  }
+
+  FloggerTestRule withInterceptor(LogInterceptor interceptor) {
+    return new FloggerTestRule(levelMap(), Optional.of(interceptor));
   }
 
   @Override

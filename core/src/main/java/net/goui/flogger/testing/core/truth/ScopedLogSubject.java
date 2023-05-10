@@ -5,6 +5,7 @@ import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.ABOVE;
 import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.BELOW;
 import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.COMPATIBLE;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
@@ -59,9 +60,7 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
   public void messageContains(String substring) {
     handleResult(
         log.assertLogs(e -> e.getMessage().contains(substring)),
-        Fact.fact(
-            "expected " + log.strategyDescription() + " log message to contain substring",
-            substring));
+        logFact("message", "contain substring", substring));
   }
 
   @Override
@@ -69,31 +68,64 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
     Pattern pattern = Pattern.compile(regex);
     handleResult(
         log.assertLogs(e -> pattern.matcher(e.getMessage()).find()),
-        Fact.fact(
-            "expected " + log.strategyDescription() + " log message to match regular expression",
-            regex));
+        logFact("message", "match regular expression", regex));
+  }
+
+  @Override
+  public void metadataContains(String key, boolean value) {
+    metadataContainsImpl(key, value);
+  }
+
+  @Override
+  public void metadataContains(String key, long value) {
+    metadataContainsImpl(key, value);
+  }
+
+  @Override
+  public void metadataContains(String key, double value) {
+    metadataContainsImpl(key, value);
+  }
+
+  @Override
+  public void metadataContains(String key, String value) {
+    metadataContainsImpl(key, value);
+  }
+
+  private void metadataContainsImpl(String key, Object value) {
+    handleResult(
+        log.assertLogs(e -> e.getMetadata().getOrDefault(key, ImmutableList.of()).contains(value)),
+        logFact("metadata", "contain", key + "=" + value));
+  }
+
+  @Override
+  public void hasCause(Class<? extends Throwable> type) {
+    handleResult(
+        log.assertLogs(e -> type.isInstance(e.getCause())), logFact("cause", "be of type", type));
   }
 
   @Override
   public void levelIsCompatibleWith(Level level) {
     handleResult(
         log.assertLogs(e -> e.checkLevel(level) == COMPATIBLE),
-        Fact.fact(
-            "expected " + log.strategyDescription() + " log level to be compatible with", level));
+        logFact("level", "be compatible with", level));
   }
 
   @Override
   public void levelIsAbove(Level level) {
     handleResult(
-        log.assertLogs(e -> e.checkLevel(level) == ABOVE),
-        Fact.fact("expected " + log.strategyDescription() + " log level to be above", level));
+        log.assertLogs(e -> e.checkLevel(level) == ABOVE), logFact("level", "be above", level));
   }
 
   @Override
   public void levelIsBelow(Level level) {
     handleResult(
-        log.assertLogs(e -> e.checkLevel(level) == BELOW),
-        Fact.fact("expected " + log.strategyDescription() + " log level to be below", level));
+        log.assertLogs(e -> e.checkLevel(level) == BELOW), logFact("level", "be below", level));
+  }
+
+  Fact logFact(String attribute, String claim, Object expected) {
+    return Fact.fact(
+        String.format("expected %s of %s log to %s", attribute, log.strategyDescription(), claim),
+        expected);
   }
 
   public void handleResult(LogAssertionResult result, Fact headlineFact) {

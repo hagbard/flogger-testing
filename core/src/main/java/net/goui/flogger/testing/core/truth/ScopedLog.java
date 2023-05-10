@@ -26,7 +26,8 @@ public abstract class ScopedLog {
   abstract TestStrategy strategy();
 
   public final ScopedLog filter(Predicate<LogEntry> predicate) {
-    return new AutoValue_ScopedLog(log(), testFilter().and(predicate), "every", ScopedLog::testEveryMatch);
+    return new AutoValue_ScopedLog(
+        log(), testFilter().and(predicate), strategyDescription(), strategy());
   }
 
   public static ScopedLog everyMatch(ImmutableList<LogEntry> log) {
@@ -64,12 +65,8 @@ public abstract class ScopedLog {
   private static LogAssertionResult testNoMatch(
       Supplier<Stream<LogEntry>> logsUnderTest, Predicate<LogEntry> logAssertion) {
     ImmutableList<LogEntry> firstFewUnexpectedLogs =
-        logsUnderTest
-            .get()
-            .filter(Predicate.not(logAssertion))
-            .limit(10)
-            .collect(toImmutableList());
-    if (!firstFewUnexpectedLogs.isEmpty()) {
+        logsUnderTest.get().filter(logAssertion).limit(10).collect(toImmutableList());
+    if (firstFewUnexpectedLogs.isEmpty()) {
       return LogAssertionResult.PASS;
     }
     return LogAssertionResult.fail(

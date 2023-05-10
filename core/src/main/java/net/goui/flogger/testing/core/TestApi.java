@@ -14,7 +14,9 @@ import net.goui.flogger.testing.core.LogInterceptor.Recorder;
 import net.goui.flogger.testing.core.truth.LogEntry;
 import net.goui.flogger.testing.core.truth.LogEntrySubject;
 import net.goui.flogger.testing.core.truth.LogSubject;
+import net.goui.flogger.testing.jdk.JdkLogInterceptor;
 
+/** One of these is instantiated per test case. */
 public class TestApi {
   private final ImmutableMap<String, ? extends Level> levelMap;
   private final LogInterceptor interceptor;
@@ -22,6 +24,10 @@ public class TestApi {
   protected TestApi(Map<String, ? extends Level> levelMap, Optional<LogInterceptor> interceptor) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor.orElseGet(this::loadBestInterceptor);
+  }
+
+  private ImmutableList<LogEntry> logged() {
+    return interceptor.getLogs();
   }
 
   public LogEntrySubject assertLog(int n) {
@@ -32,8 +38,8 @@ public class TestApi {
     return LogSubject.assertThat(logged());
   }
 
-  private ImmutableList<LogEntry> logged() {
-    return interceptor.getLogs();
+  protected final ImmutableMap<String, ? extends Level> levelMap() {
+    return levelMap;
   }
 
   protected final ApiHook install() {
@@ -60,6 +66,6 @@ public class TestApi {
   }
 
   private LogInterceptor loadBestInterceptor() {
-    return new JdkLogInterceptor();
+    return JdkLogInterceptor.create();
   }
 }
