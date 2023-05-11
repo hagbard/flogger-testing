@@ -5,17 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Better messages and log sites.">
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultMetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultMetadataExtractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertionResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertionResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/log4j2/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/AppTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,8 +23,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="Class" />
         <option value="JUnit4 Test Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -217,7 +214,21 @@
       <option name="project" value="LOCAL" />
       <updated>1683840322332</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Better messages and log sites.">
+      <created>1683840433987</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1683840433987</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Better messages and log sites.">
+      <created>1683840439903</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1683840439903</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

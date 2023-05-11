@@ -15,6 +15,7 @@
     <module>core</module>
     <module>junit4</module>
     <module>junit5</module>
+    <module>log4j2</module>
   </modules>
   <packaging>pom</packaging>
 

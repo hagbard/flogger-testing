@@ -33,7 +33,13 @@ public final class JdkLogInterceptor implements LogInterceptor {
     handler.setLevel(level);
     Logger logger = Logger.getLogger(loggerName);
     logger.addHandler(handler);
-    return () -> logger.removeHandler(handler);
+    return () -> {
+      try {
+        logger.removeHandler(handler);
+      } catch (RuntimeException e) {
+        // Ignored on close().
+      }
+    };
   }
 
   @Override
@@ -48,12 +54,13 @@ public final class JdkLogInterceptor implements LogInterceptor {
       Level level = record.getLevel();
       logs.add(
           LogEntry.of(
-          record.getSourceClassName(),
-          record.getSourceMethodName(),
+              record.getSourceClassName(),
+              record.getSourceMethodName(),
               level.getName(),
               levelClassOf(level),
               mm.message(),
-              mm.metadata(), record.getThrown()));
+              mm.metadata(),
+              record.getThrown()));
     }
 
     @Override
@@ -70,18 +77,10 @@ public final class JdkLogInterceptor implements LogInterceptor {
 
   private static LevelClass levelClassOf(Level level) {
     int levelValue = level.intValue();
-    if (levelValue >= SEVERE_VALUE) {
-      return LevelClass.SEVERE;
-    }
-    if (levelValue >= WARNING_VALUE) {
-      return LevelClass.WARNING;
-    }
-    if (levelValue >= INFO_VALUE) {
-      return LevelClass.INFO;
-    }
-    if (levelValue >= FINE_VALUE) {
-      return LevelClass.FINE;
-    }
+    if (levelValue >= SEVERE_VALUE) return LevelClass.SEVERE;
+    if (levelValue >= WARNING_VALUE) return LevelClass.WARNING;
+    if (levelValue >= INFO_VALUE) return LevelClass.INFO;
+    if (levelValue >= FINE_VALUE) return LevelClass.FINE;
     return LevelClass.FINEST;
   }
 }
