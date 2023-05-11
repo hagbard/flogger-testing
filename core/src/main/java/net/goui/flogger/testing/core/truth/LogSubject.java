@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.regex.Pattern;
@@ -82,9 +81,7 @@ public class LogSubject extends Subject implements LogAssertion {
 
   @Override
   public void hasCause(Class<? extends Throwable> type) {
-    check("cause()")
-        .that(entry().getCause())
-        .isInstanceOf(type);
+    check("cause()").that(entry().getCause()).isInstanceOf(type);
   }
 
   @Override

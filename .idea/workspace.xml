@@ -4,15 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Fixed level mess.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Better messages and log sites.">
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultMetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultMetadataExtractor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntrySubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogsSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertionResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertionResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -38,27 +40,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit4&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4&quot;: &quot;&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;openjdk-20&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/David/.m2/repository/com/google/auto/value/auto-value/1.10.1/auto-value-1.10.1.jar&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.48390806&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit4",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4": "",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "jdk.selected.JAVA_MODULE": "openjdk-20",
+    "last_opened_file_path": "C:/Users/David/.m2/repository/com/google/auto/value/auto-value/1.10.1/auto-value-1.10.1.jar",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.48390806",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "project.propCompiler"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\David\IdeaProjects\flogger-testing" />
@@ -200,7 +203,21 @@
       <option name="project" value="LOCAL" />
       <updated>1683812861531</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Better messages and common assertions.">
+      <created>1683827431428</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1683827431428</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Better messages and log sites.">
+      <created>1683840322332</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1683840322332</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -210,7 +227,9 @@
     <MESSAGE value="Config" />
     <MESSAGE value="Wooot, mostly done now." />
     <MESSAGE value="Fixed level mess." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed level mess." />
+    <MESSAGE value="Better messages and common assertions." />
+    <MESSAGE value="Better messages and log sites." />
+    <option name="LAST_COMMIT_MESSAGE" value="Better messages and log sites." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

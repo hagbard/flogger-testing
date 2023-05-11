@@ -1,13 +1,11 @@
 package net.goui.flogger.testing.core;
 
 import static java.lang.Character.isHighSurrogate;
-import static java.lang.Character.isLowSurrogate;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.logging.Level;
-import net.goui.flogger.testing.core.AutoValue_LogEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @AutoValue
@@ -110,17 +108,30 @@ public abstract class LogEntry {
   }
 
   public static LogEntry of(
-      LevelClass levelClass,
+      @Nullable String className,
+      @Nullable String methodName,
       String levelName,
+      LevelClass levelClass,
       String message,
       ImmutableMap<String, ImmutableList<Object>> metadata,
       Throwable cause) {
-    return new AutoValue_LogEntry(levelClass, levelName, message, metadata, cause);
+    return new AutoValue_LogEntry(
+        className != null ? className : "unknown",
+        methodName != null ? methodName : "unknown",
+        levelName,
+        levelClass,
+        message,
+        metadata,
+        cause);
   }
 
-  public abstract LevelClass levelClass();
+  public abstract String className();
+
+  public abstract String methodName();
 
   public abstract String levelName();
+
+  public abstract LevelClass levelClass();
 
   public abstract String getMessage();
 
@@ -136,6 +147,9 @@ public abstract class LogEntry {
    */
   @Override
   public final String toString() {
+    String logSiteString = className();
+    logSiteString = logSiteString.substring(logSiteString.lastIndexOf('.') + 1);
+    logSiteString += "#" + methodName();
     // For JDK level show just "FINE", for Log4J show "DEBUG(FINE)" etc.
     String levelString = levelName();
     if (!levelString.equals(levelClass().name())) {
@@ -144,7 +158,14 @@ public abstract class LogEntry {
     String messageSnippet = shortSnippet(getMessage());
     String causeStr = getCause() != null ? ", cause=" + getCause().getClass().getSimpleName() : "";
     String metadataStr = !getMetadata().isEmpty() ? ", context=" + getMetadata() : "";
-    return "Log{" + levelString + ": '" + messageSnippet + "'" + causeStr + metadataStr + "}";
+    return logSiteString
+        + "@"
+        + levelString
+        + ": \""
+        + messageSnippet
+        + "\""
+        + causeStr
+        + metadataStr;
   }
 
   private static String shortSnippet(String message) {

@@ -48,11 +48,12 @@ public final class JdkLogInterceptor implements LogInterceptor {
       Level level = record.getLevel();
       logs.add(
           LogEntry.of(
-              levelClassOf(level),
+          record.getSourceClassName(),
+          record.getSourceMethodName(),
               level.getName(),
+              levelClassOf(level),
               mm.message(),
-              mm.metadata(),
-              record.getThrown()));
+              mm.metadata(), record.getThrown()));
     }
 
     @Override

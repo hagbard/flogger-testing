@@ -7,7 +7,6 @@ import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 import net.goui.flogger.testing.core.LogEntry.LevelClass;
 
@@ -110,13 +109,15 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
   @Override
   public void levelIsAbove(LevelClass level) {
     handleResult(
-        log.assertLogs(e -> e.levelClass().compareTo(level) > 0), logFact("level", "be above", level));
+        log.assertLogs(e -> e.levelClass().compareTo(level) > 0),
+        logFact("level", "be above", level));
   }
 
   @Override
   public void levelIsBelow(LevelClass level) {
     handleResult(
-        log.assertLogs(e -> e.levelClass().compareTo(level) < 0), logFact("level", "be below", level));
+        log.assertLogs(e -> e.levelClass().compareTo(level) < 0),
+        logFact("level", "be below", level));
   }
 
   Fact logFact(String attribute, String claim, Object expected) {

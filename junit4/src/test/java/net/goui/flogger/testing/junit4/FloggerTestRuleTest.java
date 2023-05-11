@@ -1,8 +1,6 @@
 package net.goui.flogger.testing.junit4;
 
-import static net.goui.flogger.testing.core.LogEntry.LevelClass.FINE;
-import static net.goui.flogger.testing.core.LogEntry.LevelClass.SEVERE;
-import static net.goui.flogger.testing.core.LogEntry.LevelClass.WARNING;
+import static net.goui.flogger.testing.core.LogEntry.LevelClass.*;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogContext.Key;
@@ -22,7 +20,11 @@ public class FloggerTestRuleTest {
   public FloggerTestRule logs =
       FloggerTestRule.forClass(FloggerTestRuleTest.class, Level.FINE)
           .asserting(
-              logs -> logs.assertThat().everyLog().atOrAboveLevel(WARNING).messageContains("Warn"));
+              logs ->
+                  logs.assertThat()
+                      .everyLog()
+                      .atOrAboveLevel(LevelClass.WARNING)
+                      .messageContains("Warn"));
 
   @Test
   public void test() {
@@ -36,8 +38,6 @@ public class FloggerTestRuleTest {
     // value of                   : log.level()
     // expected to be greater than: SEVERE
     // but was                    : WARNING
-    // log was                    : Log{WARNING: 'Message: foo', cause=IllegalArgumentException,
-    // context={forced=[true]}}
     // --------------------------------------------------------------------------------------------
     // logs.assertLog(0).levelIsAbove(SEVERE);
 
@@ -45,7 +45,6 @@ public class FloggerTestRuleTest {
     // value of: log.level()
     // expected: FINE
     // but was : INFO
-    // log was : Log{INFO: 'Message: <long message that wi...', context={forced=[true]}}
     // --------------------------------------------------------------------------------------------
     // logs.assertLog(1).levelIs(FINE);
 
@@ -53,8 +52,6 @@ public class FloggerTestRuleTest {
     // value of                       : log.message()
     // expected to contain a match for: ot[A-Z]er
     // but was                        : Message: <long message that will be truncated for debugging>
-    // log was                        : Log{INFO: 'Message: <long message that wi...',
-    // context={forced=[true]}}
     // --------------------------------------------------------------------------------------------
     // logs.assertLog(1).messageMatches("ot[A-Z]er");
 
@@ -63,7 +60,6 @@ public class FloggerTestRuleTest {
     // value of           : log.metadata().get("foo")
     // expected to contain: 567
     // but was            : [123]
-    // log was            : Log{FINE: 'Message: bar', context={forced=[true], foo=[123]}}
     // --------------------------------------------------------------------------------------------
     // logs.assertLog(2).metadataContains("foo", 567);
 
@@ -71,7 +67,6 @@ public class FloggerTestRuleTest {
     // value of            : log.cause()
     // expected instance of: java.lang.RuntimeException
     // but was             : null
-    // log was             : Log{INFO: 'Message: <long message that wi...', context={forced=[true]}}
     // --------------------------------------------------------------------------------------------
     // logs.assertLog(1).hasCause(RuntimeException.class);
 
@@ -79,8 +74,7 @@ public class FloggerTestRuleTest {
     // value of                                       : logs.everyLog().atOrAboveLevel(WARNING)
     // expected every log message to contain substring: Woot!
     // but it was not true
-    // failing logs                                   : [Log{WARNING: 'Message: foo',
-    // cause=IllegalArgumentException, context={forced=[true]}}]
+    // failing logs                                   : << LOG SUMMARIES >>
     // --------------------------------------------------------------------------------------------
     // logs.assertThat().everyLog().atOrAboveLevel(WARNING).messageContains("Woot!");
 
@@ -88,8 +82,7 @@ public class FloggerTestRuleTest {
     // value of                           : logs.noLog().atOrBelowLevel(WARNING)
     // expected no log cause to be of type: class java.lang.RuntimeException
     // but it was not true
-    // failing logs                       : [Log{WARNING: 'Message: foo',
-    // cause=IllegalArgumentException, context={forced=[true]}}]
+    // failing logs                       : << LOG SUMMARIES >>
     // --------------------------------------------------------------------------------------------
     // logs.assertThat().noLog().atOrBelowLevel(WARNING).hasCause(RuntimeException.class);
 
@@ -97,10 +90,7 @@ public class FloggerTestRuleTest {
     // value of                                            : logs.anyLog()
     // expected any log message to match regular expression: xxx|yyy
     // but it was not true
-    // failing logs                                        : [Log{WARNING: 'Message: foo',
-    // cause=IllegalArgumentException, context={forced=[true]}}, Log{INFO: 'Message: <long message
-    // that wi...', context={forced=[true]}}, Log{FINE: 'Message: bar', context={forced=[true],
-    // foo=[123]}}]
+    // failing logs                                        : << LOG SUMMARIES >>
     // --------------------------------------------------------------------------------------------
     // logs.assertThat().anyLog().messageMatches("xxx|yyy");
 
@@ -108,10 +98,7 @@ public class FloggerTestRuleTest {
     // value of                            : logs.anyLog()
     // expected any log metadata to contain: foo=789
     // but it was not true
-    // failing logs                        : [Log{WARNING: 'Message: foo',
-    // cause=IllegalArgumentException, context={forced=[true]}}, Log{INFO: 'Message: <long message
-    // that wi...', context={forced=[true]}}, Log{FINE: 'Message: bar', context={forced=[true],
-    // foo=[123]}}]
+    // failing logs                        : << LOG SUMMARIES >>
     // --------------------------------------------------------------------------------------------
     // logs.assertThat().anyLog().metadataContains("foo", 789);
 

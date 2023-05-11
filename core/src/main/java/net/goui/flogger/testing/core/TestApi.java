@@ -1,7 +1,5 @@
 package net.goui.flogger.testing.core;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.context.LogLevelMap;
@@ -10,7 +8,6 @@ import com.google.common.flogger.context.ScopedLoggingContexts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
