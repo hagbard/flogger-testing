@@ -1,9 +1,6 @@
 package net.goui.flogger.testing.core.truth;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.ABOVE;
-import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.BELOW;
-import static net.goui.flogger.testing.core.truth.LogEntry.LevelCheck.COMPATIBLE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
@@ -12,7 +9,7 @@ import com.google.common.truth.Subject;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import net.goui.flogger.testing.core.truth.LogEntry.LevelCheck;
+import net.goui.flogger.testing.core.LogEntry.LevelClass;
 
 public class ScopedLogSubject extends Subject implements LogAssertion {
   private final ScopedLog log;
@@ -30,30 +27,30 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
     return assertAbout(scopedLogs()).that(log);
   }
 
-  public LogAssertion atLevel(Level level) {
-    return filter("aboveLevel", level, c -> c == COMPATIBLE);
+  public LogAssertion atLevel(LevelClass level) {
+    return filter("aboveLevel", level, c -> c == level);
   }
 
-  public LogAssertion aboveLevel(Level level) {
-    return filter("aboveLevel", level, c -> c == ABOVE);
+  public LogAssertion aboveLevel(LevelClass level) {
+    return filter("aboveLevel", level, c -> c.compareTo(level) > 0);
   }
 
-  public LogAssertion belowLevel(Level level) {
-    return filter("belowLevel", level, c -> c == BELOW);
+  public LogAssertion belowLevel(LevelClass level) {
+    return filter("belowLevel", level, c -> c.compareTo(level) < 0);
   }
 
-  public LogAssertion atOrAboveLevel(Level level) {
-    return filter("atOrAboveLevel", level, c -> c != BELOW);
+  public LogAssertion atOrAboveLevel(LevelClass level) {
+    return filter("atOrAboveLevel", level, c -> c.compareTo(level) >= 0);
   }
 
-  public LogAssertion atOrBelowLevel(Level level) {
-    return filter("atOrBelowLevel", level, c -> c != ABOVE);
+  public LogAssertion atOrBelowLevel(LevelClass level) {
+    return filter("atOrBelowLevel", level, c -> c.compareTo(level) <= 0);
   }
 
-  private LogAssertion filter(String name, Level level, Predicate<LevelCheck> test) {
+  private LogAssertion filter(String name, LevelClass level, Predicate<LevelClass> test) {
     return check("%s(%s)", name, level)
         .about(scopedLogs())
-        .that(log.filter(e -> test.test(e.checkLevel(level))));
+        .that(log.filter(e -> test.test(e.levelClass())));
   }
 
   @Override
@@ -104,22 +101,22 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
   }
 
   @Override
-  public void levelIsCompatibleWith(Level level) {
+  public void levelIs(LevelClass level) {
     handleResult(
-        log.assertLogs(e -> e.checkLevel(level) == COMPATIBLE),
+        log.assertLogs(e -> e.levelClass() == level),
         logFact("level", "be compatible with", level));
   }
 
   @Override
-  public void levelIsAbove(Level level) {
+  public void levelIsAbove(LevelClass level) {
     handleResult(
-        log.assertLogs(e -> e.checkLevel(level) == ABOVE), logFact("level", "be above", level));
+        log.assertLogs(e -> e.levelClass().compareTo(level) > 0), logFact("level", "be above", level));
   }
 
   @Override
-  public void levelIsBelow(Level level) {
+  public void levelIsBelow(LevelClass level) {
     handleResult(
-        log.assertLogs(e -> e.checkLevel(level) == BELOW), logFact("level", "be below", level));
+        log.assertLogs(e -> e.levelClass().compareTo(level) < 0), logFact("level", "be below", level));
   }
 
   Fact logFact(String attribute, String claim, Object expected) {

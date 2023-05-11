@@ -7,9 +7,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
-import net.goui.flogger.testing.core.truth.LogEntry.LevelCheck;
+import net.goui.flogger.testing.core.LogEntry;
+import net.goui.flogger.testing.core.LogEntry.LevelClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class LogEntrySubject extends Subject implements LogAssertion {
@@ -84,27 +84,23 @@ public class LogEntrySubject extends Subject implements LogAssertion {
   }
 
   @Override
-  public void levelIsCompatibleWith(Level level) {
-    if (entry().checkLevel(level) != LevelCheck.COMPATIBLE) {
-      failWithoutActual(
-          Fact.fact(
-              "expected logged level '" + entry().levelName() + "' to be compatible with", level));
+  public void levelIs(LevelClass level) {
+    if (entry().levelClass() == level) {
+      failWithActual(Fact.fact("expected to have level compatible with", level));
     }
   }
 
   @Override
-  public void levelIsAbove(Level level) {
-    if (entry().checkLevel(level) != LevelCheck.ABOVE) {
-      failWithoutActual(
-          Fact.fact("expected logged level '" + entry().levelName() + "' to be above", level));
+  public void levelIsAbove(LevelClass level) {
+    if (entry().levelClass().compareTo(level) <= 0) {
+      failWithActual(Fact.fact("expected to have level above", level));
     }
   }
 
   @Override
-  public void levelIsBelow(Level level) {
-    if (entry().checkLevel(level) != LevelCheck.BELOW) {
-      failWithoutActual(
-          Fact.fact("expected logged level '" + entry().levelName() + "' to be below", level));
+  public void levelIsBelow(LevelClass level) {
+    if (entry().levelClass().compareTo(level) >= 0) {
+      failWithActual(Fact.fact("expected to have level below", level));
     }
   }
 }

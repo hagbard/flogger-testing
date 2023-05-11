@@ -2,7 +2,6 @@ package net.goui.flogger.testing.jdk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
@@ -10,10 +9,11 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import net.goui.flogger.testing.core.DefaultMetadataExtractor;
+import net.goui.flogger.testing.core.LogEntry;
+import net.goui.flogger.testing.core.LogEntry.LevelClass;
 import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.MessageAndMetadata;
 import net.goui.flogger.testing.core.MetadataExtractor;
-import net.goui.flogger.testing.core.truth.LogEntry;
 
 public final class JdkLogInterceptor implements LogInterceptor {
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
@@ -48,7 +48,7 @@ public final class JdkLogInterceptor implements LogInterceptor {
       Level level = record.getLevel();
       logs.add(
           LogEntry.of(
-              l -> Integer.compare(level.intValue(), l.intValue()),
+              levelClassOf(level),
               level.getName(),
               mm.message(),
               mm.metadata(),
@@ -60,5 +60,27 @@ public final class JdkLogInterceptor implements LogInterceptor {
 
     @Override
     public void close() throws SecurityException {}
+  }
+
+  private static final int SEVERE_VALUE = Level.SEVERE.intValue();
+  private static final int WARNING_VALUE = Level.WARNING.intValue();
+  private static final int INFO_VALUE = Level.INFO.intValue();
+  private static final int FINE_VALUE = Level.FINE.intValue();
+
+  private static LevelClass levelClassOf(Level level) {
+    int levelValue = level.intValue();
+    if (levelValue >= SEVERE_VALUE) {
+      return LevelClass.SEVERE;
+    }
+    if (levelValue >= WARNING_VALUE) {
+      return LevelClass.WARNING;
+    }
+    if (levelValue >= INFO_VALUE) {
+      return LevelClass.INFO;
+    }
+    if (levelValue >= FINE_VALUE) {
+      return LevelClass.FINE;
+    }
+    return LevelClass.FINEST;
   }
 }

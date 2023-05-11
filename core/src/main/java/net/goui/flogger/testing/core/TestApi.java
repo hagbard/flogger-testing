@@ -11,9 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
-import net.goui.flogger.testing.core.truth.LogEntry;
 import net.goui.flogger.testing.core.truth.LogEntrySubject;
-import net.goui.flogger.testing.core.truth.LogSubject;
+import net.goui.flogger.testing.core.truth.LogsSubject;
 import net.goui.flogger.testing.jdk.JdkLogInterceptor;
 
 /** One of these is instantiated per test case. */
@@ -31,11 +30,11 @@ public class TestApi {
   }
 
   public LogEntrySubject assertLog(int n) {
-    return LogSubject.assertThat(logged()).log(n);
+    return LogsSubject.assertThat(logged()).get(n);
   }
 
-  public LogSubject assertLogs() {
-    return LogSubject.assertThat(logged());
+  public LogsSubject assertLogs() {
+    return LogsSubject.assertThat(logged());
   }
 
   protected final ImmutableMap<String, ? extends Level> levelMap() {

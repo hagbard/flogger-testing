@@ -1,6 +1,6 @@
 package net.goui.flogger.testing.core.truth;
 
-import java.util.logging.Level;
+import net.goui.flogger.testing.core.LogEntry.LevelClass;
 
 public interface LogAssertion {
   void messageContains(String substring);
@@ -17,9 +17,9 @@ public interface LogAssertion {
 
   void hasCause(Class<? extends Throwable> type);
 
-  void levelIsCompatibleWith(Level level);
+  void levelIs(LevelClass level);
 
-  void levelIsAbove(Level level);
+  void levelIsAbove(LevelClass level);
 
-  void levelIsBelow(Level level);
+  void levelIsBelow(LevelClass level);
 }

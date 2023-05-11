@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import net.goui.flogger.testing.core.LogEntry;
 
 @AutoValue
 public abstract class ScopedLog {

@@ -4,24 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Config">
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultMetadataExtractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/core/DefaultMetadataExtractorTest.java" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Wooot, mostly done now.">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogAssertion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntrySubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntrySubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogsSubject.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLog.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/core/App.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/core/AppTest.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +53,7 @@
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit4",
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4": "",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "openjdk-20",
     "last_opened_file_path": "C:/Users/David/.m2/repository/com/google/auto/value/auto-value/1.10.1/auto-value-1.10.1.jar",
     "project.structure.last.edited": "Modules",
@@ -77,6 +73,7 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing.core" />
       <recent name="net.goui.flogger.testing.core.test" />
     </key>
     <key name="CreateTestDialog.RecentsKey">
@@ -192,7 +189,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683728499281</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Wooot, mostly done now.">
+      <created>1683760715392</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1683760715392</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -200,26 +204,16 @@
     <MESSAGE value="Delete rubbish." />
     <MESSAGE value="Working again!!" />
     <MESSAGE value="Config" />
-    <option name="LAST_COMMIT_MESSAGE" value="Config" />
+    <MESSAGE value="Wooot, mostly done now." />
+    <option name="LAST_COMMIT_MESSAGE" value="Wooot, mostly done now." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java</url>
-          <line>48</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/LogEntry.java</url>
-          <line>26</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/truth/ScopedLogSubject.java</url>
-          <line>131</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
+          <option name="timeStamp" value="14" />
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
