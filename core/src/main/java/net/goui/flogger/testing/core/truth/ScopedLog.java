@@ -47,32 +47,26 @@ public abstract class ScopedLog {
     return strategy().apply(() -> log().stream().filter(testFilter()), logAssertion);
   }
 
-  private static LogAssertionResult testEveryMatch(
-      Supplier<Stream<LogEntry>> logsUnderTest, Predicate<LogEntry> logAssertion) {
-    ImmutableList<LogEntry> firstFewUnexpectedLogs =
-        logsUnderTest
-            .get()
-            .filter(Predicate.not(logAssertion))
-            .limit(10)
-            .collect(toImmutableList());
-    if (firstFewUnexpectedLogs.isEmpty()) {
+  private static LogAssertionResult testMatch(
+      Supplier<Stream<LogEntry>> logsUnderTest, Predicate<LogEntry> failures) {
+    ImmutableList<LogEntry> failedLogs =
+        logsUnderTest.get().filter(failures).limit(10).collect(toImmutableList());
+    if (failedLogs.isEmpty()) {
       return LogAssertionResult.PASS;
     }
+    String prefix = failedLogs.size() < 10 ? "failing logs" : "first few failing logs";
     return LogAssertionResult.fail(
-        Fact.simpleFact("but some did not"),
-        Fact.fact("first few unexpected logs", firstFewUnexpectedLogs));
+        Fact.simpleFact("but it was not true"), Fact.fact(prefix, failedLogs));
+  }
+
+  private static LogAssertionResult testEveryMatch(
+      Supplier<Stream<LogEntry>> logsUnderTest, Predicate<LogEntry> logAssertion) {
+    return testMatch(logsUnderTest, Predicate.not(logAssertion));
   }
 
   private static LogAssertionResult testNoMatch(
       Supplier<Stream<LogEntry>> logsUnderTest, Predicate<LogEntry> logAssertion) {
-    ImmutableList<LogEntry> firstFewUnexpectedLogs =
-        logsUnderTest.get().filter(logAssertion).limit(10).collect(toImmutableList());
-    if (firstFewUnexpectedLogs.isEmpty()) {
-      return LogAssertionResult.PASS;
-    }
-    return LogAssertionResult.fail(
-        Fact.simpleFact("but some did"),
-        Fact.fact("first few unexpected logs", firstFewUnexpectedLogs));
+    return testMatch(logsUnderTest, logAssertion);
   }
 
   private static LogAssertionResult testAnyMatch(
@@ -80,8 +74,9 @@ public abstract class ScopedLog {
     if (logsUnderTest.get().anyMatch(logAssertion)) {
       return LogAssertionResult.PASS;
     }
+    ImmutableList<LogEntry> failedLogs = logsUnderTest.get().limit(10).collect(toImmutableList());
+    String prefix = failedLogs.size() < 10 ? "failing logs" : "first few failing logs";
     return LogAssertionResult.fail(
-        Fact.simpleFact("but none did"),
-        Fact.fact("first few logs", logsUnderTest.get().limit(10).collect(toImmutableList())));
+        Fact.simpleFact("but it was not true"), Fact.fact(prefix, failedLogs));
   }
 }

@@ -1,7 +1,7 @@
 package net.goui.flogger.testing.core.truth;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static net.goui.flogger.testing.core.truth.LogEntrySubject.logEntries;
+import static net.goui.flogger.testing.core.truth.LogSubject.logEntries;
 import static net.goui.flogger.testing.core.truth.ScopedLogSubject.scopedLogs;
 
 import com.google.common.collect.ImmutableList;
@@ -37,7 +37,7 @@ public class LogsSubject extends Subject {
     return check("anyLog()").about(scopedLogs()).that(ScopedLog.anyMatch(log));
   }
 
-  public LogEntrySubject get(int n) {
-    return check("get(%s)", n).about(logEntries()).that(log.get(n));
+  public LogSubject get(int n) {
+    return assertAbout(logEntries()).that(log.get(n));
   }
 }

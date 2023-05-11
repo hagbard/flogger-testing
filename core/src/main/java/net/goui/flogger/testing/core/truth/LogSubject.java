@@ -12,10 +12,10 @@ import net.goui.flogger.testing.core.LogEntry;
 import net.goui.flogger.testing.core.LogEntry.LevelClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class LogEntrySubject extends Subject implements LogAssertion {
+public class LogSubject extends Subject implements LogAssertion {
   private final LogEntry logEntry;
 
-  protected LogEntrySubject(FailureMetadata metadata, @Nullable LogEntry logEntry) {
+  protected LogSubject(FailureMetadata metadata, @Nullable LogEntry logEntry) {
     super(metadata, logEntry);
     this.logEntry = logEntry;
   }
@@ -24,27 +24,25 @@ public class LogEntrySubject extends Subject implements LogAssertion {
     return checkNotNull(logEntry);
   }
 
-  public static Factory<LogEntrySubject, LogEntry> logEntries() {
-    return LogEntrySubject::new;
+  public static Factory<LogSubject, LogEntry> logEntries() {
+    return LogSubject::new;
   }
 
-  public static LogEntrySubject assertThat(LogEntry logEntry) {
+  public static LogSubject assertThat(LogEntry logEntry) {
     return assertAbout(logEntries()).that(logEntry);
   }
 
   @Override
   public void messageContains(String substring) {
     if (!entry().getMessage().contains(substring)) {
-      failWithActual("expected log message to contain substring", substring);
+      failWithActual("expected to contain substring", substring);
     }
   }
 
   @Override
   public void messageMatches(String regex) {
     Pattern pattern = Pattern.compile(regex);
-    if (!pattern.matcher(entry().getMessage()).find()) {
-      failWithActual("expected log message to match regular expression", regex);
-    }
+    check("message()").that(entry().getMessage()).containsMatch(regex);
   }
 
   @Override
@@ -63,44 +61,44 @@ public class LogEntrySubject extends Subject implements LogAssertion {
   }
 
   @Override
-  public void metadataContains(String key, String value) {
+  public void metadataContains(String key, @Nullable String value) {
     metadataContainsImpl(key, value);
   }
 
-  private void metadataContainsImpl(String key, Object value) {
-    ImmutableList<Object> values = entry().getMetadata().getOrDefault(key, ImmutableList.of());
-    check("metadata[%s]", key)
-        .withMessage("expected metadata to contain '%s'='%s'", key, value)
-        .that(values)
-        .contains(value);
+  private void metadataContainsImpl(String key, @Nullable Object value) {
+    check("metadata()")
+        .withMessage("log metadata did not contain key %s", key)
+        .that(entry().getMetadata())
+        .containsKey(key);
+    if (value != null) {
+      ImmutableList<Object> values = checkNotNull(entry().getMetadata().get(key));
+      String valueStr = value instanceof String ? "\"" + values + "\"" : value.toString();
+      check("metadata().get(\"%s\")", key)
+          .withMessage("log metadata did not contain entry {%s: %s}", key, valueStr)
+          .that(values)
+          .contains(value);
+    }
   }
 
   @Override
   public void hasCause(Class<? extends Throwable> type) {
     check("cause()")
-        .withMessage("expected cause to be of type: %s", type)
         .that(entry().getCause())
         .isInstanceOf(type);
   }
 
   @Override
   public void levelIs(LevelClass level) {
-    if (entry().levelClass() == level) {
-      failWithActual(Fact.fact("expected to have level compatible with", level));
-    }
+    check("level()").that(entry().levelClass()).isEqualTo(level);
   }
 
   @Override
   public void levelIsAbove(LevelClass level) {
-    if (entry().levelClass().compareTo(level) <= 0) {
-      failWithActual(Fact.fact("expected to have level above", level));
-    }
+    check("level()").that(entry().levelClass()).isGreaterThan(level);
   }
 
   @Override
   public void levelIsBelow(LevelClass level) {
-    if (entry().levelClass().compareTo(level) >= 0) {
-      failWithActual(Fact.fact("expected to have level below", level));
-    }
+    check("level()").that(entry().levelClass()).isLessThan(level);
   }
 }

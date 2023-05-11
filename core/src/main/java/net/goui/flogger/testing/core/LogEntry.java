@@ -1,5 +1,8 @@
 package net.goui.flogger.testing.core;
 
+import static java.lang.Character.isHighSurrogate;
+import static java.lang.Character.isLowSurrogate;
+
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -138,8 +141,25 @@ public abstract class LogEntry {
     if (!levelString.equals(levelClass().name())) {
       levelString += "(" + levelClass().name() + ")";
     }
+    String messageSnippet = shortSnippet(getMessage());
     String causeStr = getCause() != null ? ", cause=" + getCause().getClass().getSimpleName() : "";
     String metadataStr = !getMetadata().isEmpty() ? ", context=" + getMetadata() : "";
-    return "Log{" + levelString + ": '" + getMessage() + "'" + causeStr + metadataStr + "}";
+    return "Log{" + levelString + ": '" + messageSnippet + "'" + causeStr + metadataStr + "}";
+  }
+
+  private static String shortSnippet(String message) {
+    int splitIndex = message.indexOf('\n');
+    if (splitIndex == -1) {
+      splitIndex = message.length();
+    }
+    splitIndex = Math.min(30, splitIndex);
+    if (splitIndex == message.length()) {
+      return message;
+    }
+    if (isHighSurrogate(message.charAt(splitIndex - 1))) {
+      splitIndex--;
+    }
+    // Definitely truncating!
+    return message.substring(0, splitIndex) + "...";
   }
 }

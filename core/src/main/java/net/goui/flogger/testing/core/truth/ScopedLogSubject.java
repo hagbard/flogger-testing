@@ -121,7 +121,7 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
 
   Fact logFact(String attribute, String claim, Object expected) {
     return Fact.fact(
-        String.format("expected %s of %s log to %s", attribute, log.strategyDescription(), claim),
+        String.format("expected %s log %s to %s", log.strategyDescription(), attribute, claim),
         expected);
   }
 

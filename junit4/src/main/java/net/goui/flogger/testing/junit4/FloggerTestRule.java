@@ -5,9 +5,11 @@ import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.TestApi;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -55,16 +57,29 @@ public class FloggerTestRule extends TestApi implements TestRule {
   }
 
   public static FloggerTestRule using(Map<String, ? extends Level> levelMap) {
-    return new FloggerTestRule(levelMap, Optional.empty());
+    return new FloggerTestRule(levelMap, null, null);
   }
 
   private FloggerTestRule(
-      Map<String, ? extends Level> levelMap, Optional<LogInterceptor> interceptor) {
-    super(levelMap, interceptor);
+      Map<String, ? extends Level> levelMap,
+      @Nullable LogInterceptor interceptor,
+      @Nullable Consumer<TestApi> commonAssertions) {
+    super(levelMap, interceptor, commonAssertions);
   }
 
   FloggerTestRule withInterceptor(LogInterceptor interceptor) {
-    return new FloggerTestRule(levelMap(), Optional.of(interceptor));
+    return new FloggerTestRule(levelMap(), interceptor, commonAssertions());
+  }
+
+  FloggerTestRule asserting(Consumer<TestApi> assertions) {
+    Consumer<TestApi> newAssertions =
+        commonAssertions() == null
+            ? assertions
+            : t -> {
+              commonAssertions().accept(t);
+              assertions.accept(t);
+            };
+    return new FloggerTestRule(levelMap(), interceptor(), newAssertions);
   }
 
   @Override

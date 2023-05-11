@@ -1,5 +1,7 @@
 package net.goui.flogger.testing.core;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.context.LogLevelMap;
@@ -9,36 +11,51 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
-import net.goui.flogger.testing.core.truth.LogEntrySubject;
+import net.goui.flogger.testing.core.truth.LogSubject;
 import net.goui.flogger.testing.core.truth.LogsSubject;
 import net.goui.flogger.testing.jdk.JdkLogInterceptor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** One of these is instantiated per test case. */
 public class TestApi {
   private final ImmutableMap<String, ? extends Level> levelMap;
-  private final LogInterceptor interceptor;
+  private LogInterceptor interceptor;
+  private final Consumer<TestApi> commonAssertions;
 
-  protected TestApi(Map<String, ? extends Level> levelMap, Optional<LogInterceptor> interceptor) {
+  protected TestApi(
+      Map<String, ? extends Level> levelMap,
+      @Nullable LogInterceptor interceptor,
+      @Nullable Consumer<TestApi> commonAssertions) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
-    this.interceptor = interceptor.orElseGet(this::loadBestInterceptor);
+    this.interceptor = interceptor;
+    this.commonAssertions = commonAssertions;
   }
 
   private ImmutableList<LogEntry> logged() {
     return interceptor.getLogs();
   }
 
-  public LogEntrySubject assertLog(int n) {
+  public LogSubject assertLog(int n) {
     return LogsSubject.assertThat(logged()).get(n);
   }
 
-  public LogsSubject assertLogs() {
+  public LogsSubject assertThat() {
     return LogsSubject.assertThat(logged());
   }
 
   protected final ImmutableMap<String, ? extends Level> levelMap() {
     return levelMap;
+  }
+
+  protected final LogInterceptor interceptor() {
+    return interceptor;
+  }
+
+  protected final Consumer<TestApi> commonAssertions() {
+    return commonAssertions;
   }
 
   protected final ApiHook install() {
@@ -50,6 +67,9 @@ public class TestApi {
     private final LoggingContextCloseable context;
 
     private ApiHook() {
+      if (interceptor == null) {
+        interceptor = loadBestInterceptor();
+      }
       levelMap.forEach((name, level) -> recorders.add(interceptor.attachTo(name, level)));
       context =
           ScopedLoggingContexts.newContext()
@@ -61,6 +81,7 @@ public class TestApi {
     public void close() {
       context.close();
       recorders.forEach(Recorder::close);
+      commonAssertions.accept(TestApi.this);
     }
   }
 
