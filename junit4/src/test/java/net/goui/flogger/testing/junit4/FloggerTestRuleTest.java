@@ -1,12 +1,10 @@
 package net.goui.flogger.testing.junit4;
 
-import static net.goui.flogger.testing.core.LogEntry.LevelClass.*;
-
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogContext.Key;
 import com.google.common.flogger.context.Tags;
 import java.util.logging.Level;
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
+import net.goui.flogger.testing.LevelClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

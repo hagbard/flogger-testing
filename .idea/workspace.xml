@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Better messages and log sites.">
-      <change afterPath="$PROJECT_DIR$/log4j2/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/AppTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Moving stuff around.">
+      <change beforePath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/jdk/JdkLogInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/jdk/JdkLogInterceptorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +44,7 @@
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "openjdk-20",
+    "last_directory_selection": "C:/Users/David/IdeaProjects/flogger-testing/core/src/main/java/net/goui/flogger/testing",
     "last_opened_file_path": "C:/Users/David/.m2/repository/com/google/auto/value/auto-value/1.10.1/auto-value-1.10.1.jar",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
@@ -67,6 +61,7 @@
       <recent name="" />
     </key>
     <key name="MoveInnerDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing" />
       <recent name="net.goui.flogger.testing.core" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -77,22 +72,7 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
-    <configuration name="DefaultMetadataExtractorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="core" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.core" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.core.DefaultMetadataExtractorTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="JUnit.DefaultMetadataExtractorTest.parse_extractsMetadata_success">
     <configuration name="DefaultMetadataExtractorTest.parse_extractsMetadata_success" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="core" />
       <extension name="coverage">
@@ -140,12 +120,44 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="JdkLogInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="core" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.testing.jdk.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.jdk" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.jdk.JdkLogInterceptorTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="JdkLogInterceptorTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="core" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.testing.jdk.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.jdk" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.jdk.JdkLogInterceptorTest" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.DefaultMetadataExtractorTest.parse_extractsMetadata_success" />
+        <item itemvalue="JUnit.JdkLogInterceptorTest" />
+        <item itemvalue="JUnit.JdkLogInterceptorTest.test" />
         <item itemvalue="JUnit.FloggerTestRuleTest.test" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
-        <item itemvalue="JUnit.DefaultMetadataExtractorTest.parse_extractsMetadata_success" />
-        <item itemvalue="JUnit.DefaultMetadataExtractorTest" />
       </list>
     </recent_temporary>
   </component>
@@ -228,7 +240,21 @@
       <option name="project" value="LOCAL" />
       <updated>1683840439903</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Log4J Interceptor.">
+      <created>1683846688695</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1683846688695</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Moving stuff around.">
+      <created>1684019568517</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1684019568517</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -240,7 +266,9 @@
     <MESSAGE value="Fixed level mess." />
     <MESSAGE value="Better messages and common assertions." />
     <MESSAGE value="Better messages and log sites." />
-    <option name="LAST_COMMIT_MESSAGE" value="Better messages and log sites." />
+    <MESSAGE value="Log4J Interceptor." />
+    <MESSAGE value="Moving stuff around." />
+    <option name="LAST_COMMIT_MESSAGE" value="Moving stuff around." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

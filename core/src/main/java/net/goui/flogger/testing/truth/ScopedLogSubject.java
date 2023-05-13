@@ -1,4 +1,4 @@
-package net.goui.flogger.testing.core.truth;
+package net.goui.flogger.testing.truth;
 
 import static com.google.common.truth.Truth.assertAbout;
 
@@ -8,7 +8,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
+import net.goui.flogger.testing.LevelClass;
 
 public class ScopedLogSubject extends Subject implements LogAssertion {
   private final ScopedLog log;

@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.core.LogInterceptor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

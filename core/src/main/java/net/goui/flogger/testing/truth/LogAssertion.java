@@ -1,6 +1,6 @@
-package net.goui.flogger.testing.core.truth;
+package net.goui.flogger.testing.truth;
 
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
+import net.goui.flogger.testing.LevelClass;
 
 public interface LogAssertion {
   void messageContains(String substring);

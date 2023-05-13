@@ -8,9 +8,9 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import net.goui.flogger.testing.core.DefaultMetadataExtractor;
+import net.goui.flogger.testing.LevelClass;
+import net.goui.flogger.testing.core.DefaultFormatMetadataExtractor;
 import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
 import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.MessageAndMetadata;
 import net.goui.flogger.testing.core.MetadataExtractor;
@@ -20,7 +20,7 @@ public final class JdkLogInterceptor implements LogInterceptor {
   private final MetadataExtractor metadataExtractor;
 
   public static LogInterceptor create() {
-    return new JdkLogInterceptor(new DefaultMetadataExtractor());
+    return new JdkLogInterceptor(new DefaultFormatMetadataExtractor());
   }
 
   private JdkLogInterceptor(MetadataExtractor metadataExtractor) {

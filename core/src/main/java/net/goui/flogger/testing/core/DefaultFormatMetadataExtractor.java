@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DefaultMetadataExtractor implements MetadataExtractor {
+public class DefaultFormatMetadataExtractor implements MetadataExtractor {
   // Default Flogger log message formatting adds metadata consistently in the form:
   // [CONTEXT a=b x="y" ]
   // Non-quoted values are from tag values boolean, long or double and can be re-parsed.
@@ -33,8 +33,9 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
       while (pairs.find()) {
         String key = pairs.group(1);
         String value = pairs.group(2);
+        List<Object> values = metadata.computeIfAbsent(key, k -> new ArrayList<>());
         if (value != null) {
-          metadata.computeIfAbsent(key, k -> new ArrayList<>()).add(parseValue(value));
+          values.add(parseValue(value));
         }
       }
     }

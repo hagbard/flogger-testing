@@ -1,4 +1,4 @@
-package net.goui.flogger.testing.core.truth;
+package net.goui.flogger.testing.truth;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 

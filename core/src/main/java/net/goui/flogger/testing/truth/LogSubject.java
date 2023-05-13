@@ -1,4 +1,4 @@
-package net.goui.flogger.testing.core.truth;
+package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.regex.Pattern;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogEntry.LevelClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class LogSubject extends Subject implements LogAssertion {

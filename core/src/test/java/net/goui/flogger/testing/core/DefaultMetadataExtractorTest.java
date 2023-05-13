@@ -12,7 +12,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class DefaultMetadataExtractorTest {
-  MetadataExtractor extractor = new DefaultMetadataExtractor();
+  MetadataExtractor extractor = new DefaultFormatMetadataExtractor();
 
   @Test
   public void parse_extractsMessage_success() {
@@ -35,6 +35,7 @@ public class DefaultMetadataExtractorTest {
 
   @Test
   public void parse_extractsMetadata_success() {
+    assertMetadata("ignored [CONTEXT foo ]", "foo", null);
     assertMetadata("ignored [CONTEXT foo=true ]", "foo", true);
     assertMetadata("ignored [CONTEXT foo=true bar=10 baz=3.1415926 ]", "foo", true, "bar", 10L, "baz", 3.1415926D);
     assertMetadata("ignored [CONTEXT foo=\"true\" ]", "foo", "true");
