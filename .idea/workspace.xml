@@ -4,18 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Log4J done.">
-      <change afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="JUnit5 done plus tidying.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/core/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit5/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -285,7 +280,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684101741585</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="JUnit5 done plus tidying.">
+      <created>1684105540337</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1684105540337</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -301,7 +303,8 @@
     <MESSAGE value="Moving stuff around." />
     <MESSAGE value="Log4J testing and tidyup." />
     <MESSAGE value="Log4J done." />
-    <option name="LAST_COMMIT_MESSAGE" value="Log4J done." />
+    <MESSAGE value="JUnit5 done plus tidying." />
+    <option name="LAST_COMMIT_MESSAGE" value="JUnit5 done plus tidying." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

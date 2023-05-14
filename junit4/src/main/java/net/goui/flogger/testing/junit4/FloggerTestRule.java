@@ -4,7 +4,6 @@ import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor;
