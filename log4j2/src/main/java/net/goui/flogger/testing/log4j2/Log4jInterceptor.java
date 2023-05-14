@@ -14,10 +14,11 @@ import net.goui.flogger.testing.core.MetadataExtractor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter.Result;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.filter.LevelMatchFilter;
+import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 
 public final class Log4jInterceptor implements LogInterceptor {
   private static final int JDK_SEVERE_VALUE = java.util.logging.Level.SEVERE.intValue();
@@ -45,14 +46,19 @@ public final class Log4jInterceptor implements LogInterceptor {
 
   @Override
   public Recorder attachTo(String loggerName, java.util.logging.Level jdkLevel) {
-    var filter = LevelMatchFilter.newBuilder().setLevel(toLog4JLevel(jdkLevel)).build();
+    // WARNING: Log4J is unintuitive with log level ordering (compared to JDK). A "high" level means
+    // high verbosity (i.e. what most people call "low level logging").
+    LevelRangeFilter specifiedLevelAndAbove =
+        LevelRangeFilter.createFilter(
+            /* minLevel (null ==> max) */ null,
+            /* maxLevel */ toLog4JLevel(jdkLevel),
+            /* onMatch (null ==> accept) */ Result.NEUTRAL,
+            /* onMismatch (null ==> deny) */ Result.DENY);
 
-    String probablyUniqueAppenderName =
-        String.format("CapturingAppender@%08x", new Object().hashCode());
     Appender appender =
         new AbstractAppender(
-            probablyUniqueAppenderName,
-            filter,
+            "CapturingAppender",
+            specifiedLevelAndAbove,
             /* layout */ null,
             /* ignoreExceptions */ true,
             EMPTY_ARRAY) {
@@ -63,10 +69,12 @@ public final class Log4jInterceptor implements LogInterceptor {
         };
 
     Logger logger = (Logger) LogManager.getLogger(loggerName);
-    // This *changes* the logger's level because there's no existing config.
-    // For example, existing loggers set to TRACE level become set to ERROR after
-    // this call because the act of creating a new config for this logger inherits
-    // from the parent (root) instead of using the level set on the instance.
+    // WARNING: If the logger referenced here has had transient modifications made to it (e.g.
+    // calling setLevel() directly rather than using configuration to set the level), the act of
+    // adding an appender here will reset the logger to its "original state". This is almost
+    // impossible to avoid unfortunately, but with appropriate warnings in the right places it
+    // shouldn't be too bad. The "Configurator" class is a way to set a logger's level
+    // programmatically which won't be undone here.
     logger.addAppender(appender);
     return () -> {
       try {

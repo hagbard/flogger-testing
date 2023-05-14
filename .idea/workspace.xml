@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Moving stuff around.">
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Log4J testing and tidyup.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultFormatMetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultFormatMetadataParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkLogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/core/DefaultMetadataExtractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/core/DefaultMetadataExtractorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/jdk/JdkLogInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/jdk/JdkInterceptorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" afterDir="false" />
     </list>
@@ -81,7 +74,22 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.java in log4j">
+  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
+    <configuration name="Log4jInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="log4j" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.log4j2.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.log4j2" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.log4j2.Log4jInterceptorTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Log4jInterceptorTest.testInterceptorScope" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="log4j" />
       <extension name="coverage">
@@ -114,14 +122,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="java in core" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="core" />
-      <option name="TEST_OBJECT" value="directory" />
-      <dir value="$PROJECT_DIR$/core/src/test/java" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="java in junit4" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit4" />
       <option name="TEST_OBJECT" value="directory" />
@@ -140,11 +140,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.Log4jInterceptorTest" />
+        <item itemvalue="JUnit.Log4jInterceptorTest.testInterceptorScope" />
+        <item itemvalue="JUnit.Log4jInterceptorTest.testWithFlogger" />
         <item itemvalue="JUnit.java in log4j" />
         <item itemvalue="JUnit.java in junit4" />
-        <item itemvalue="JUnit.java in core" />
-        <item itemvalue="JUnit.Log4jInterceptorTest.testWithFlogger" />
-        <item itemvalue="JUnit.Log4jInterceptorTest.testInterceptorScope" />
       </list>
     </recent_temporary>
   </component>
@@ -248,7 +248,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684019625692</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Log4J testing and tidyup.">
+      <created>1684084527684</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1684084527684</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -262,7 +269,8 @@
     <MESSAGE value="Better messages and log sites." />
     <MESSAGE value="Log4J Interceptor." />
     <MESSAGE value="Moving stuff around." />
-    <option name="LAST_COMMIT_MESSAGE" value="Moving stuff around." />
+    <MESSAGE value="Log4J testing and tidyup." />
+    <option name="LAST_COMMIT_MESSAGE" value="Log4J testing and tidyup." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -273,6 +281,11 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="JUnit">
+        <watch expression="logger" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
