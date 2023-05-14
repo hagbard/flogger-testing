@@ -9,22 +9,22 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import net.goui.flogger.testing.LevelClass;
-import net.goui.flogger.testing.core.DefaultFormatMetadataExtractor;
+import net.goui.flogger.testing.core.DefaultFormatMetadataParser;
 import net.goui.flogger.testing.core.LogEntry;
 import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.MessageAndMetadata;
 import net.goui.flogger.testing.core.MetadataExtractor;
 
-public final class JdkLogInterceptor implements LogInterceptor {
+public final class JdkInterceptor implements LogInterceptor {
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
-  private final MetadataExtractor metadataExtractor;
+  private final MetadataExtractor<String> metadataParser;
 
   public static LogInterceptor create() {
-    return new JdkLogInterceptor(new DefaultFormatMetadataExtractor());
+    return new JdkInterceptor(DefaultFormatMetadataParser::parse);
   }
 
-  private JdkLogInterceptor(MetadataExtractor metadataExtractor) {
-    this.metadataExtractor = checkNotNull(metadataExtractor);
+  private JdkInterceptor(MetadataExtractor<String> metadataParser) {
+    this.metadataParser = checkNotNull(metadataParser);
   }
 
   @Override
@@ -50,7 +50,7 @@ public final class JdkLogInterceptor implements LogInterceptor {
   private class CapturingHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
-      MessageAndMetadata mm = metadataExtractor.parse(record.getMessage());
+      MessageAndMetadata mm = metadataParser.extract(record.getMessage());
       Level level = record.getLevel();
       logs.add(
           LogEntry.of(

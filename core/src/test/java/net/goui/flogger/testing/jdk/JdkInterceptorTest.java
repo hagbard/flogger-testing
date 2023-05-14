@@ -14,15 +14,21 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class JdkLogInterceptorTest {
+public class JdkInterceptorTest {
+  Logger logger(String name) {
+    Logger logger = Logger.getLogger(name);
+    logger.setLevel(INFO);
+    return logger;
+  }
+
   @Test
   public void testInterceptorScope() {
-    Logger jdkLogger = Logger.getLogger("foo.bar.Baz");
-    Logger childLogger = Logger.getLogger("foo.bar.Baz.Child");
-    Logger parentLogger = Logger.getLogger("foo.bar");
-    Logger siblingLogger = Logger.getLogger("foo.bar.Sibling");
+    Logger jdkLogger = logger("foo.bar.Baz");
+    Logger childLogger = logger("foo.bar.Baz.Child");
+    Logger parentLogger = logger("foo.bar");
+    Logger siblingLogger = logger("foo.bar.Sibling");
 
-    LogInterceptor interceptor = JdkLogInterceptor.create();
+    LogInterceptor interceptor = JdkInterceptor.create();
     ImmutableList<LogEntry> logged;
     try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO)) {
       assertThat(interceptor.getLogs()).isEmpty();
@@ -43,8 +49,8 @@ public class JdkLogInterceptorTest {
 
   @Test
   public void testMetadata_allTypes() {
-    Logger jdkLogger = Logger.getLogger("foo.bar.Baz");
-    LogInterceptor interceptor = JdkLogInterceptor.create();
+    Logger jdkLogger = logger("foo.bar.Baz");
+    LogInterceptor interceptor = JdkInterceptor.create();
     try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO)) {
       jdkLogger.warning("Message [CONTEXT foo=true ]");
       jdkLogger.warning("Message [CONTEXT bar=1234 ]");
@@ -64,8 +70,8 @@ public class JdkLogInterceptorTest {
 
   @Test
   public void testMetadata_multipleValues() {
-    Logger jdkLogger = Logger.getLogger("foo.bar.Baz");
-    LogInterceptor interceptor = JdkLogInterceptor.create();
+    Logger jdkLogger = logger("foo.bar.Baz");
+    LogInterceptor interceptor = JdkInterceptor.create();
     try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO)) {
       jdkLogger.warning(
           "Message [CONTEXT foo=true foo=1234 foo=1.23e6 foo=\"\\tline1\\n\\t\\\"line2\\\"\" ]");

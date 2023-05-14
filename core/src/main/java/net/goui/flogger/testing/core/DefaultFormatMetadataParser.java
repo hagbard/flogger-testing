@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DefaultFormatMetadataExtractor implements MetadataExtractor {
+public class DefaultFormatMetadataParser {
   // Default Flogger log message formatting adds metadata consistently in the form:
   // [CONTEXT a=b x="y" ]
   // Non-quoted values are from tag values boolean, long or double and can be re-parsed.
@@ -20,8 +20,7 @@ public class DefaultFormatMetadataExtractor implements MetadataExtractor {
   private static final Pattern CONTEXT =
       Pattern.compile("(?:^|[ \\n])\\[CONTEXT ((?:" + KEY_VALUE_PAIR.pattern() + " )+)]$");
 
-  @Override
-  public MessageAndMetadata parse(String message) {
+  public static MessageAndMetadata parse(String message) {
     Matcher m = CONTEXT.matcher(message);
     Map<String, List<Object>> metadata = ImmutableMap.of();
     if (m.find()) {

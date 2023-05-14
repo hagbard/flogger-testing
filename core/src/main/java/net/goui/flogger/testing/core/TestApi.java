@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
-import net.goui.flogger.testing.jdk.JdkLogInterceptor;
+import net.goui.flogger.testing.jdk.JdkInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -83,6 +83,6 @@ public class TestApi {
   }
 
   private LogInterceptor loadBestInterceptor() {
-    return JdkLogInterceptor.create();
+    return JdkInterceptor.create();
   }
 }
