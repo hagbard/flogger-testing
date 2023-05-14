@@ -35,8 +35,4 @@ public class LogsSubject extends Subject {
   public ScopedLogSubject anyLog() {
     return check("anyLog()").about(ScopedLogSubject.scopedLogs()).that(ScopedLog.anyMatch(log));
   }
-
-  public LogSubject get(int n) {
-    return Truth.assertAbout(LogSubject.logEntries()).that(log.get(n));
-  }
 }

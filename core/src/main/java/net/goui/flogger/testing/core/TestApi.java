@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.context.LogLevelMap;
 import com.google.common.flogger.context.ScopedLoggingContext.LoggingContextCloseable;
 import com.google.common.flogger.context.ScopedLoggingContexts;
+import com.google.common.truth.Truth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class TestApi {
   private final ImmutableMap<String, ? extends Level> levelMap;
   private LogInterceptor interceptor;
-  private final Consumer<TestApi> commonAssertions;
+  @Nullable private final Consumer<TestApi> commonAssertions;
 
   protected TestApi(
       Map<String, ? extends Level> levelMap,
@@ -36,7 +37,7 @@ public class TestApi {
   }
 
   public LogSubject assertLog(int n) {
-    return LogsSubject.assertThat(logged()).get(n);
+    return Truth.assertWithMessage("failure for log[%s]", n).about(LogSubject.logEntries()).that(logged().get(n));
   }
 
   public LogsSubject assertThat() {
@@ -78,7 +79,9 @@ public class TestApi {
     public void close() {
       context.close();
       recorders.forEach(Recorder::close);
-      commonAssertions.accept(TestApi.this);
+      if (commonAssertions != null) {
+        commonAssertions.accept(TestApi.this);
+      }
     }
   }
 

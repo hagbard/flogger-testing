@@ -17,6 +17,7 @@ import net.goui.flogger.testing.core.MetadataExtractor;
 
 public final class JdkInterceptor implements LogInterceptor {
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
+  private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private final MetadataExtractor<String> metadataParser;
 
   public static LogInterceptor create() {
@@ -44,7 +45,11 @@ public final class JdkInterceptor implements LogInterceptor {
 
   @Override
   public ImmutableList<LogEntry> getLogs() {
-    return ImmutableList.copyOf(logs);
+    // Not thread safe, but asserting should not be concurrent with logging.
+    if (logsSnapshot.size() != logs.size()) {
+      logsSnapshot = ImmutableList.copyOf(logs);
+    }
+    return logsSnapshot;
   }
 
   private class CapturingHandler extends Handler {

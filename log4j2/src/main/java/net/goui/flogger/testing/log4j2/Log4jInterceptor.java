@@ -37,7 +37,8 @@ public final class Log4jInterceptor implements LogInterceptor {
     return new Log4jInterceptor(metadataExtractor);
   }
 
-  private final ConcurrentLinkedQueue<LogEntry> records = new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
+  private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private final MetadataExtractor<LogEvent> metadataExtractor;
 
   private Log4jInterceptor(MetadataExtractor<LogEvent> metadataExtractor) {
@@ -64,7 +65,7 @@ public final class Log4jInterceptor implements LogInterceptor {
             EMPTY_ARRAY) {
           @Override
           public void append(LogEvent event) {
-            records.add(toLogEntry(event));
+            logs.add(toLogEntry(event));
           }
         };
 
@@ -87,7 +88,11 @@ public final class Log4jInterceptor implements LogInterceptor {
 
   @Override
   public ImmutableList<LogEntry> getLogs() {
-    return ImmutableList.copyOf(records);
+    // Not thread safe, but asserting should not be concurrent with logging.
+    if (logsSnapshot.size() != logs.size()) {
+      logsSnapshot = ImmutableList.copyOf(logs);
+    }
+    return logsSnapshot;
   }
 
   private LogEntry toLogEntry(LogEvent event) {
