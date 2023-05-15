@@ -12,10 +12,11 @@
   <!-- FIXME change it to the project's website -->
   <!-- <url>http://www.example.com</url> -->
   <modules>
-    <module>core</module>
+    <module>api</module>
     <module>junit4</module>
     <module>junit5</module>
     <module>log4j2</module>
+    <module>truth</module>
   </modules>
   <packaging>pom</packaging>
 

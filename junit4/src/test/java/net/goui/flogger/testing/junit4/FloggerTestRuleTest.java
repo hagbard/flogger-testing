@@ -1,7 +1,5 @@
 package net.goui.flogger.testing.junit4;
 
-import static net.goui.flogger.testing.LevelClass.SEVERE;
-
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogContext.Key;
 import com.google.common.flogger.context.Tags;
@@ -24,7 +22,7 @@ public class FloggerTestRuleTest {
                   logs.assertThat()
                       .everyLog()
                       .atOrAboveLevel(LevelClass.WARNING)
-                      .messageContains("Warn"));
+                      .contains("Warn"));
 
   @Test
   public void test() {

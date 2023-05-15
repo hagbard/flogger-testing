@@ -7,10 +7,10 @@ import static java.util.logging.Level.INFO;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.context.Tags;
-import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogInterceptor;
-import net.goui.flogger.testing.core.LogInterceptor.Recorder;
-import net.goui.flogger.testing.core.LogInterceptor.Support;
+import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.api.LogInterceptor;
+import net.goui.flogger.testing.api.LogInterceptor.Recorder;
+import net.goui.flogger.testing.api.LogInterceptor.Support;
 import net.goui.flogger.testing.log4j2.Log4jInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import org.apache.logging.log4j.Level;
@@ -56,8 +56,8 @@ public class Log4jInterceptorTest {
 
       logged = interceptor.getLogs();
       assertThat(logged).hasSize(2);
-      assertThat(logged.get(0).getMessage()).isEqualTo("Log message");
-      assertThat(logged.get(1).getMessage()).isEqualTo("Child message");
+      assertThat(logged.get(0).message()).isEqualTo("Log message");
+      assertThat(logged.get(1).message()).isEqualTo("Child message");
     }
     logger.error("Should not be captured!!");
     assertThat(interceptor.getLogs()).isEqualTo(logged);
@@ -81,9 +81,9 @@ public class Log4jInterceptorTest {
 
       logged = interceptor.getLogs();
       assertThat(logged).hasSize(3);
-      assertThat(logged.get(0).getMessage()).isEqualTo("Message: Error");
-      assertThat(logged.get(1).getMessage()).isEqualTo("Message: Warn");
-      assertThat(logged.get(2).getMessage()).isEqualTo("Message: Info");
+      assertThat(logged.get(0).message()).isEqualTo("Message: Error");
+      assertThat(logged.get(1).message()).isEqualTo("Message: Warn");
+      assertThat(logged.get(2).message()).isEqualTo("Message: Info");
     }
   }
 
@@ -102,9 +102,9 @@ public class Log4jInterceptorTest {
 
     ImmutableList<LogEntry> logged = interceptor.getLogs();
     assertThat(logged).hasSize(2);
-    LogSubject.assertThat(logged.get(0)).messageContains("Badness");
+    LogSubject.assertThat(logged.get(0)).contains("Badness");
     LogSubject.assertThat(logged.get(0)).hasCause(IllegalStateException.class);
-    LogSubject.assertThat(logged.get(1)).messageContains("Hello");
-    LogSubject.assertThat(logged.get(1)).metadataContains("foo", "bar");
+    LogSubject.assertThat(logged.get(1)).contains("Hello");
+    LogSubject.assertThat(logged.get(1)).hasMetadata("foo", "bar");
   }
 }

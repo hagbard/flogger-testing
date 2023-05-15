@@ -4,13 +4,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Factory sorted.">
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Tidyup - now tests and docs.">
+      <change afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/truth/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/LogEntryTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/ScopedLogSubjectTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultFormatMetadataParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultFormatMetadataParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptorLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptorLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/api/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/truth/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/LevelClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LevelClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/AbstractLogInterceptorFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/AbstractLogInterceptorFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/DefaultFormatMetadataParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/DefaultFormatMetadataParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/LogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptorLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/LogInterceptorLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MessageAndMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/MessageAndMetadata.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/MetadataExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/MetadataExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogAssertion.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogAssertion.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogAssertionResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/ScopedLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/truth/ScopedLogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/core/DefaultMetadataExtractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/DefaultMetadataExtractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/test/java/net/goui/flogger/testing/jdk/JdkInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/jdk/JdkInterceptorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit5/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log4j2/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/App.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/AppTest.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,29 +67,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit4&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4&quot;: &quot;&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;openjdk-20&quot;,
-    &quot;last_directory_selection&quot;: &quot;C:/Users/David/IdeaProjects/flogger-testing/core/src/main/java/net/goui/flogger/testing&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/David/.m2/repository/com/google/auto/value/auto-value/1.10.1/auto-value-1.10.1.jar&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.48390806&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit4",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit4": "",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "jdk.selected.JAVA_MODULE": "openjdk-20",
+    "last_directory_selection": "C:/Users/David/IdeaProjects/flogger-testing/core/src/main/java/net/goui/flogger/testing",
+    "last_opened_file_path": "C:/Users/David/IdeaProjects/flogger-testing",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.48390806",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "project.propCompiler"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\David\IdeaProjects\flogger-testing" />
@@ -70,6 +102,7 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing" />
       <recent name="net.goui.flogger.testing.core" />
       <recent name="net.goui.flogger.testing.core.test" />
     </key>
@@ -77,7 +110,7 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
+  <component name="RunManager" selected="JUnit.LogEntryTest">
     <configuration name="FloggerTestRuleTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit4" />
       <extension name="coverage">
@@ -93,24 +126,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="FloggerTestRuleTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="junit4" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.junit4.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
-      <option name="METHOD_NAME" value="test" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="JdkInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="core" />
+      <module name="api" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="net.goui.flogger.testing.jdk.*" />
@@ -155,13 +172,28 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="LogEntryTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="truth" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.testing.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.LogEntryTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.LogEntryTest" />
         <item itemvalue="JUnit.Log4jInterceptorTest.testFactory_fullSupport" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
         <item itemvalue="JUnit.JdkInterceptorTest" />
-        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
       </list>
     </recent_temporary>
   </component>
@@ -300,7 +332,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684164513705</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Tidyup - now tests and docs.">
+      <created>1684165213872</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1684165213872</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -319,7 +358,8 @@
     <MESSAGE value="JUnit5 done plus tidying." />
     <MESSAGE value="Dependencies sorted better." />
     <MESSAGE value="Factory sorted." />
-    <option name="LAST_COMMIT_MESSAGE" value="Factory sorted." />
+    <MESSAGE value="Tidyup - now tests and docs." />
+    <option name="LAST_COMMIT_MESSAGE" value="Tidyup - now tests and docs." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

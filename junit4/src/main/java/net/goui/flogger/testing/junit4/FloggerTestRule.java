@@ -3,13 +3,12 @@ package net.goui.flogger.testing.junit4;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import net.goui.flogger.testing.core.LogInterceptor;
-import net.goui.flogger.testing.core.TestApi;
+import net.goui.flogger.testing.api.LogInterceptor;
+import net.goui.flogger.testing.api.TestApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
