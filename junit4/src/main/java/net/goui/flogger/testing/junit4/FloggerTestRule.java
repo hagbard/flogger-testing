@@ -1,7 +1,9 @@
 package net.goui.flogger.testing.junit4;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -32,7 +34,6 @@ import org.junit.runners.model.Statement;
  * #using(Map)}.
  */
 public class FloggerTestRule extends TestApi implements TestRule {
-
   public static FloggerTestRule forClassUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClass(caller, level);
@@ -44,17 +45,26 @@ public class FloggerTestRule extends TestApi implements TestRule {
   }
 
   public static FloggerTestRule forClass(Class<?> clazz, Level level) {
-    return of(clazz.getName(), level);
+    return of(loggerNameOf(clazz), level);
   }
 
   public static FloggerTestRule forPackage(Package pkg, Level level) {
     return of(pkg.getName(), level);
   }
 
+  /**
+   * @param loggerName a dot-separated hierarchical logger name.
+   * @param level
+   * @return
+   */
   public static FloggerTestRule of(String loggerName, Level level) {
     return using(ImmutableMap.of(loggerName, level));
   }
 
+  /**
+   * @param levelMap a map of dot-separated hierarchical logger names to corresponding levels.
+   * @return
+   */
   public static FloggerTestRule using(Map<String, ? extends Level> levelMap) {
     return new FloggerTestRule(levelMap, null, null);
   }

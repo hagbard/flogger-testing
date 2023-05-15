@@ -10,6 +10,7 @@ import com.google.common.flogger.context.Tags;
 import net.goui.flogger.testing.core.LogEntry;
 import net.goui.flogger.testing.core.LogInterceptor;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
+import net.goui.flogger.testing.core.LogInterceptor.Support;
 import net.goui.flogger.testing.log4j2.Log4jInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import org.apache.logging.log4j.Level;
@@ -28,6 +29,11 @@ public class Log4jInterceptorTest {
     // is added. We assume that in testing users are not using loggers with transient state set.
     Configurator.setLevel(logger, Level.TRACE);
     return logger;
+  }
+
+  @Test
+  public void testFactory_fullSupport() {
+    assertThat(new Log4jInterceptor.Factory().getSupportLevel()).isEqualTo(Support.FULL);
   }
 
   @Test
@@ -93,6 +99,7 @@ public class Log4jInterceptorTest {
       logger.atInfo().with(TAGS, Tags.of("foo", "bar")).log("Hello World");
       logger.atFine().log("Ignore me!");
     }
+
     ImmutableList<LogEntry> logged = interceptor.getLogs();
     assertThat(logged).hasSize(2);
     LogSubject.assertThat(logged.get(0)).messageContains("Badness");

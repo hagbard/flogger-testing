@@ -10,12 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import net.goui.flogger.testing.core.LogInterceptor.Recorder;
-import net.goui.flogger.testing.jdk.JdkInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /** One of these is instantiated per test case. */
 public class TestApi {
@@ -36,8 +39,28 @@ public class TestApi {
     return interceptor.getLogs();
   }
 
+  protected static String loggerNameOf(Class<?> clazz) {
+    checkArgument(
+        !clazz.isArray(), "Invalid class for log capture (must not be an array): %s", clazz);
+    checkArgument(
+        !clazz.isAnonymousClass(),
+        "Invalid class for log capture (must not be anonymous): %s",
+        clazz);
+    checkArgument(
+        !clazz.isPrimitive(),
+        "Invalid class for log capture (must not be an primitive): %s",
+        clazz);
+    checkArgument(
+        !clazz.isSynthetic(), "Invalid class for log capture (must not be synthetic): %s", clazz);
+    String className = clazz.getCanonicalName();
+    checkNotNull(className, "target class does not have a canonical name: %s", clazz);
+    return className.replace('$', '.');
+  }
+
   public LogSubject assertLog(int n) {
-    return Truth.assertWithMessage("failure for log[%s]", n).about(LogSubject.logEntries()).that(logged().get(n));
+    return Truth.assertWithMessage("failure for log[%s]", n)
+        .about(LogSubject.logEntries())
+        .that(logged().get(n));
   }
 
   public LogsSubject assertThat() {
@@ -66,7 +89,7 @@ public class TestApi {
 
     private ApiHook() {
       if (interceptor == null) {
-        interceptor = loadBestInterceptor();
+        interceptor = BestInterceptorFactory.get();
       }
       levelMap.forEach((name, level) -> recorders.add(interceptor.attachTo(name, level)));
       context =
@@ -85,7 +108,13 @@ public class TestApi {
     }
   }
 
-  private LogInterceptor loadBestInterceptor() {
-    return JdkInterceptor.create();
+  // Lazy holder for caching the loaded interceptor.
+  private static final class BestInterceptorFactory {
+    private static final Supplier<LogInterceptor> factory =
+        LogInterceptorLoader.loadBestInterceptorFactory();
+
+    static LogInterceptor get() {
+      return factory.get();
+    }
   }
 }

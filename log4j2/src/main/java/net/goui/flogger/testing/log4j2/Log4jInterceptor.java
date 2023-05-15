@@ -3,14 +3,11 @@ package net.goui.flogger.testing.log4j2;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
+import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import net.goui.flogger.testing.LevelClass;
-import net.goui.flogger.testing.core.DefaultFormatMetadataParser;
-import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogInterceptor;
-import net.goui.flogger.testing.core.MessageAndMetadata;
-import net.goui.flogger.testing.core.MetadataExtractor;
+import net.goui.flogger.testing.core.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -18,6 +15,7 @@ import org.apache.logging.log4j.core.Filter.Result;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 
 public final class Log4jInterceptor implements LogInterceptor {
@@ -25,6 +23,21 @@ public final class Log4jInterceptor implements LogInterceptor {
   private static final int JDK_WARNING_VALUE = java.util.logging.Level.WARNING.intValue();
   private static final int JDK_INFO_VALUE = java.util.logging.Level.INFO.intValue();
   private static final int JDK_FINE_VALUE = java.util.logging.Level.FINE.intValue();
+
+  @AutoService(LogInterceptor.Factory.class)
+  public static final class Factory extends AbstractLogInterceptorFactory {
+    @Override
+    public LogInterceptor get() {
+      return Log4jInterceptor.create();
+    }
+
+    @Override
+    protected void configureUnderlyingLoggerForFinestLogging(String loggerName) {
+      Logger underlyingLogger = (Logger) LogManager.getLogger(loggerName);
+      Configurator.setLevel(underlyingLogger, Level.TRACE);
+      underlyingLogger.setAdditive(false);
+    }
+  }
 
   private static final MetadataExtractor<LogEvent> DEFAULT_LOG4J_EXTRACTOR =
       e -> DefaultFormatMetadataParser.parse(e.getMessage().getFormattedMessage());

@@ -9,13 +9,24 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import net.goui.flogger.testing.LevelClass;
-import net.goui.flogger.testing.core.DefaultFormatMetadataParser;
-import net.goui.flogger.testing.core.LogEntry;
-import net.goui.flogger.testing.core.LogInterceptor;
-import net.goui.flogger.testing.core.MessageAndMetadata;
-import net.goui.flogger.testing.core.MetadataExtractor;
+import net.goui.flogger.testing.core.*;
 
 public final class JdkInterceptor implements LogInterceptor {
+
+  public static class Factory extends AbstractLogInterceptorFactory {
+    @Override
+    public LogInterceptor get() {
+      return JdkInterceptor.create();
+    }
+
+    @Override
+    protected void configureUnderlyingLoggerForFinestLogging(String loggerName) {
+      Logger underlyingLogger = Logger.getLogger(loggerName);
+      underlyingLogger.setLevel(Level.FINEST);
+      underlyingLogger.setUseParentHandlers(false);
+    }
+  }
+
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private final MetadataExtractor<String> metadataParser;
@@ -32,11 +43,11 @@ public final class JdkInterceptor implements LogInterceptor {
   public Recorder attachTo(String loggerName, Level level) {
     CapturingHandler handler = new CapturingHandler();
     handler.setLevel(level);
-    Logger logger = Logger.getLogger(loggerName);
-    logger.addHandler(handler);
+    Logger jdkLogger = Logger.getLogger(loggerName);
+    jdkLogger.addHandler(handler);
     return () -> {
       try {
-        logger.removeHandler(handler);
+        jdkLogger.removeHandler(handler);
       } catch (RuntimeException e) {
         // Ignored on close().
       }

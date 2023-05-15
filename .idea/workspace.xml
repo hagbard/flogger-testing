@@ -4,13 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="JUnit5 done plus tidying.">
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Dependencies sorted better.">
+      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/AbstractLogInterceptorFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptorLoader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/TestApi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log4j2/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,17 +82,17 @@
       <recent name="net.goui.flogger.testing.core" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
-    <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="junit5" />
+  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
+    <configuration name="FloggerTestRuleTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="junit4" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.*" />
+          <option name="PATTERN" value="net.goui.flogger.testing.junit4.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.FloggerTestExtensionTest" />
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -109,6 +114,21 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="JdkInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="core" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.testing.jdk.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.jdk" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.jdk.JdkInterceptorTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Log4jInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="log4j" />
       <extension name="coverage">
@@ -124,7 +144,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Log4jInterceptorTest.testInterceptorScope" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="Log4jInterceptorTest.testFactory_fullSupport" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="log4j" />
       <extension name="coverage">
         <pattern>
@@ -134,23 +154,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="net.goui.flogger.log4j2" />
       <option name="MAIN_CLASS_NAME" value="net.goui.flogger.log4j2.Log4jInterceptorTest" />
-      <option name="METHOD_NAME" value="testInterceptorScope" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Log4jInterceptorTest.testWithFlogger" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="log4j" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="net.goui.flogger.log4j2.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.log4j2" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.log4j2.Log4jInterceptorTest" />
-      <option name="METHOD_NAME" value="testWithFlogger" />
+      <option name="METHOD_NAME" value="testFactory_fullSupport" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -158,11 +162,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
-        <item itemvalue="JUnit.FloggerTestExtensionTest" />
+        <item itemvalue="JUnit.Log4jInterceptorTest.testFactory_fullSupport" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
-        <item itemvalue="JUnit.Log4jInterceptorTest.testInterceptorScope" />
-        <item itemvalue="JUnit.Log4jInterceptorTest.testWithFlogger" />
+        <item itemvalue="JUnit.FloggerTestRuleTest" />
+        <item itemvalue="JUnit.JdkInterceptorTest" />
+        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
       </list>
     </recent_temporary>
   </component>
@@ -287,7 +291,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684105540337</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Dependencies sorted better.">
+      <created>1684108135090</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1684108135090</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -304,7 +315,8 @@
     <MESSAGE value="Log4J testing and tidyup." />
     <MESSAGE value="Log4J done." />
     <MESSAGE value="JUnit5 done plus tidying." />
-    <option name="LAST_COMMIT_MESSAGE" value="JUnit5 done plus tidying." />
+    <MESSAGE value="Dependencies sorted better." />
+    <option name="LAST_COMMIT_MESSAGE" value="Dependencies sorted better." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -313,6 +325,11 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="14" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/core/src/main/java/net/goui/flogger/testing/core/LogInterceptorLoader.java</url>
+          <line>14</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
