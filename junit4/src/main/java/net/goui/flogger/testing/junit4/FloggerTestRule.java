@@ -33,7 +33,7 @@ import org.junit.runners.model.Statement;
  * If this is not the case, specify logger names directly via {@link #of(String, Level)} or {@link
  * #using(Map)}.
  */
-public class FloggerTestRule extends TestApi implements TestRule {
+public final class FloggerTestRule extends TestApi implements TestRule {
   public static FloggerTestRule forClassUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClass(caller, level);

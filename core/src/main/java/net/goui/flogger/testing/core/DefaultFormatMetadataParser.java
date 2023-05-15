@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DefaultFormatMetadataParser {
+public final class DefaultFormatMetadataParser {
   // Default Flogger log message formatting adds metadata consistently in the form:
   // [CONTEXT a=b x="y" ]
   // Non-quoted values are from tag values boolean, long or double and can be re-parsed.

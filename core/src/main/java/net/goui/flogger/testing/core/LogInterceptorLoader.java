@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import net.goui.flogger.testing.core.LogInterceptor.Factory;
 import net.goui.flogger.testing.jdk.JdkInterceptor;
 
-public class LogInterceptorLoader {
+final class LogInterceptorLoader {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static final ServiceLoader<Factory> loader = ServiceLoader.load(Factory.class);

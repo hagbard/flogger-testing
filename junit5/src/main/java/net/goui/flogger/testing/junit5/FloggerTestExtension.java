@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class FloggerTestExtension extends TestApi
+public final class FloggerTestExtension extends TestApi
     implements BeforeEachCallback, AfterEachCallback {
   public static FloggerTestExtension forClassUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
@@ -27,17 +27,26 @@ public class FloggerTestExtension extends TestApi
   }
 
   public static FloggerTestExtension forClass(Class<?> clazz, Level level) {
-    return of(clazz.getName(), level);
+    return of(loggerNameOf(clazz), level);
   }
 
   public static FloggerTestExtension forPackage(Package pkg, Level level) {
     return of(pkg.getName(), level);
   }
 
+  /**
+   * @param loggerName a dot-separated hierarchical logger name.
+   * @param level
+   * @return
+   */
   public static FloggerTestExtension of(String loggerName, Level level) {
     return using(ImmutableMap.of(loggerName, level));
   }
 
+  /**
+   * @param levelMap a map of dot-separated hierarchical logger names to corresponding levels.
+   * @return
+   */
   public static FloggerTestExtension using(Map<String, ? extends Level> levelMap) {
     return new FloggerTestExtension(levelMap, null, null);
   }
