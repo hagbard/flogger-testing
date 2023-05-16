@@ -11,6 +11,11 @@ import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Support;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * An implementation of {@link LogInterceptor.Factory} which supplies its own test to the determine
+ * support level of an interceptor. Subclasses need only configure an underlying logger instance
+ * programmatically in order to get a good measure of support.
+ */
 public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Factory {
   private static final FluentLogger testFluentLogger = FluentLogger.forEnclosingClass();
   private static final String EXPECTED_LOGGER_NAME =
@@ -18,6 +23,11 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
 
   protected abstract void configureUnderlyingLoggerForInfoLogging(String loggerName);
 
+  /**
+   * A fairly comprehensive test to determine the support level for an interceptor.
+   *
+   * @return
+   */
   @Override
   public final Support getSupportLevel() {
     configureUnderlyingLoggerForInfoLogging(EXPECTED_LOGGER_NAME);

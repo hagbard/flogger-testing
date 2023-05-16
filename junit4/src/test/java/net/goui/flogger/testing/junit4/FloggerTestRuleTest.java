@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import static net.goui.flogger.testing.LevelClass.FINE;
+
 @RunWith(JUnit4.class)
 public class FloggerTestRuleTest {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -44,7 +46,7 @@ public class FloggerTestRuleTest {
     // expected: FINE
     // but was : INFO
     // --------------------------------------------------------------------------------------------
-    // logs.assertLog(1).levelIs(FINE);
+    logs.assertLog(1).isAtLevel(FINE);
 
     // --------------------------------------------------------------------------------------------
     // value of                       : log.message()
