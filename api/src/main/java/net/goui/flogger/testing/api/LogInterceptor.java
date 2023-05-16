@@ -5,8 +5,15 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LogEntry;
 
+/**
+ * Defines an interceptor which can extract log entries from one or more underlying loggers for use
+ * in test assertions.
+ *
+ * <p>While users can supply interceptors directly to the test API, implementations of this
+ * interface should also be made available from a {@link LogInterceptor.Factory} class which is
+ * registered as a "service" (i.e. obtained via {@code ServiceLoader.load(Factory.class)}).
+ */
 public interface LogInterceptor {
-
   /**
    * The support level of an interceptor implementation as determined via {@link
    * Factory#getSupportLevel()}.
@@ -42,8 +49,7 @@ public interface LogInterceptor {
 
   /**
    * Implemented by classes wishing to support log interceptors. Factory classes should register
-   * themselves as service loaders for the {@link LogInterceptor} type (e.g. by using Guava's {@code
-   * AutoService} annotation.
+   * themselves as "services" (e.g. by using Guava's {@code AutoService} annotation.
    */
   interface Factory extends Supplier<LogInterceptor> {
     /** Returns a new log interceptor for use during tests. */

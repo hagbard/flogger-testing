@@ -24,9 +24,10 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
   protected abstract void configureUnderlyingLoggerForInfoLogging(String loggerName);
 
   /**
-   * A fairly comprehensive test to determine the support level for an interceptor.
+   * A fairly comprehensive test to determine the support level for an interceptor using {@link
+   * FluentLogger} to sample the behaviour of the subclass interceptor implementation.
    *
-   * @return
+   * @return the support level of the implementation subclass.
    */
   @Override
   public final Support getSupportLevel() {
@@ -46,10 +47,14 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
     Support support = Support.FULL;
     LogEntry enabledLog = logged.get(0);
     support =
-        min(support, testSupport(enabledLog, LevelClass.INFO, "<<enabled message>>", testCause));
+        min(
+            support,
+            testBasicSupport(enabledLog, LevelClass.INFO, "<<enabled message>>", testCause));
     if (logged.size() == 2) {
       LogEntry forcedLog = logged.get(1);
-      support = min(support, testSupport(forcedLog, LevelClass.FINEST, "<<forced message>>", null));
+      support =
+          min(support, testBasicSupport(forcedLog, LevelClass.FINEST, "<<forced message>>", null));
+      // As well as basic support, test for the expected "forced=true" metadata.
       ImmutableList<Object> values = forcedLog.metadata().get("forced");
       if (values == null || !values.contains(TRUE)) {
         support = min(support, Support.PARTIAL);
@@ -60,11 +65,12 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
     return support;
   }
 
+  /** Returns the minimum of the given support levels. */
   private static Support min(Support existing, Support result) {
     return existing.compareTo(result) < 0 ? existing : result;
   }
 
-  private static Support testSupport(
+  private static Support testBasicSupport(
       LogEntry e, LevelClass levelClass, String messageSubstring, @Nullable Throwable cause) {
     if (!e.message().contains(messageSubstring)) {
       return Support.NONE;
