@@ -25,9 +25,9 @@ public final class JdkInterceptor implements LogInterceptor {
     }
 
     @Override
-    protected void configureUnderlyingLoggerForFinestLogging(String loggerName) {
+    protected void configureUnderlyingLoggerForInfoLogging(String loggerName) {
       Logger underlyingLogger = Logger.getLogger(loggerName);
-      underlyingLogger.setLevel(Level.FINEST);
+      underlyingLogger.setLevel(Level.INFO);
       underlyingLogger.setUseParentHandlers(false);
     }
   }

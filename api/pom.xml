@@ -35,6 +35,20 @@
             <artifactId>flogger</artifactId>
             <version>0.7.4</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
+        <dependency>
+            <groupId>com.google.flogger</groupId>
+            <artifactId>flogger-grpc-context</artifactId>
+            <version>0.7.4</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.grpc/grpc-context -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.truth/truth -->
         <dependency>
             <groupId>com.google.truth</groupId>

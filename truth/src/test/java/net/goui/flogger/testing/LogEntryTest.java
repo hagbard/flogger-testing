@@ -23,7 +23,7 @@ public class LogEntryTest {
     assertThat(entry.levelName()).isEqualTo("<info>");
     assertThat(entry.levelClass()).isEqualTo(LevelClass.INFO);
     assertThat(entry.message()).isEqualTo("log message");
-    assertThat(entry.getMetadata()).isEqualTo(metadata);
+    assertThat(entry.metadata()).isEqualTo(metadata);
     assertThat(entry.cause()).isEqualTo(cause);
   }
 

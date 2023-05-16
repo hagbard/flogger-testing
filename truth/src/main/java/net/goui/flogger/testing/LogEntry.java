@@ -102,7 +102,7 @@ public abstract class LogEntry {
    * metadata value as an {@code int}, it must be losslessly represented here as a {@code Long}.
    * This permits log assertions to test exact values for primitive types.
    */
-  public abstract ImmutableMap<String, ImmutableList<Object>> getMetadata();
+  public abstract ImmutableMap<String, ImmutableList<Object>> metadata();
 
   /** Returns the associated "cause" of this log entry (if present). */
   @Nullable
@@ -129,7 +129,7 @@ public abstract class LogEntry {
     }
     String messageSnippet = shortSnippet(message());
     String causeStr = cause() != null ? ", cause=" + cause().getClass().getSimpleName() : "";
-    String metadataStr = !getMetadata().isEmpty() ? ", context=" + getMetadata() : "";
+    String metadataStr = !metadata().isEmpty() ? ", context=" + metadata() : "";
     return logSiteString
         + "@"
         + levelString

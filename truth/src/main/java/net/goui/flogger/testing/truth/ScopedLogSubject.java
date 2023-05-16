@@ -89,7 +89,7 @@ public class ScopedLogSubject extends Subject implements LogAssertion {
 
   private void hasMetadataImpl(String key, Object value) {
     handleResult(
-        log.assertLogs(e -> e.getMetadata().getOrDefault(key, ImmutableList.of()).contains(value)),
+        log.assertLogs(e -> e.metadata().getOrDefault(key, ImmutableList.of()).contains(value)),
         logFact("metadata", "contain", key + "=" + value));
   }
 

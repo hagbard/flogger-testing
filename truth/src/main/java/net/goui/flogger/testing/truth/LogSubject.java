@@ -67,10 +67,10 @@ public class LogSubject extends Subject implements LogAssertion {
   private void metadataContainsImpl(String key, @Nullable Object value) {
     check("metadata()")
         .withMessage("log metadata did not contain key %s", key)
-        .that(entry().getMetadata())
+        .that(entry().metadata())
         .containsKey(key);
     if (value != null) {
-      ImmutableList<Object> values = checkNotNull(entry().getMetadata().get(key));
+      ImmutableList<Object> values = checkNotNull(entry().metadata().get(key));
       String valueStr = value instanceof String ? "\"" + values + "\"" : value.toString();
       check("metadata().get(\"%s\")", key)
           .withMessage("log metadata did not contain entry {%s: %s}", key, valueStr)

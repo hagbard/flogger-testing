@@ -90,7 +90,7 @@ public abstract class ScopedLog {
 
     static Result fail(Fact... facts) {
       checkArgument(facts.length > 0);
-      return new AutoValue_LogAssertionResult(false, ImmutableList.copyOf(facts));
+      return new AutoValue_ScopedLog_Result(false, ImmutableList.copyOf(facts));
     }
 
     final Fact[] describeFailure() {
