@@ -4,12 +4,16 @@ import static java.lang.Boolean.TRUE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Support;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.units.qual.A;
 
 /**
  * An implementation of {@link LogInterceptor.Factory} which supplies its own test to the determine
@@ -17,7 +21,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * programmatically in order to get a good measure of support.
  */
 public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Factory {
-  private static final FluentLogger testFluentLogger = FluentLogger.forEnclosingClass();
   private static final String EXPECTED_LOGGER_NAME =
       AbstractLogInterceptorFactory.class.getCanonicalName();
 
@@ -34,12 +37,16 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
     configureUnderlyingLoggerForInfoLogging(EXPECTED_LOGGER_NAME);
     LogInterceptor interceptor = get();
     RuntimeException testCause = new RuntimeException();
-    try (LogInterceptor.Recorder r = interceptor.attachTo(EXPECTED_LOGGER_NAME, Level.FINE)) {
+    List<LogEntry> logged = new ArrayList<>();
+    try (LogInterceptor.Recorder r =
+        interceptor.attachTo(EXPECTED_LOGGER_NAME, Level.FINE, logged::add, "DUMMY_TEST_ID")) {
+      // Rare case where we only want the logger in one method and don't want to initialize
+      // logging until we get here. We could also use a lazy holder if needed.
+      FluentLogger testFluentLogger = FluentLogger.forEnclosingClass();
       testFluentLogger.atInfo().withCause(testCause).log("<<enabled message>>");
       testFluentLogger.atFine().log("<<forced message>>");
       testFluentLogger.atFinest().log("<<disabled log>>");
     }
-    ImmutableList<LogEntry> logged = interceptor.getLogs();
     if (logged.isEmpty()) {
       return Support.NONE;
     }

@@ -78,7 +78,7 @@ public final class FloggerTestExtension extends TestApi
   
   @Override
   public void beforeEach(ExtensionContext extensionContext) throws Exception {
-    apiHook = install();
+    apiHook = install(true);
   }
 
   @Override

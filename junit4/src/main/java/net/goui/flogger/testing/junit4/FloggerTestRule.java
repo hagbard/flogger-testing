@@ -52,7 +52,7 @@ public final class FloggerTestRule extends TestApi implements TestRule {
   }
 
   /**
-   * @param loggerName a dot-separated hierarchical logger name.
+   * @param loggerName a dot-separated hierarchical logger name (class or package).
    * @param level
    * @return
    */
@@ -95,7 +95,7 @@ public final class FloggerTestRule extends TestApi implements TestRule {
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        try (var ctx = install()) {
+        try (var ctx = install(true)) {
           statement.evaluate();
         }
       }

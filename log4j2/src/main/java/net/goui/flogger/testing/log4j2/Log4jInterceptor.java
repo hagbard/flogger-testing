@@ -4,8 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
 import com.google.auto.service.AutoService;
+import java.util.function.Consumer;
+
 import com.google.common.collect.ImmutableList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.*;
@@ -15,8 +16,10 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter.Result;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 
 public final class Log4jInterceptor implements LogInterceptor {
@@ -51,8 +54,6 @@ public final class Log4jInterceptor implements LogInterceptor {
     return new Log4jInterceptor(metadataExtractor);
   }
 
-  private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
-  private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private final MetadataExtractor<LogEvent> metadataExtractor;
 
   private Log4jInterceptor(MetadataExtractor<LogEvent> metadataExtractor) {
@@ -60,13 +61,18 @@ public final class Log4jInterceptor implements LogInterceptor {
   }
 
   @Override
-  public Recorder attachTo(String loggerName, java.util.logging.Level jdkLevel) {
+  public Recorder attachTo(
+      String loggerName,
+      java.util.logging.Level jdkLevel,
+      Consumer<LogEntry> collector,
+      String testId) {
     // WARNING: Log4J is unintuitive with log level ordering (compared to JDK). A "high" level means
     // high verbosity (i.e. what most people call "low level logging").
+    Level log4JLevel = toLog4JLevel(jdkLevel);
     LevelRangeFilter specifiedLevelAndAbove =
         LevelRangeFilter.createFilter(
             /* minLevel (null ==> max) */ null,
-            /* maxLevel */ toLog4JLevel(jdkLevel),
+            /* maxLevel */ log4JLevel,
             /* onMatch (null ==> accept) */ Result.NEUTRAL,
             /* onMismatch (null ==> deny) */ Result.DENY);
 
@@ -79,45 +85,45 @@ public final class Log4jInterceptor implements LogInterceptor {
             EMPTY_ARRAY) {
           @Override
           public void append(LogEvent event) {
-            logs.add(toLogEntry(event));
+            MessageAndMetadata mm = metadataExtractor.extract(event);
+            if (LogInterceptor.shouldCollect(mm, testId)) {
+              collector.accept(toLogEntry(event, mm));
+            }
           }
         };
 
-    Logger logger = (Logger) LogManager.getLogger(loggerName);
-    // WARNING: If the logger referenced here has had transient modifications made to it (e.g.
-    // calling setLevel() directly rather than using configuration to set the level), the act of
-    // adding an appender here will reset the logger to its "original state". This is almost
-    // impossible to avoid unfortunately, but with appropriate warnings in the right places it
-    // shouldn't be too bad. The "Configurator" class is a way to set a logger's level
-    // programmatically which won't be undone here.
-    logger.addAppender(appender);
+    // If the call to configureUnderlyingLoggerForInfoLogging() succeeded, we should be
+    // able to cast the context instance.
+    LoggerContext context = (LoggerContext) LogManager.getContext(false);
+    // The existing config for the logger name might be a parent config.
+    LoggerConfig oldConfig = context.getConfiguration().getLoggerConfig(loggerName);
+    // Add a new logger config or use the existing one.
+    LoggerConfig config =
+        loggerName.equals(oldConfig.getName())
+            ? oldConfig
+            : new LoggerConfig(loggerName, log4JLevel, true);
+    // Actually adds an AppenderRef
+    config.addAppender(appender, null, null);
+    // Sets the level of the LoggerConfig
+    config.setLevel(log4JLevel);
+    context.getConfiguration().addLogger(loggerName, config);
+    context.updateLoggers();
     return () -> {
       try {
-        logger.removeAppender(appender);
+        context.getConfiguration().removeLogger(loggerName);
+        context.updateLoggers();
       } catch (RuntimeException e) {
         // Ignored on close().
       }
     };
   }
 
-  @Override
-  public ImmutableList<LogEntry> getLogs() {
-    // Not thread safe, but asserting should not be concurrent with logging.
-    if (logsSnapshot.size() != logs.size()) {
-      logsSnapshot = ImmutableList.copyOf(logs);
-    }
-    return logsSnapshot;
-  }
-
-  private LogEntry toLogEntry(LogEvent event) {
+  private LogEntry toLogEntry(LogEvent event, MessageAndMetadata mm) {
     StackTraceElement source = event.getSource(); // nullable
-    String className = source != null ? source.getClassName() : null;
-    String methodName = source != null ? source.getMethodName() : null;
     Level log4jLevel = event.getLevel();
-    MessageAndMetadata mm = metadataExtractor.extract(event);
     return LogEntry.of(
-        className,
-        methodName,
+        source != null ? source.getClassName() : null,
+        source != null ? source.getMethodName() : null,
         log4jLevel.name(),
         toLevelClass(log4jLevel),
         mm.message(),

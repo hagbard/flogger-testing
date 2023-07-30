@@ -20,6 +20,6 @@ public class FloggerTestExtensionTest {
   public void testFoo() {
     logger.atInfo().log("Hello World!");
 
-    logged.assertLog(0).contains("Hexllo");
+    logged.assertLog(0).contains("Hello");
   }
 }

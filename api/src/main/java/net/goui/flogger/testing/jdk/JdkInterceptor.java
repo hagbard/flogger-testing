@@ -3,7 +3,7 @@ package net.goui.flogger.testing.jdk;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -32,8 +32,6 @@ public final class JdkInterceptor implements LogInterceptor {
     }
   }
 
-  private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
-  private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private final MetadataExtractor<String> metadataParser;
 
   public static LogInterceptor create() {
@@ -45,8 +43,9 @@ public final class JdkInterceptor implements LogInterceptor {
   }
 
   @Override
-  public Recorder attachTo(String loggerName, Level level) {
-    CapturingHandler handler = new CapturingHandler();
+  public Recorder attachTo(
+      String loggerName, Level level, Consumer<LogEntry> collector, String testId) {
+    CapturingHandler handler = new CapturingHandler(collector, testId);
     handler.setLevel(level);
     Logger jdkLogger = Logger.getLogger(loggerName);
     jdkLogger.addHandler(handler);
@@ -59,29 +58,30 @@ public final class JdkInterceptor implements LogInterceptor {
     };
   }
 
-  @Override
-  public ImmutableList<LogEntry> getLogs() {
-    // Not thread safe, but asserting should not be concurrent with logging.
-    if (logsSnapshot.size() != logs.size()) {
-      logsSnapshot = ImmutableList.copyOf(logs);
-    }
-    return logsSnapshot;
-  }
-
   private class CapturingHandler extends Handler {
+    private final Consumer<LogEntry> collector;
+    private final String testId;
+
+    private CapturingHandler(Consumer<LogEntry> collector, String testId) {
+      this.collector = collector;
+      this.testId = testId;
+    }
+
     @Override
     public void publish(LogRecord record) {
-      MessageAndMetadata mm = metadataParser.extract(record.getMessage());
       Level level = record.getLevel();
-      logs.add(
-          LogEntry.of(
-              record.getSourceClassName(),
-              record.getSourceMethodName(),
-              level.getName(),
-              levelClassOf(level),
-              mm.message(),
-              mm.metadata(),
-              record.getThrown()));
+      MessageAndMetadata mm = metadataParser.extract(record.getMessage());
+      if (LogInterceptor.shouldCollect(mm, testId)) {
+        collector.accept(
+            LogEntry.of(
+                record.getSourceClassName(),
+                record.getSourceMethodName(),
+                level.getName(),
+                levelClassOf(level),
+                mm.message(),
+                mm.metadata(),
+                record.getThrown()));
+      }
     }
 
     @Override

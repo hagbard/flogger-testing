@@ -1,6 +1,7 @@
 package net.goui.flogger.testing.api;
 
 import com.google.common.collect.ImmutableList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LogEntry;
@@ -29,7 +30,7 @@ public interface LogInterceptor {
     /**
      * This interceptor implementation extracts basic information (log message) but may omit
      * additional information such as call-site information or even metadata. If an interceptor with
-     * partial support is used, some logging tests are likely to start (spuriously) failing.
+     * partial support is used, some logging tests are likely to start failing spuriously.
      *
      * <p>A partially supported log interceptor will only be used if no fully supported instances
      * can be found (and logging will alert the user to the risk of test failure).
@@ -76,22 +77,15 @@ public interface LogInterceptor {
    * @return a closeable "recorder" which encapsulated the attachment to the specific logger and
    *     which will be removed once testing is complete.
    */
-  Recorder attachTo(String loggerName, Level level);
+  Recorder attachTo(String loggerName, Level level, Consumer<LogEntry> collector, String testId);
+
+  static boolean shouldCollect(MessageAndMetadata mm, String testId) {
+    return TestApi.hasMatchingTestId(mm, testId);
+  }
 
   /**
-   * Returns a thread-safe snapshot of the current set of logs recorded across all attached loggers.
-   *
-   * <p>Interceptor implementations must ensure that the capturing of log entries is thread safe,
-   * and that a snapshot can be taken at any time. However, in the face of concurrent logging, an
-   * interceptor may choose to order logs from different threads arbitrarily (i.e. the order of logs
-   * <em>need not</em> be strictly monotonic by original timestamp in the returned list, and users
-   * should never rely on log entry ordering between threads).
-   */
-  ImmutableList<LogEntry> getLogs();
-
-  /**
-   * Detaches the interceptor from the logger for which the original {@link #attachTo(String,
-   * Level)} call was made.
+   * Detaches the interceptor from the logger for which the original {@link #attachTo(String, Level,
+   * Consumer, String)} call was made.
    */
   interface Recorder extends AutoCloseable {
     @Override

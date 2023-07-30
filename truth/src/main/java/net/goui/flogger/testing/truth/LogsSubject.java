@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Subject;
 import net.goui.flogger.testing.LogEntry;
 
@@ -21,6 +22,10 @@ public class LogsSubject extends Subject {
 
   public static LogsSubject assertThat(ImmutableList<LogEntry> log) {
     return assertAbout(logs()).that(log);
+  }
+
+  public IntegerSubject logCount() {
+    return check("size()").that(log.size());
   }
 
   public ScopedLogSubject everyLog() {
