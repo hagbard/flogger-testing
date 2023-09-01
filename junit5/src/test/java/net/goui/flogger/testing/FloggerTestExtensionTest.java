@@ -13,7 +13,8 @@ public class FloggerTestExtensionTest {
 
   @RegisterExtension
   static final FloggerTestExtension logged =
-      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, Level.INFO);
+      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, Level.INFO)
+          .verify(logs -> logs.always().haveMessageContaining("Hello"));
 
   @ExtendWith(FloggerTestExtension.class)
   @Test

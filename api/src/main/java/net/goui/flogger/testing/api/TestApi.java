@@ -1,8 +1,6 @@
 package net.goui.flogger.testing.api;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.StackSize.MEDIUM;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -21,21 +19,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 import javax.annotation.CheckReturnValue;
-
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
-import net.goui.flogger.testing.truth.ScopedLogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** One of these is instantiated per test case. */
@@ -52,12 +43,12 @@ public class TestApi {
   // Captured logs (thread safe).
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
-  @Nullable private final Consumer<TestApi> commonAssertions;
+  @Nullable private final Consumer<LogsSubject> commonAssertions;
 
   protected TestApi(
       Map<String, ? extends Level> levelMap,
       @Nullable LogInterceptor interceptor,
-      @Nullable Consumer<TestApi> commonAssertions) {
+      @Nullable Consumer<LogsSubject> commonAssertions) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor;
     this.commonAssertions = commonAssertions;
@@ -86,18 +77,14 @@ public class TestApi {
     return className.replace('$', '.');
   }
 
-  public ScopedLogsSubject assertLogs() {
-    return ScopedLogsSubject.assertThat(logged());
+  public LogsSubject assertLogs() {
+    return LogsSubject.assertThat(logged());
   }
 
   public LogSubject assertLog(int n) {
     return Truth.assertWithMessage("failure for log[%s]", n)
         .about(LogSubject.logEntries())
         .that(logged().get(n));
-  }
-
-  public LogsSubject assertThat() {
-    return LogsSubject.assertThat(logged());
   }
 
   protected final ImmutableMap<String, ? extends Level> levelMap() {
@@ -108,7 +95,7 @@ public class TestApi {
     return interceptor;
   }
 
-  protected final Consumer<TestApi> commonAssertions() {
+  protected final Consumer<LogsSubject> commonAssertions() {
     return commonAssertions;
   }
 
@@ -145,7 +132,7 @@ public class TestApi {
       recorders.forEach(Recorder::close);
       TestId.release(testId);
       if (commonAssertions != null) {
-        commonAssertions.accept(TestApi.this);
+        commonAssertions.accept(TestApi.this.assertLogs());
       }
     }
   }

@@ -4,17 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Mostly working for basic stuff, needs a better API.">
-      <change afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="First version of better API idea.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/LogEntryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/LogEntryTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +86,7 @@
       <recent name="net.goui.flogger.testing.truth" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
+  <component name="RunManager" selected="JUnit.FloggerTestExtensionTest">
     <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit5" />
       <extension name="coverage">
@@ -167,9 +165,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest.test" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
-        <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
         <item itemvalue="JUnit.TestApiTest" />
       </list>
@@ -376,7 +374,9 @@
     <MESSAGE value="Better support tests." />
     <MESSAGE value="Docs." />
     <MESSAGE value="Mostly working for basic stuff, needs a better API." />
-    <option name="LAST_COMMIT_MESSAGE" value="Mostly working for basic stuff, needs a better API." />
+    <MESSAGE value="WIP" />
+    <MESSAGE value="First version of better API idea." />
+    <option name="LAST_COMMIT_MESSAGE" value="First version of better API idea." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -385,24 +385,6 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="14" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java</url>
-          <line>39</line>
-          <option name="timeStamp" value="20" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java</url>
-          <line>149</line>
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java</url>
-          <line>150</line>
-          <properties>
-            <option name="lambda-ordinal" value="0" />
-          </properties>
-          <option name="timeStamp" value="22" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

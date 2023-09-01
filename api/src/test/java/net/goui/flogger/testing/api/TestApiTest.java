@@ -69,7 +69,7 @@ public class TestApiTest {
     }
     assertThat(interceptor.attached).isEmpty();
 
-    myApi.assertThat().logCount().isEqualTo(4);
+    myApi.assertLogs().matchCount().isEqualTo(4);
     myApi.assertLog(0).contains("attach: foo");
     myApi.assertLog(1).contains("attach: bar");
     myApi.assertLog(2).contains("detach: foo");

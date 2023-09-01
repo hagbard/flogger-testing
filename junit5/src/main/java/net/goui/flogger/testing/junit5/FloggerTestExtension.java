@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.TestApi;
+import net.goui.flogger.testing.truth.LogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -54,7 +55,7 @@ public final class FloggerTestExtension extends TestApi
   private FloggerTestExtension(
       Map<String, ? extends Level> levelMap,
       @Nullable LogInterceptor interceptor,
-      @Nullable Consumer<TestApi> commonAssertions) {
+      @Nullable Consumer<LogsSubject> commonAssertions) {
     super(levelMap, interceptor, commonAssertions);
   }
 
@@ -63,8 +64,8 @@ public final class FloggerTestExtension extends TestApi
     return new FloggerTestExtension(levelMap(), interceptor, commonAssertions());
   }
 
-  FloggerTestExtension asserting(Consumer<TestApi> assertions) {
-    Consumer<TestApi> newAssertions =
+  public FloggerTestExtension verify(Consumer<LogsSubject> assertions) {
+    Consumer<LogsSubject> newAssertions =
         commonAssertions() == null
             ? assertions
             : t -> {
