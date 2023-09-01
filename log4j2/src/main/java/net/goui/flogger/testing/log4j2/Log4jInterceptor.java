@@ -4,9 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
 import com.google.auto.service.AutoService;
+import java.time.Instant;
 import java.util.function.Consumer;
-
-import com.google.common.collect.ImmutableList;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.*;
@@ -121,11 +120,14 @@ public final class Log4jInterceptor implements LogInterceptor {
   private LogEntry toLogEntry(LogEvent event, MessageAndMetadata mm) {
     StackTraceElement source = event.getSource(); // nullable
     Level log4jLevel = event.getLevel();
+    var ts = event.getInstant();
+    Instant timestamp = Instant.ofEpochSecond(ts.getEpochSecond(), ts.getNanoOfSecond());
     return LogEntry.of(
         source != null ? source.getClassName() : null,
         source != null ? source.getMethodName() : null,
         log4jLevel.name(),
         toLevelClass(log4jLevel),
+        timestamp,
         mm.message(),
         mm.metadata(),
         event.getThrown());

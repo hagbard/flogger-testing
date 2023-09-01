@@ -4,12 +4,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LogEntryTest {
+  private static final Instant TEST_TIMESTAMP = Instant.now();
+
   @Test
   public void testInit() {
     ImmutableMap<String, ImmutableList<Object>> metadata =
@@ -17,11 +20,19 @@ public class LogEntryTest {
     Throwable cause = new RuntimeException();
     LogEntry entry =
         LogEntry.of(
-            "<class>", "<method>", "<info>", LevelClass.INFO, "log message", metadata, cause);
+            "<class>",
+            "<method>",
+            "<info>",
+            LevelClass.INFO,
+            TEST_TIMESTAMP,
+            "log message",
+            metadata,
+            cause);
     assertThat(entry.className()).isEqualTo("<class>");
     assertThat(entry.methodName()).isEqualTo("<method>");
     assertThat(entry.levelName()).isEqualTo("<info>");
     assertThat(entry.levelClass()).isEqualTo(LevelClass.INFO);
+    assertThat(entry.timeStamp()).isEqualTo(TEST_TIMESTAMP);
     assertThat(entry.message()).isEqualTo("log message");
     assertThat(entry.metadata()).isEqualTo(metadata);
     assertThat(entry.cause()).isEqualTo(cause);
@@ -30,7 +41,15 @@ public class LogEntryTest {
   @Test
   public void testInit_optionalArguments() {
     LogEntry entry =
-        LogEntry.of(null, null, "<info>", LevelClass.INFO, "log message", ImmutableMap.of(), null);
+        LogEntry.of(
+            null,
+            null,
+            "<info>",
+            LevelClass.INFO,
+            TEST_TIMESTAMP,
+            "log message",
+            ImmutableMap.of(),
+            null);
     assertThat(entry.className()).isEqualTo("<unknown>");
     assertThat(entry.methodName()).isEqualTo("<unknown>");
     assertThat(entry.cause()).isNull();
@@ -42,8 +61,15 @@ public class LogEntryTest {
             ImmutableMap.of("foo", ImmutableList.of("bar"));
     Throwable cause = new RuntimeException();
     LogEntry entry =
-            LogEntry.of(
-                    "<class>", "<method>", "<info>", LevelClass.INFO, "log message", metadata, cause);
+        LogEntry.of(
+            "<class>",
+            "<method>",
+            "<info>",
+            LevelClass.INFO,
+            TEST_TIMESTAMP,
+            "log message",
+            metadata,
+            cause);
     assertThat(entry.toString()).contains("<class>#<method>@<info>(INFO)");
     assertThat(entry.toString()).contains("log message");
     assertThat(entry.toString()).contains("RuntimeException");

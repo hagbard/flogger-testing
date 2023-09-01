@@ -1,6 +1,8 @@
 package net.goui.flogger.testing.api;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.StackSize.MEDIUM;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -19,16 +21,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
+import javax.annotation.CheckReturnValue;
+
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
+import net.goui.flogger.testing.truth.ScopedLogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** One of these is instantiated per test case. */
+@CheckReturnValue
 public class TestApi {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -73,6 +84,10 @@ public class TestApi {
         "Invalid class for log capture (does not have a canonical name): %s",
         clazz);
     return className.replace('$', '.');
+  }
+
+  public ScopedLogsSubject assertLogs() {
+    return ScopedLogsSubject.assertThat(logged());
   }
 
   public LogSubject assertLog(int n) {

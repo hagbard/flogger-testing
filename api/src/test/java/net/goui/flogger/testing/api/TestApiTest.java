@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.context.Tags;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +41,14 @@ public class TestApiTest {
 
     private static LogEntry logEntry(String message) {
       return LogEntry.of(
-          "class", "method", "info", LevelClass.INFO, message, ImmutableMap.of(), null);
+          "class",
+          "method",
+          "info",
+          LevelClass.INFO,
+          Instant.now(),
+          message,
+          ImmutableMap.of(),
+          null);
     }
   }
 

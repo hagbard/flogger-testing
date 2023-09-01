@@ -4,29 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Docs.">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Mostly working for basic stuff, needs a better API.">
+      <change afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/AbstractLogInterceptorFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/AbstractLogInterceptorFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/DefaultFormatMetadataParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/DefaultFormatMetadataParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/LogInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/LogInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/jdk/JdkInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/jdk/JdkInterceptorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/test/java/net/goui/flogger/log4j2/Log4jInterceptorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/truth/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/truth/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/LogEntryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/test/java/net/goui/flogger/testing/LogEntryTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,8 +84,11 @@
     <key name="CreateTestDialog.RecentsKey">
       <recent name="net.goui.flogger.testing.core" />
     </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing.truth" />
+    </key>
   </component>
-  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
+  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
     <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit5" />
       <extension name="coverage">
@@ -124,6 +115,22 @@
       <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
       <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="FloggerTestRuleTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="junit4" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.goui.flogger.testing.junit4.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -158,29 +165,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestApiTest.testApi" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.api.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.api" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.api.TestApiTest" />
-      <option name="METHOD_NAME" value="testApi" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
         <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
         <item itemvalue="JUnit.TestApiTest" />
-        <item itemvalue="JUnit.TestApiTest.testApi" />
       </list>
     </recent_temporary>
   </component>
@@ -384,7 +375,8 @@
     <MESSAGE value="Testing, docs and refactoring." />
     <MESSAGE value="Better support tests." />
     <MESSAGE value="Docs." />
-    <option name="LAST_COMMIT_MESSAGE" value="Docs." />
+    <MESSAGE value="Mostly working for basic stuff, needs a better API." />
+    <option name="LAST_COMMIT_MESSAGE" value="Mostly working for basic stuff, needs a better API." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -394,14 +386,22 @@
           <option name="timeStamp" value="14" />
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestApi.java</url>
-          <line>113</line>
-          <option name="timeStamp" value="16" />
+          <url>file://$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java</url>
+          <line>39</line>
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestApiTest.java</url>
-          <line>55</line>
-          <option name="timeStamp" value="17" />
+          <url>file://$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java</url>
+          <line>149</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/ScopedLogsSubject.java</url>
+          <line>150</line>
+          <properties>
+            <option name="lambda-ordinal" value="0" />
+          </properties>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

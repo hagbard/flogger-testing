@@ -1,13 +1,17 @@
 package net.goui.flogger.testing.jdk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.concurrent.TimeUnit.*;
 
-import com.google.common.collect.ImmutableList;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import com.google.common.flogger.backend.system.AbstractLogRecord;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.AbstractLogInterceptorFactory;
@@ -78,6 +82,7 @@ public final class JdkInterceptor implements LogInterceptor {
                 record.getSourceMethodName(),
                 level.getName(),
                 levelClassOf(level),
+                getBestTimestamp(record),
                 mm.message(),
                 mm.metadata(),
                 record.getThrown()));
@@ -103,5 +108,20 @@ public final class JdkInterceptor implements LogInterceptor {
     if (levelValue >= INFO_VALUE) return LevelClass.INFO;
     if (levelValue >= FINE_VALUE) return LevelClass.FINE;
     return LevelClass.FINEST;
+  }
+
+  private static Instant getBestTimestamp(LogRecord record) {
+    Instant bestTimestamp;
+    if (record instanceof AbstractLogRecord) {
+      long timestampNanos = ((AbstractLogRecord) record).getLogData().getTimestampNanos();
+      long seconds = NANOSECONDS.toSeconds(timestampNanos);
+      bestTimestamp = Instant.ofEpochSecond(seconds, timestampNanos - SECONDS.toNanos(seconds));
+    } else {
+      long timestampMillis = record.getMillis();
+      long seconds = MILLISECONDS.toSeconds(timestampMillis);
+      long millis = timestampMillis - SECONDS.toMillis(seconds);
+      bestTimestamp = Instant.ofEpochSecond(seconds, MILLISECONDS.toNanos(millis));
+    }
+    return bestTimestamp;
   }
 }

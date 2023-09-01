@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Instant;
+
 /**
  * Representation of a captured log entry for testing via the Truth based API.
  *
@@ -24,30 +26,31 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @AutoValue
 public abstract class LogEntry {
   /**
-   * @param className the optional class name of the log site for this entry (not necessarily the
-   *     name of the logger which logged it). This is primarily informational, to aid the user in
-   *     finding a log site for a failing test. If the class name cannot be determined, passing
-   *     {@code null} results in {@code "<unknown>"} being used.
+   * @param className  the optional class name of the log site for this entry (not necessarily the
+   *                   name of the logger which logged it). This is primarily informational, to aid the user in
+   *                   finding a log site for a failing test. If the class name cannot be determined, passing
+   *                   {@code null} results in {@code "<unknown>"} being used.
    * @param methodName the optional plain method name (no signature) of the log-site for this entry.
-   *     This is primarily informational, to aid the user in finding a log site for a failing test.
-   *     If the method name cannot be determined, passing {@code null} results in {@code
-   *     "<unknown>"} being used.
-   * @param levelName the name of the log level used by the underlying logging system to log this
-   *     entry (for example, in Log4J this could be {@code "DEBUG"} rather than {@code "FINE"}).
+   *                   This is primarily informational, to aid the user in finding a log site for a failing test.
+   *                   If the method name cannot be determined, passing {@code null} results in {@code
+   *                   "<unknown>"} being used.
+   * @param levelName  the name of the log level used by the underlying logging system to log this
+   *                   entry (for example, in Log4J this could be {@code "DEBUG"} rather than {@code "FINE"}).
    * @param levelClass the normalized equivalence class for the log level, calculated from the
-   *     underlying log level.
-   * @param message the log message (possibly processed to remove metadata or other additional
-   *     formatting). This must contain at least the original formatted log message, but can be
-   *     longer.
-   * @param metadata key/value metadata extracted from the underlying log structure. This can be
-   *     coded in the formatted message (e.g. {@code "[CONTEXT foo="bar" ]"}, or as part of a
-   *     structured log entry). If this metadata is parsed from the underlying logged message, it
-   *     should also be removed from it. Metadata values can only have 4 types (Boolean, Long,
-   *     Double and String) and it is up to the extractor to preserve types accordingly and document
-   *     its behaviour.
-   * @param cause an optional {@code Throwable} representing a "cause" for the log statement.
-   *     Conceptually this is just metadata, but since it's so commonly pulled out as a separate
-   *     specific concept by common logging libraries, it's kept separate in this API.
+   *                   underlying log level.
+   * @param timestamp
+   * @param message    the log message (possibly processed to remove metadata or other additional
+   *                   formatting). This must contain at least the original formatted log message, but can be
+   *                   longer.
+   * @param metadata   key/value metadata extracted from the underlying log structure. This can be
+   *                   coded in the formatted message (e.g. {@code "[CONTEXT foo="bar" ]"}, or as part of a
+   *                   structured log entry). If this metadata is parsed from the underlying logged message, it
+   *                   should also be removed from it. Metadata values can only have 4 types (Boolean, Long,
+   *                   Double and String) and it is up to the extractor to preserve types accordingly and document
+   *                   its behaviour.
+   * @param cause      an optional {@code Throwable} representing a "cause" for the log statement.
+   *                   Conceptually this is just metadata, but since it's so commonly pulled out as a separate
+   *                   specific concept by common logging libraries, it's kept separate in this API.
    * @return a LogEntry suitable for asserting on by the Truth API.
    */
   public static LogEntry of(
@@ -55,7 +58,7 @@ public abstract class LogEntry {
       @Nullable String methodName,
       String levelName,
       LevelClass levelClass,
-      String message,
+      Instant timestamp, String message,
       ImmutableMap<String, ImmutableList<Object>> metadata,
       @Nullable Throwable cause) {
     return new AutoValue_LogEntry(
@@ -63,6 +66,7 @@ public abstract class LogEntry {
         methodName != null ? methodName : "<unknown>",
         levelName,
         levelClass,
+        timestamp,
         message,
         metadata,
         cause);
@@ -82,6 +86,9 @@ public abstract class LogEntry {
 
   /** Returns the equivalence class of the log level (see {@link LevelClass}). */
   public abstract LevelClass levelClass();
+
+  /** The timestamp of the log message (used to assert relative order). */
+  public abstract Instant timeStamp();
 
   /**
    * Return the original log message (minus any metadata). Note that this is allowed to contain
