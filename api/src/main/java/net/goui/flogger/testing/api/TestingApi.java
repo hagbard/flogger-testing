@@ -152,7 +152,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * logs.assertLog(9).contains("End Task: Foo");
    * }</pre>
    *
-   * <p>it is better to do something like:
+   * <p>it is usually better to do something like:
    *
    * <pre>{@code
    * var start = logs.assertLogs().withMessageContaining("Start Task: Foo").getOnlyMatch();
@@ -174,7 +174,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * extension is initialized) or during a test. Assertions are combined, in the order they were
    * added, and executed immediately after the test exits.
    *
-   * For example:
+   * <p>For example:
+   *
    * <pre>{@code
    * @Rule
    * public final FloggerTestRule logs =
@@ -228,7 +229,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * Determines if the test ID of a log entry matches the given value. This is used to filter log
    * entries when tests are run in parallel to avoid capturing entries for the wrong tests.
    *
-   * <p>Called from {@link LogInterceptor} so as not to be part of this class's public API.
+   * <p>Called from {@link LogInterceptor}, so as not to be part of this class's public API.
    */
   static boolean hasMatchingTestId(MessageAndMetadata mm, String testId) {
     ImmutableList<Object> values = mm.metadata().get(TEST_ID);

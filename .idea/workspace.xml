@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Rename TestApi to TestingApi">
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Extra method.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
@@ -373,7 +373,8 @@
     <MESSAGE value="First version of better API idea." />
     <MESSAGE value="More improvements and docs." />
     <MESSAGE value="Rename TestApi to TestingApi" />
-    <option name="LAST_COMMIT_MESSAGE" value="Rename TestApi to TestingApi" />
+    <MESSAGE value="Extra method." />
+    <option name="LAST_COMMIT_MESSAGE" value="Extra method." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

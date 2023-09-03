@@ -19,6 +19,47 @@ import javax.annotation.CheckReturnValue;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 
+/**
+ * Fluent logs testing API for making assertions on a sequence of captured log entries.
+ *
+ * <p>The first part of a test assertion will typically filter captured logs using assertions such
+ * as {@link #withMessageContaining(String)} or {@link #atOrAboveLevel(LevelClass)}.
+ *
+ * <p>Then assertions can be made by:
+ *
+ * <ul>
+ *   <li>Calling a "getter" method such as {@link #getOnlyMatch()} to return one or more logs
+ *       entries, on which further assertions can then be made.
+ *   <li>Calling {@link #always()} or {@link #never()} to make assertions about the entire matched
+ *       set of log entries.
+ *   <li>Calling {@link #doNotOccur()} to directly assert that no log entries were matched.
+ * </ul>
+ *
+ * <p>Because {@code LogsSubject} and {@code LogEntry} instances are immutable, and {@code
+ * LogsSubject} operate on a snapshot of captured log entries, so it is safe to "split" a fluent
+ * assertion for readability. For example:
+ *
+ * <pre>{@code
+ * var assertWarnings = logs.assertLogs().atLevel(WARNING);
+ * assertWarnings.matchCount().isGreaterThan(2);
+ * assertWarnings.never().haveMetadata(REQUEST_ID, GOOD_TEST_ID);
+ * assertWarnings.withMessageContaining("Read error").always().haveCause(IOException.class);
+ * }</pre>
+ *
+ * <p>Note that by naming the local variable 'assertXxx', any following assertions read more
+ * fluently.
+ *
+ * <p>The method {@link #doNotOccur()} is specifically designed to allow for easily asserting that
+ * certain logs never occur, and it is particularly useful in conjunction with {@link
+ * TestingApi#verify(java.util.function.Consumer)}. For example:
+ *
+ * <pre>{@code
+ * @Rule
+ * public final FloggerTestRule logs =
+ *     FloggerTestRule.forClassUnderTest(INFO)
+ *         .verify(assertLogs -> assertLogs.atOrAbove(WARNING).doNotOccur());
+ * }</pre>
+ */
 @CheckReturnValue
 public class LogsSubject extends Subject {
   private final ImmutableList<LogEntry> logs;
