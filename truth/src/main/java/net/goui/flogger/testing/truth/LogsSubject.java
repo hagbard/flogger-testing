@@ -3,6 +3,7 @@ package net.goui.flogger.testing.truth;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.collect.ImmutableList;
@@ -152,11 +153,20 @@ public class LogsSubject extends Subject {
     return check("matchCount()").that(logs.size());
   }
 
+  /**
+   * Equivalent to {@code matchCount().isEqualTo(0)}, but more readable for testing unwanted logs.
+   */
+  public void doNotOccur() {
+    if (!logs.isEmpty()) {
+      failWithActual(simpleFact("was expected to be empty"));
+    }
+  }
+
   /** Asserts that only one log entry is matched, and returns it. */
   public LogEntry getOnlyMatch() {
-    Fact error = Fact.simpleFact("was expected to match exactly one log");
+    Fact error = simpleFact("was expected to match exactly one log");
     if (logs.isEmpty()) {
-      failWithoutActual(error, Fact.simpleFact("but was empty"));
+      failWithoutActual(error, simpleFact("but was empty"));
     } else if (logs.size() > 1) {
       failWithActual(error);
     }
@@ -170,7 +180,7 @@ public class LogsSubject extends Subject {
   public LogEntry getMatch(int n) {
     checkArgument(n >= 0, "Match index must not be negative");
     if (n >= logs.size()) {
-      failWithActual(Fact.simpleFact("expected at least " + (n + 1) + " matching logs"));
+      failWithActual(simpleFact("expected at least " + (n + 1) + " matching logs"));
     }
     return logs.get(0);
   }

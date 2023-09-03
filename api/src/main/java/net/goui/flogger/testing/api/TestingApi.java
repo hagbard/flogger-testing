@@ -178,7 +178,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * <pre>{@code
    * @Rule
    * public final FloggerTestRule logs =
-   *     FloggerTestRule.forClassUnderTest(INFO).verify(logs -> logs.never().haveLevel(WARNING));
+   *     FloggerTestRule.forClassUnderTest(INFO)
+   *         .verify(logs -> logs.atOrAbove(WARNING).doNotOccur());
    * }</pre>
    */
   @CanIgnoreReturnValue
