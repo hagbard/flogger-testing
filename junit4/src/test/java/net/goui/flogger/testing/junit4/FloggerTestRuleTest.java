@@ -55,7 +55,7 @@ public class FloggerTestRuleTest {
     logs.assertLog(0).hasCause(RuntimeException.class);
 
     logs.assertLog(1).isAtLevel(INFO);
-    logs.assertLog(1).containsMatch("[Mm]es+age");
+    logs.assertLog(1).hasMessageMatching("[Mm]es+age");
 
     logs.assertLog(2).hasMetadata("foo", 123);
 

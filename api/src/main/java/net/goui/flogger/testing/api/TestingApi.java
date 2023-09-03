@@ -34,7 +34,43 @@ import net.goui.flogger.testing.truth.LogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Abstract base class for log testing APIs.
+ * Log testing API.
+ *
+ * <p>This API primarily uses two <a href="https://github.com/google/truth">Truth</a> "subjects" to
+ * implement a rich testing API for logs. For specific details on Truth APIs, see {@link
+ * LogsSubject} and {@link LogSubject}.
+ *
+ * <p>In this API there are three sub-APIs which share similarly named methods, but in each case
+ * they have different roles.
+ *
+ * <ul>
+ *   <li>Filtering logs via {@link LogsSubject}; {@code withMessageContaining()}, {@code atLevel()}
+ *       ...
+ *   <li>Asserting over all logs via {@link net.goui.flogger.testing.truth.AllLogsSubject
+ *       AllLogsSubject}; {@code haveMessageContaining()}, {@code areAtLevel()} ...
+ *   <li>Asserting a single log via {@link LogSubject}; {@code hasMessageContaining()}, {@code
+ *       isAtLevel()} ...
+ * </ul>
+ *
+ * <p>This naming convention helps distinguish the intent of log assertions such as:
+ *
+ * <pre>{@code
+ * // Asserts that all warning logs contain "error".
+ * logs.assertLogs().atLevel(WARNING).always().haveMessageContaining("error");
+ * }</pre>
+ *
+ * versus (the somewhat less useful):
+ *
+ * <pre>{@code
+ * // Asserts that all logs containing "error" are warning logs.
+ * logs.assertLogs().withMessageContaining("error").always().areAtLevel(WARNING);
+ * }</pre>
+ *
+ * <pre>{@code
+ * // Asserts that a single log entry is a warning log, and contains "error".
+ * assertThat(logEntry).hasMessageContaining("error");
+ * assertThat(logEntry).isAtLevel(WARNING);
+ * }</pre>
  *
  * <p>A subclass of this class will be installed per test case according to a specific test
  * framework (e.g. JUnit4 or JUnit5). One instance of this class is created and installed per test
@@ -56,7 +92,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private Consumer<LogsSubject> verification;
 
-  protected TestingApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+  protected TestingApi(
+      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor;
     this.verification = s -> {};
@@ -163,7 +200,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    */
   public LogSubject assertLog(int n) {
     return Truth.assertWithMessage("failure for log[%s]", n)
-        .about(LogSubject.logEntries())
+        .about(LogSubject.logs())
         .that(logged().get(n));
   }
 

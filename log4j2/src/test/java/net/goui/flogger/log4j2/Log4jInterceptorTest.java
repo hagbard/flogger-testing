@@ -12,7 +12,6 @@ import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.api.LogInterceptor.Support;
-import net.goui.flogger.testing.jdk.JdkInterceptor;
 import net.goui.flogger.testing.log4j2.Log4jInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import org.apache.logging.log4j.Level;
@@ -122,9 +121,9 @@ public class Log4jInterceptorTest {
     }
 
     assertThat(logged).hasSize(2);
-    LogSubject.assertThat(logged.get(0)).contains("Badness");
+    LogSubject.assertThat(logged.get(0)).hasMessageContaining("Badness");
     LogSubject.assertThat(logged.get(0)).hasCause(IllegalStateException.class);
-    LogSubject.assertThat(logged.get(1)).contains("Hello");
+    LogSubject.assertThat(logged.get(1)).hasMessageContaining("Hello");
     LogSubject.assertThat(logged.get(1)).hasMetadata("foo", "bar");
   }
 }

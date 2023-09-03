@@ -21,6 +21,6 @@ public class FloggerTestExtensionTest {
   public void testFoo() {
     logger.atInfo().log("Hello World!");
 
-    logged.assertLog(0).contains("Hello");
+    logged.assertLog(0).hasMessageContaining("Hello");
   }
 }

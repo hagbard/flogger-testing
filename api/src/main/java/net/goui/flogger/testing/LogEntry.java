@@ -116,6 +116,17 @@ public abstract class LogEntry {
   public abstract Throwable cause();
 
   /**
+   * Returns whether the log entry's metadata has the given key-value pair.
+   *
+   * @param key metadata key/label.
+   * @param value value to test (if null, only the existence of the key is tested).
+   */
+  public boolean hasMetadata(String key, @Nullable Object value) {
+    ImmutableList<Object> values = metadata().get(key);
+    return value == null || (values != null && values.contains(value));
+  }
+
+  /**
    * A deliberately concise representation of the log, intended for showing in test failures without
    * causing too much "spammy" output, while retaining enough information to identify the log
    * statement from which it came. In particular, this string representation may truncate log

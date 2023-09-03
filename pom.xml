@@ -16,7 +16,6 @@
         <module>junit4</module>
         <module>junit5</module>
         <module>log4j2</module>
-        <module>truth</module>
     </modules>
     <packaging>pom</packaging>
 

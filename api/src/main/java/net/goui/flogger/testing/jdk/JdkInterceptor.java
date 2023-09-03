@@ -3,15 +3,13 @@ package net.goui.flogger.testing.jdk;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.*;
 
+import com.google.common.flogger.backend.system.AbstractLogRecord;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
-import com.google.common.flogger.backend.system.AbstractLogRecord;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.AbstractLogInterceptorFactory;

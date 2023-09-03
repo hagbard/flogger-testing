@@ -83,10 +83,10 @@ public class TestingApiTest {
     assertThat(interceptor.attached).isEmpty();
 
     myApi.assertLogs().matchCount().isEqualTo(4);
-    myApi.assertLog(0).contains("attach: foo");
-    myApi.assertLog(1).contains("attach: bar");
-    myApi.assertLog(2).contains("detach: foo");
-    myApi.assertLog(3).contains("detach: bar");
+    myApi.assertLog(0).hasMessageContaining("attach: foo");
+    myApi.assertLog(1).hasMessageContaining("attach: bar");
+    myApi.assertLog(2).hasMessageContaining("detach: foo");
+    myApi.assertLog(3).hasMessageContaining("detach: bar");
   }
 
   // Not static since we want to test inner class names.

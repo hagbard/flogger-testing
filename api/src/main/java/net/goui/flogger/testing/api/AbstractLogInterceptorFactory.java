@@ -4,7 +4,6 @@ import static java.lang.Boolean.TRUE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Support;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.units.qual.A;
 
 /**
  * An implementation of {@link LogInterceptor.Factory} which supplies its own test to the determine

@@ -1,19 +1,14 @@
 package net.goui.flogger.testing.jdk;
 
-import static com.google.common.flogger.LogContext.Key.TAGS;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.logging.Level.INFO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.context.Tags;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
-import net.goui.flogger.testing.truth.LogSubject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
