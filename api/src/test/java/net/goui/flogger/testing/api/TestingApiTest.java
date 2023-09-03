@@ -17,15 +17,15 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
-import net.goui.flogger.testing.api.TestApi.TestId;
+import net.goui.flogger.testing.api.TestingApi.TestId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class TestApiTest {
-  private static final String PACKAGE_NAME = TestApi.class.getPackage().getName();
+public class TestingApiTest {
+  private static final String PACKAGE_NAME = TestingApi.class.getPackage().getName();
 
   private static class TestInterceptor implements LogInterceptor {
     final HashMap<String, Level> attached = new HashMap<>();
@@ -54,7 +54,7 @@ public class TestApiTest {
     }
   }
 
-  static class FooApi extends TestApi<FooApi> {
+  static class FooApi extends TestingApi<FooApi> {
     protected FooApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
       super(levelMap, interceptor);
     }
@@ -78,7 +78,7 @@ public class TestApiTest {
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.
       Tags tags = Platform.getContextDataProvider().getTags();
-      assertThat(tags.asMap()).containsKey(TestApi.TEST_ID);
+      assertThat(tags.asMap()).containsKey(TestingApi.TEST_ID);
     }
     assertThat(interceptor.attached).isEmpty();
 
@@ -94,14 +94,14 @@ public class TestApiTest {
 
   @Test
   public void testLoggerName() {
-    assertThat(TestApi.loggerNameOf(TestApiTest.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest");
-    assertThat(TestApi.loggerNameOf(Inner.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest.Inner");
+    assertThat(TestingApi.loggerNameOf(TestingApiTest.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest");
+    assertThat(TestingApi.loggerNameOf(Inner.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest.Inner");
 
     // Don't expect to be given primitive/array class etc.
-    assertThrows(IllegalArgumentException.class, () -> TestApi.loggerNameOf(int.class));
-    assertThrows(IllegalArgumentException.class, () -> TestApi.loggerNameOf(int[].class));
+    assertThrows(IllegalArgumentException.class, () -> TestingApi.loggerNameOf(int.class));
+    assertThrows(IllegalArgumentException.class, () -> TestingApi.loggerNameOf(int[].class));
     assertThrows(
-        IllegalArgumentException.class, () -> TestApi.loggerNameOf(new Object() {}.getClass()));
+        IllegalArgumentException.class, () -> TestingApi.loggerNameOf(new Object() {}.getClass()));
   }
 
   @Test

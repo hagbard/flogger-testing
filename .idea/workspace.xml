@@ -87,7 +87,7 @@
       <recent name="net.goui.flogger.testing.truth" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
+  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
     <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit5" />
       <extension name="coverage">
@@ -149,7 +149,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestApiTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestingApiTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="api" />
       <extension name="coverage">
         <pattern>
@@ -158,7 +158,7 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="net.goui.flogger.testing.api" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.api.TestApiTest" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.api.TestingApiTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -166,11 +166,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
-        <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
-        <item itemvalue="JUnit.TestApiTest" />
+        <item itemvalue="JUnit.FloggerTestExtensionTest" />
+        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
+        <item itemvalue="JUnit.TestingApiTest" />
       </list>
     </recent_temporary>
   </component>

@@ -1,6 +1,5 @@
 package net.goui.flogger.testing.api;
 
-import com.google.common.collect.ImmutableList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -80,7 +79,7 @@ public interface LogInterceptor {
   Recorder attachTo(String loggerName, Level level, Consumer<LogEntry> collector, String testId);
 
   static boolean shouldCollect(MessageAndMetadata mm, String testId) {
-    return TestApi.hasMatchingTestId(mm, testId);
+    return TestingApi.hasMatchingTestId(mm, testId);
   }
 
   /**

@@ -43,7 +43,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * be modified after the instance is installed.
  */
 @CheckReturnValue
-public abstract class TestApi<ApiT extends TestApi<ApiT>> {
+public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   // Tag label for a unique ID set for tests to support parallel testing.
@@ -56,7 +56,7 @@ public abstract class TestApi<ApiT extends TestApi<ApiT>> {
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private Consumer<LogsSubject> verification;
 
-  protected TestApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+  protected TestingApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor;
     this.verification = s -> {};
@@ -219,7 +219,7 @@ public abstract class TestApi<ApiT extends TestApi<ApiT>> {
       // Recorders are defined to catch/ignore their own exceptions on close.
       recorders.forEach(Recorder::close);
       TestId.release(testId);
-      verification.accept(TestApi.this.assertLogs());
+      verification.accept(TestingApi.this.assertLogs());
     }
   }
 

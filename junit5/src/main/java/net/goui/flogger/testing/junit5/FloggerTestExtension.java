@@ -6,13 +6,13 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.logging.Level;
 import net.goui.flogger.testing.api.LogInterceptor;
-import net.goui.flogger.testing.api.TestApi;
+import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public final class FloggerTestExtension extends TestApi<FloggerTestExtension>
+public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
     implements BeforeEachCallback, AfterEachCallback {
 
   public static FloggerTestExtension forClassUnderTest(Level level) {

@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.logging.Level;
 import net.goui.flogger.testing.api.LogInterceptor;
-import net.goui.flogger.testing.api.TestApi;
+import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -30,7 +30,7 @@ import org.junit.runners.model.Statement;
  * If this is not the case, specify logger names directly via {@link #forClassOrPackage(String,
  * Level)}.
  */
-public final class FloggerTestRule extends TestApi<FloggerTestRule> implements TestRule {
+public final class FloggerTestRule extends TestingApi<FloggerTestRule> implements TestRule {
 
   public static FloggerTestRule forClassUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
