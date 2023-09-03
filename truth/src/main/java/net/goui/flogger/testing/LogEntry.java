@@ -5,9 +5,8 @@ import static java.lang.Character.isHighSurrogate;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import java.time.Instant;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Representation of a captured log entry for testing via the Truth based API.
@@ -26,31 +25,31 @@ import java.time.Instant;
 @AutoValue
 public abstract class LogEntry {
   /**
-   * @param className  the optional class name of the log site for this entry (not necessarily the
-   *                   name of the logger which logged it). This is primarily informational, to aid the user in
-   *                   finding a log site for a failing test. If the class name cannot be determined, passing
-   *                   {@code null} results in {@code "<unknown>"} being used.
+   * @param className the optional class name of the log site for this entry (not necessarily the
+   *     name of the logger which logged it). This is primarily informational, to aid the user in
+   *     finding a log site for a failing test. If the class name cannot be determined, passing
+   *     {@code null} results in {@code "<unknown>"} being used.
    * @param methodName the optional plain method name (no signature) of the log-site for this entry.
-   *                   This is primarily informational, to aid the user in finding a log site for a failing test.
-   *                   If the method name cannot be determined, passing {@code null} results in {@code
-   *                   "<unknown>"} being used.
-   * @param levelName  the name of the log level used by the underlying logging system to log this
-   *                   entry (for example, in Log4J this could be {@code "DEBUG"} rather than {@code "FINE"}).
+   *     This is primarily informational, to aid the user in finding a log site for a failing test.
+   *     If the method name cannot be determined, passing {@code null} results in {@code
+   *     "<unknown>"} being used.
+   * @param levelName the name of the log level used by the underlying logging system to log this
+   *     entry (for example, in Log4J this could be {@code "DEBUG"} rather than {@code "FINE"}).
    * @param levelClass the normalized equivalence class for the log level, calculated from the
-   *                   underlying log level.
-   * @param timestamp
-   * @param message    the log message (possibly processed to remove metadata or other additional
-   *                   formatting). This must contain at least the original formatted log message, but can be
-   *                   longer.
-   * @param metadata   key/value metadata extracted from the underlying log structure. This can be
-   *                   coded in the formatted message (e.g. {@code "[CONTEXT foo="bar" ]"}, or as part of a
-   *                   structured log entry). If this metadata is parsed from the underlying logged message, it
-   *                   should also be removed from it. Metadata values can only have 4 types (Boolean, Long,
-   *                   Double and String) and it is up to the extractor to preserve types accordingly and document
-   *                   its behaviour.
-   * @param cause      an optional {@code Throwable} representing a "cause" for the log statement.
-   *                   Conceptually this is just metadata, but since it's so commonly pulled out as a separate
-   *                   specific concept by common logging libraries, it's kept separate in this API.
+   *     underlying log level.
+   * @param timestamp the timestamp for this entry.
+   * @param message the log message (possibly processed to remove metadata or other additional
+   *     formatting). This must contain at least the original formatted log message, but can be
+   *     longer.
+   * @param metadata key/value metadata extracted from the underlying log structure. This can be
+   *     coded in the formatted message (e.g. {@code "[CONTEXT foo="bar" ]"}, or as part of a
+   *     structured log entry). If this metadata is parsed from the underlying logged message, it
+   *     should also be removed from it. Metadata values can only have 4 types (Boolean, Long,
+   *     Double and String) and it is up to the extractor to preserve types accordingly and document
+   *     its behaviour.
+   * @param cause an optional {@code Throwable} representing a "cause" for the log statement.
+   *     Conceptually this is just metadata, but since it's so commonly pulled out as a separate
+   *     specific concept by common logging libraries, it's kept separate in this API.
    * @return a LogEntry suitable for asserting on by the Truth API.
    */
   public static LogEntry of(
@@ -58,7 +57,8 @@ public abstract class LogEntry {
       @Nullable String methodName,
       String levelName,
       LevelClass levelClass,
-      Instant timestamp, String message,
+      Instant timestamp,
+      String message,
       ImmutableMap<String, ImmutableList<Object>> metadata,
       @Nullable Throwable cause) {
     return new AutoValue_LogEntry(
@@ -129,24 +129,27 @@ public abstract class LogEntry {
     String logSiteString = className();
     logSiteString = logSiteString.substring(logSiteString.lastIndexOf('.') + 1);
     logSiteString += "#" + methodName();
+    String causeStr = cause() != null ? ", cause=" + cause().getClass().getSimpleName() : "";
+    String metadataStr = !metadata().isEmpty() ? ", context=" + metadata() : "";
+    return logSiteString + "@" + snippet() + causeStr + metadataStr;
+  }
+
+  /**
+   * A one line snippet aimed at identifying a log entry as part of an error message.
+   *
+   * <p>It is going to be very common that this is shown for errors in assertions near to the test
+   * code which generated this log entry, so it should be unlikely to be ambiguous to the user.
+   */
+  public String snippet() {
     // For JDK level show just "FINE", for Log4J show "DEBUG(FINE)" etc.
     String levelString = levelName();
     if (!levelString.equals(levelClass().name())) {
       levelString += "(" + levelClass().name() + ")";
     }
-    String messageSnippet = shortSnippet(message());
-    String causeStr = cause() != null ? ", cause=" + cause().getClass().getSimpleName() : "";
-    String metadataStr = !metadata().isEmpty() ? ", context=" + metadata() : "";
-    return logSiteString
-        + "@"
-        + levelString
-        + ": \""
-        + messageSnippet
-        + "\""
-        + causeStr
-        + metadataStr;
+    return levelString + ": \"" + shortSnippet(message()) + "\"";
   }
 
+  // Rough and ready trim of the log message to no more than 30 chars.
   private static String shortSnippet(String message) {
     int splitIndex = message.indexOf('\n');
     if (splitIndex == -1) {

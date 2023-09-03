@@ -11,12 +11,14 @@ import com.google.common.flogger.context.Tags;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.TestApi.TestId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -52,15 +54,26 @@ public class TestApiTest {
     }
   }
 
+  static class FooApi extends TestApi<FooApi> {
+    protected FooApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+      super(levelMap, interceptor);
+    }
+
+    @Override
+    protected FooApi api() {
+      return this;
+    }
+  }
+
   @Test
   public void testApi() {
     ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", INFO, "bar", WARNING);
     TestInterceptor interceptor = new TestInterceptor();
-    TestApi myApi = new TestApi(levelMap, interceptor, null) {};
+    FooApi myApi = new FooApi(levelMap, interceptor);
 
     // Loggers are attached only while the API hook is active.
     assertThat(interceptor.attached).isEmpty();
-    try (TestApi.ApiHook install = myApi.install(/* useTestId= */ true)) {
+    try (var unused = myApi.install(/* useTestId= */ true)) {
       assertThat(interceptor.attached).isEqualTo(levelMap);
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.

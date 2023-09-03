@@ -1,7 +1,8 @@
 package net.goui.flogger.testing.api;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.*;
 import static com.google.common.flogger.StackSize.MEDIUM;
+import static com.google.common.truth.StreamSubject.streams;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -13,7 +14,9 @@ import com.google.common.flogger.context.ScopedLoggingContext.LoggingContextClos
 import com.google.common.flogger.context.ScopedLoggingContexts;
 import com.google.common.flogger.context.Tags;
 import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -22,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 import javax.annotation.CheckReturnValue;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
@@ -29,30 +33,37 @@ import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/** One of these is instantiated per test case. */
+/**
+ * Abstract base class for log testing APIs.
+ *
+ * <p>A subclass of this class will be installed per test case according to a specific test
+ * framework (e.g. JUnit4 or JUnit5). One instance of this class is created and installed per test
+ * case, before it is invoked. This means that in order to affect the state of the API during a
+ * test, the instance must be mutable. It also means that things like the {@link LogLevelMap} cannot
+ * be modified after the instance is installed.
+ */
 @CheckReturnValue
-public class TestApi {
+public abstract class TestApi<ApiT extends TestApi<ApiT>> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   // Tag label for a unique ID set for tests to support parallel testing.
-  @VisibleForTesting
-  static final String TEST_ID = "test_id";
+  @VisibleForTesting static final String TEST_ID = "test_id";
 
   private final ImmutableMap<String, ? extends Level> levelMap;
   private LogInterceptor interceptor;
   // Captured logs (thread safe).
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
-  @Nullable private final Consumer<LogsSubject> commonAssertions;
+  private Consumer<LogsSubject> verification;
 
-  protected TestApi(
-      Map<String, ? extends Level> levelMap,
-      @Nullable LogInterceptor interceptor,
-      @Nullable Consumer<LogsSubject> commonAssertions) {
+  protected TestApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
     this.levelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor;
-    this.commonAssertions = commonAssertions;
+    this.verification = s -> {};
   }
+
+  /** Returns {@code this} instance from the concrete subclass for polymorphic resolution. */
+  protected abstract ApiT api();
 
   private ImmutableList<LogEntry> logged() {
     if (logsSnapshot.size() != logs.size()) {
@@ -62,6 +73,12 @@ public class TestApi {
     return logsSnapshot;
   }
 
+  /**
+   * Returns the expected logger name for a given class. Note that this is not as simple as
+   * returning the class name, because nested and inner classes are still expected to use the logger
+   * of the outer class. This is used by framework specific subclasses to determine the expected
+   * logger for a class under test.
+   */
   protected static String loggerNameOf(Class<?> clazz) {
     checkArgument(
         !clazz.isPrimitive(),
@@ -77,26 +94,97 @@ public class TestApi {
     return className.replace('$', '.');
   }
 
+  /**
+   * Begins a fluent assertion for a snapshot of the currently captured logs.
+   *
+   * <p>Because {@code LogsSubject} and {@code LogEntry} instances are immutable, it is safe to
+   * "split" a fluent assertion for readability. For example:
+   *
+   * <pre>{@code
+   * // By naming the local variable 'assertXxx', the following assertions read more fluently.
+   * var assertWarnings = logs.assertLogs().atLevel(WARNING);
+   * // Any new warning logs made after this point are not going to affect 'assertWarnings'.
+   * assertWarnings.matchCount().isGreaterThan(2);
+   * assertWarnings.never().haveMetadata(REQUEST_ID, GOOD_TEST_ID);
+   * assertWarnings.withMessageContaining("Read error").always().haveCause(IOException.class);
+   * }</pre>
+   */
   public LogsSubject assertLogs() {
     return LogsSubject.assertThat(logged());
   }
 
+  /**
+   * Asserts that the given list of distinct log entries are in strict order in the currently
+   * captured sequence of logs.
+   *
+   * <p>This method is useful when comparing the relative order of logs, and often avoids the need
+   * to call {@link #assertLog(int)}, which can contribute to brittle logs testing.
+   */
+  public void assertLogOrder(LogEntry first, LogEntry second, LogEntry... rest) {
+    ImmutableList<LogEntry> logged = logged();
+    Truth.assertWithMessage("expected log entries to be in order")
+        .about(streams())
+        .that(Stream.concat(Stream.of(first, second), Stream.of(rest)))
+        .isInStrictOrder(Comparator.<LogEntry>comparingInt(e -> indexIn(logged, e)));
+  }
+
+  private static int indexIn(ImmutableList<LogEntry> logged, LogEntry e) {
+    int index = logged.indexOf(e);
+    checkState(index >= 0, "log entry '%s' was not in the captured list: %s", e, logged);
+    return index;
+  }
+
+  /**
+   * Returns the Nth captured log entry from the start of the current test.
+   *
+   * <p>Warning: Overuse of this method is likely to result in brittle logs testing.
+   *
+   * <p>This method is provided for cases where exact log ordering is very well-defined, and
+   * essential for correct testing. In general however, it is often better to use {@link
+   * LogsSubject} via {@link #assertLogs()} to identify expected log statements, regardless of their
+   * exact index.
+   *
+   * <p>Instead of writing a test like:
+   *
+   * <pre>{@code
+   * logs.assertLog(3).contains("Start Task: Foo");
+   * logs.assertLog(6).contains("Update: Foo");
+   * logs.assertLog(9).contains("End Task: Foo");
+   * }</pre>
+   *
+   * <p>it is better to do something like:
+   *
+   * <pre>{@code
+   * var start = logs.assertLogs().withMessageContaining("Start Task: Foo").getOnlyMatch();
+   * var update = logs.assertLogs().withMessageContaining("Update: Foo").getOnlyMatch();
+   * var end = logs.assertLogs().withMessageContaining("End Task: Foo").getOnlyMatch();
+   * logs.assertLogOrder(start, update, end);
+   * }</pre>
+   */
   public LogSubject assertLog(int n) {
     return Truth.assertWithMessage("failure for log[%s]", n)
         .about(LogSubject.logEntries())
         .that(logged().get(n));
   }
 
-  protected final ImmutableMap<String, ? extends Level> levelMap() {
-    return levelMap;
-  }
-
-  protected final LogInterceptor interceptor() {
-    return interceptor;
-  }
-
-  protected final Consumer<LogsSubject> commonAssertions() {
-    return commonAssertions;
+  /**
+   * Adds a post-test assertion, run automatically after the current test case finishes.
+   *
+   * <p>This method can be called either when the test API is created (e.g. when a JUnit rule or
+   * extension is initialized) or during a test. Assertions are combined, in the order they were
+   * added, and executed immediately after the test exits.
+   *
+   * For example:
+   * <pre>{@code
+   * @Rule
+   * public final FloggerTestRule logs =
+   *     FloggerTestRule.forClassUnderTest(INFO).verify(logs -> logs.never().haveLevel(WARNING));
+   * }</pre>
+   */
+  @CanIgnoreReturnValue
+  public final ApiT verify(Consumer<LogsSubject> assertion) {
+    this.verification = this.verification.andThen(checkNotNull(assertion));
+    return api();
   }
 
   protected final ApiHook install(boolean useTestId) {
@@ -131,9 +219,7 @@ public class TestApi {
       // Recorders are defined to catch/ignore their own exceptions on close.
       recorders.forEach(Recorder::close);
       TestId.release(testId);
-      if (commonAssertions != null) {
-        commonAssertions.accept(TestApi.this.assertLogs());
-      }
+      verification.accept(TestApi.this.assertLogs());
     }
   }
 

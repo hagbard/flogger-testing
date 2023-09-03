@@ -11,7 +11,8 @@
       <change beforePath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/main/java/net/goui/flogger/testing/junit4/FloggerTestRule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/main/java/net/goui/flogger/testing/junit5/FloggerTestExtension.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit5/src/test/java/net/goui/flogger/testing/FloggerTestExtensionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/truth/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/truth/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/truth/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +87,7 @@
       <recent name="net.goui.flogger.testing.truth" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FloggerTestExtensionTest">
+  <component name="RunManager" selected="JUnit.FloggerTestRuleTest.test">
     <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="junit5" />
       <extension name="coverage">
@@ -165,8 +166,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest.test" />
+        <item itemvalue="JUnit.FloggerTestExtensionTest" />
         <item itemvalue="JUnit.Log4jInterceptorTest" />
         <item itemvalue="JUnit.FloggerTestRuleTest" />
         <item itemvalue="JUnit.TestApiTest" />
