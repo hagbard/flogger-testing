@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
-import static net.goui.flogger.testing.truth.AllLogsSubject.logs;
+import static net.goui.flogger.testing.truth.MatchedLogsSubject.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
@@ -14,7 +14,6 @@ import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Subject;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import net.goui.flogger.testing.LevelClass;
@@ -24,7 +23,7 @@ import net.goui.flogger.testing.LogEntry;
  * Fluent logs testing API for making assertions on a sequence of captured log entries.
  *
  * <p>The first part of a test assertion will typically filter captured logs using assertions such
- * as {@link #withMessageContaining(String)} or {@link #atOrAboveLevel(LevelClass)}.
+ * as {@link #withMessageContaining(String)} or {@link #withLevelAtLeast(LevelClass)}.
  *
  * <p>Then assertions can be made by:
  *
@@ -41,7 +40,7 @@ import net.goui.flogger.testing.LogEntry;
  * assertion for readability. For example:
  *
  * <pre>{@code
- * var assertWarnings = logs.assertLogs().atLevel(WARNING);
+ * var assertWarnings = logs.assertLogs().withLevel(WARNING);
  * assertWarnings.matchCount().isGreaterThan(2);
  * assertWarnings.never().haveMetadata(REQUEST_ID, GOOD_TEST_ID);
  * assertWarnings.withMessageContaining("Read error").always().haveCause(IOException.class);
@@ -76,8 +75,8 @@ public final class LogsSubject extends Subject {
   }
 
   /** Starts a fluent assertion about the current sequence of captured logs. */
-  public static LogsSubject assertThat(ImmutableList<LogEntry> log) {
-    return assertAbout(logSequences()).that(log);
+  public static LogsSubject assertThat(ImmutableList<LogEntry> logs) {
+    return assertAbout(logSequences()).that(logs);
   }
 
   private static ImmutableList<LogEntry> filter(
@@ -105,36 +104,36 @@ public final class LogsSubject extends Subject {
   }
 
   /** Matches the subsequence of captured logs at the specified level. */
-  public LogsSubject atLevel(LevelClass level) {
+  public LogsSubject withLevel(LevelClass level) {
     return check("atLevel('%s')", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass() == level));
   }
 
   /** Matches the subsequence of captured logs strictly above the specified level. */
-  public LogsSubject aboveLevel(LevelClass level) {
-    return check("aboveLevel('%s')", level)
+  public LogsSubject withLevelGreaterThan(LevelClass level) {
+    return check("GreaterThanLevel('%s')", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) > 0));
   }
 
   /** Matches the subsequence of captured logs at or above the specified level. */
-  public LogsSubject atOrAboveLevel(LevelClass level) {
-    return check("atOrAboveLevel('%s')", level)
+  public LogsSubject withLevelAtLeast(LevelClass level) {
+    return check("AtLeastLevel('%s')", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) >= 0));
   }
 
   /** Matches the subsequence of captured logs strictly below the specified level. */
-  public LogsSubject belowLevel(LevelClass level) {
-    return check("belowLevel('%s')", level)
+  public LogsSubject withLevelLessThan(LevelClass level) {
+    return check("LessThanLevel('%s')", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) < 0));
   }
 
   /** Matches the subsequence of captured logs at or below the specified level. */
-  public LogsSubject atOrBelowLevel(LevelClass level) {
-    return check("atOrBelowLevel('%s')", level)
+  public LogsSubject withLevelAtMost(LevelClass level) {
+    return check("AtMostLevel('%s')", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) <= 0));
   }
@@ -176,7 +175,7 @@ public final class LogsSubject extends Subject {
   public LogsSubject withMetadataKey(String key) {
     return check("withMetadataKey('%s')", key)
         .about(logSequences())
-        .that(filter(logs, e -> e.hasMetadata(key, null)));
+        .that(filter(logs, e -> e.hasMetadataKey(key)));
   }
 
   /**
@@ -210,13 +209,13 @@ public final class LogsSubject extends Subject {
   }
 
   /** Allows a following assertion to be applied to every matched log entry. */
-  public AllLogsSubject always() {
-    return check("always()").about(logs("all", Stream::allMatch)).that(logs);
+  public MatchedLogsSubject always() {
+    return check("always()").about(allMatchedLogs()).that(logs);
   }
 
   /** Allows a following assertion to be applied to every matched log entry in a negative sense. */
-  public AllLogsSubject never() {
-    return check("never()").about(logs("no", Stream::noneMatch)).that(logs);
+  public MatchedLogsSubject never() {
+    return check("never()").about(noMatchedLogs()).that(logs);
   }
 
   /** Asserts about the number of matched logs. */
@@ -234,17 +233,6 @@ public final class LogsSubject extends Subject {
     }
   }
 
-  /** Asserts that only one log entry is matched, and returns it. */
-  public LogEntry getOnlyMatch() {
-    Fact error = simpleFact("was expected to match exactly one log");
-    if (logs.isEmpty()) {
-      failWithoutActual(error, simpleFact("but was empty"));
-    } else if (logs.size() > 1) {
-      failWithActual(error);
-    }
-    return logs.get(0);
-  }
-
   /**
    * Returns the Nth matched log entry, asserting that there are at least {@code (n + 1)} matched
    * log entries.
@@ -253,6 +241,17 @@ public final class LogsSubject extends Subject {
     checkArgument(n >= 0, "Match index must not be negative");
     if (n >= logs.size()) {
       failWithActual(simpleFact("expected at least " + (n + 1) + " matching logs"));
+    }
+    return logs.get(n);
+  }
+
+  /** Asserts that only one log entry is matched, and returns it. */
+  public LogEntry getOnlyMatch() {
+    Fact error = simpleFact("was expected to match exactly one log");
+    if (logs.isEmpty()) {
+      failWithoutActual(error, simpleFact("but was empty"));
+    } else if (logs.size() > 1) {
+      failWithActual(error);
     }
     return logs.get(0);
   }
@@ -274,9 +273,6 @@ public final class LogsSubject extends Subject {
     return logs.subList(0, index);
   }
 
-  // A one line snippet aimed at identifying a log entry as part of an error message.
-  // It is going to be very common that this is show for errors in assertions near to
-  // code which extracted this log entry, so it should be unlikely to be ambiguous.
   private static String quoteIfString(Object value) {
     return value instanceof String ? "'" + value + "'" : String.valueOf(value);
   }

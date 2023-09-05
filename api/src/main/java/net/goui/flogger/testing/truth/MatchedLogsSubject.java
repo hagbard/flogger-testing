@@ -11,18 +11,26 @@ import javax.annotation.Nullable;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 
-/** Assertions to be applied to all matched log entries. */
-public class AllLogsSubject extends Subject {
-  static Factory<AllLogsSubject, ImmutableList<LogEntry>> logs(
+/** Logs testing API for making assertions about every item in a sequence of matched log entries. */
+public final class MatchedLogsSubject extends Subject {
+  static Factory<MatchedLogsSubject, ImmutableList<LogEntry>> allMatchedLogs() {
+    return matched("all", Stream::allMatch);
+  }
+
+  static Factory<MatchedLogsSubject, ImmutableList<LogEntry>> noMatchedLogs() {
+    return matched("no", Stream::noneMatch);
+  }
+
+  private static Factory<MatchedLogsSubject, ImmutableList<LogEntry>> matched(
       String label, BiPredicate<Stream<LogEntry>, Predicate<? super LogEntry>> op) {
-    return (subject, logs) -> new AllLogsSubject(subject, logs, label, op);
+    return (subject, logs) -> new MatchedLogsSubject(subject, logs, label, op);
   }
 
   private final ImmutableList<LogEntry> logs;
   private final String label;
   private final BiPredicate<Stream<LogEntry>, Predicate<? super LogEntry>> op;
 
-  private AllLogsSubject(
+  private MatchedLogsSubject(
       FailureMetadata metadata,
       ImmutableList<LogEntry> logs,
       String label,
@@ -52,35 +60,35 @@ public class AllLogsSubject extends Subject {
   }
 
   /** Asserts that matched log entries are at the given level. */
-  public void areAtLevel(LevelClass level) {
+  public void haveLevel(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass() == level)) {
       failWithActual(label + " matched logs were expected be at level", level);
     }
   }
 
   /** Asserts that matched log entries are above the given level. */
-  public void areAboveLevel(LevelClass level) {
+  public void haveLevelGreaterThan(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) > 0)) {
       failWithActual(label + " matched logs were expected be at level", level);
     }
   }
 
   /** Asserts that matched log entries are at or above the given level. */
-  public void areAtOrAboveLevel(LevelClass level) {
+  public void haveLevelAtLeast(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) >= 0)) {
       failWithActual(label + " matched logs were expected be at level", level);
     }
   }
 
   /** Asserts that matched log entries are below the given level. */
-  public void areBelowLevel(LevelClass level) {
+  public void haveLevelLessThan(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) < 0)) {
       failWithActual(label + " matched logs were expected be at level", level);
     }
   }
 
   /** Asserts that matched log entries are at or below the given level. */
-  public void areAtOrBelowLevel(LevelClass level) {
+  public void haveLevelAtMost(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) <= 0)) {
       failWithActual(label + " matched logs were expected be at level", level);
     }
@@ -121,7 +129,7 @@ public class AllLogsSubject extends Subject {
 
   /** Asserts that matched log entries have the specified metadata key. */
   public void haveMetadataKey(String key) {
-    if (!op.test(logs.stream(), e -> e.hasMetadata(key, null))) {
+    if (!op.test(logs.stream(), e -> e.hasMetadataKey(key))) {
       failWithActual(label + " matched logs were expected have metadata key", key);
     }
   }

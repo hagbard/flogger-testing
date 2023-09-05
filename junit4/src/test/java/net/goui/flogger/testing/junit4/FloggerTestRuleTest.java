@@ -27,7 +27,7 @@ public class FloggerTestRuleTest {
 
   @Test
   public void test() {
-    logs.verify(logs -> logs.atOrAboveLevel(WARNING).always().haveMessageContaining("Warn"));
+    logs.verify(logs -> logs.withLevelAtLeast(WARNING).always().haveMessageContaining("Warn"));
 
 
 
@@ -42,24 +42,24 @@ public class FloggerTestRuleTest {
 
     // --------------------------------
 
-    LogEntry warn = logs.assertLogs().withMessageContaining("foo").atLevel(WARNING).getOnlyMatch();
-    logs.assertLogs().afterLog(warn).withMessageMatching("[Mm]es+age").atLevel(INFO).matchCount().isEqualTo(1);
+    LogEntry warn = logs.assertLogs().withMessageContaining("foo").withLevel(WARNING).getOnlyMatch();
+    logs.assertLogs().afterLog(warn).withMessageMatching("[Mm]es+age").withLevel(INFO).matchCount().isEqualTo(1);
     assertThat(warn).hasCause(IllegalArgumentException.class);
 
     LogEntry fine = logs.assertLogs().afterLog(warn).withMessageContaining("bar").getOnlyMatch();
     assertThat(fine).hasMetadata("foo", 123);
 
-    logs.assertLogs().atLevel(WARNING).always().haveMessageMatching("foo");
+    logs.assertLogs().withLevel(WARNING).always().haveMessageMatching("foo");
 
-    logs.assertLog(0).isAtLevel(WARNING);
+    logs.assertLog(0).hasLevel(WARNING);
     logs.assertLog(0).hasCause(RuntimeException.class);
 
-    logs.assertLog(1).isAtLevel(INFO);
+    logs.assertLog(1).hasLevel(INFO);
     logs.assertLog(1).hasMessageMatching("[Mm]es+age");
 
     logs.assertLog(2).hasMetadata("foo", 123);
 
-    logs.assertLogs().atOrAboveLevel(WARNING).always().haveMessageContaining("Warning");
-    logs.assertLogs().belowLevel(WARNING).never().haveCause(RuntimeException.class);
+    logs.assertLogs().withLevelAtLeast(WARNING).always().haveMessageContaining("Warning");
+    logs.assertLogs().withLevelLessThan(WARNING).never().haveCause(RuntimeException.class);
   }
 }

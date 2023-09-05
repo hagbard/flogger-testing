@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class DefaultMetadataExtractorTest {
+public class DefaultFormatMetadataParserTest {
   @Test
   public void parse_extractsMessage_success() {
     assertMessage("no context", "no context");

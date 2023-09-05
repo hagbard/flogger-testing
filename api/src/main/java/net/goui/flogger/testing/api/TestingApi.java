@@ -31,6 +31,7 @@ import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
+import net.goui.flogger.testing.truth.MatchedLogsSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -44,32 +45,32 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * they have different roles.
  *
  * <ul>
- *   <li>Filtering logs via {@link LogsSubject}; {@code withMessageContaining()}, {@code atLevel()}
+ *   <li>Filtering logs via {@link LogsSubject}; {@code withMessageContaining()}, {@code withLevel()}
  *       ...
- *   <li>Asserting over all logs via {@link net.goui.flogger.testing.truth.AllLogsSubject
- *       AllLogsSubject}; {@code haveMessageContaining()}, {@code areAtLevel()} ...
+ *   <li>Asserting over all logs via {@link MatchedLogsSubject
+ *       AllLogsSubject}; {@code haveMessageContaining()}, {@code haveLevel()} ...
  *   <li>Asserting a single log via {@link LogSubject}; {@code hasMessageContaining()}, {@code
- *       isAtLevel()} ...
+ *       hasLevel()} ...
  * </ul>
  *
  * <p>This naming convention helps distinguish the intent of log assertions such as:
  *
  * <pre>{@code
  * // Asserts that all warning logs contain "error".
- * logs.assertLogs().atLevel(WARNING).always().haveMessageContaining("error");
+ * logs.assertLogs().withLevel(WARNING).always().haveMessageContaining("error");
  * }</pre>
  *
  * versus (the somewhat less useful):
  *
  * <pre>{@code
  * // Asserts that all logs containing "error" are warning logs.
- * logs.assertLogs().withMessageContaining("error").always().areAtLevel(WARNING);
+ * logs.assertLogs().withMessageContaining("error").always().haveLevel(WARNING);
  * }</pre>
  *
  * <pre>{@code
  * // Asserts that a single log entry is a warning log, and contains "error".
  * assertThat(logEntry).hasMessageContaining("error");
- * assertThat(logEntry).isAtLevel(WARNING);
+ * assertThat(logEntry).hasLevel(WARNING);
  * }</pre>
  *
  * <p>A subclass of this class will be installed per test case according to a specific test

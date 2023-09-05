@@ -5,7 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Nearly done.">
+      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogSubjectTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogsSubjectTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/MatchedLogsSubjectTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LevelClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LevelClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/AllLogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/MatchedLogsSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/LogEntryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/LogEntryTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/DefaultMetadataExtractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/DefaultFormatMetadataParserTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestingApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestingApiTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +30,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="JUnit4 Test Class" />
         <option value="Class" />
+        <option value="JUnit4 Test Class" />
       </list>
     </option>
   </component>
@@ -61,6 +75,7 @@
       <recent name="" />
     </key>
     <key name="MoveMembersDialog.RECENTS_KEY">
+      <recent name="net.goui.flogger.testing.truth.MatchedLogsSubject" />
       <recent name="net.goui.flogger.testing.api.TestApi" />
     </key>
     <key name="MoveInnerDialog.RECENTS_KEY">
@@ -74,15 +89,16 @@
       <recent name="net.goui.flogger.testing.core.test" />
     </key>
     <key name="CreateTestDialog.RecentsKey">
+      <recent name="net.goui.flogger.testing.truth" />
       <recent name="net.goui.flogger.testing.core" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="net.goui.flogger.testing.truth" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Log4jInterceptorTest">
-    <configuration name="FloggerTestExtensionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="junit5" />
+  <component name="RunManager" selected="JUnit.testing in api">
+    <configuration name="LogEntryTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="api" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="net.goui.flogger.testing.*" />
@@ -90,80 +106,73 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="net.goui.flogger.testing" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.FloggerTestExtensionTest" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.LogEntryTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="FloggerTestRuleTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="junit4" />
+    <configuration name="LogsSubjectTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="api" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.junit4.*" />
+          <option name="PATTERN" value="net.goui.flogger.testing.truth.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.truth" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.truth.LogsSubjectTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="FloggerTestRuleTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="junit4" />
+    <configuration name="LogsSubjectTest.testWithMetadata" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="api" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.junit4.*" />
+          <option name="PATTERN" value="net.goui.flogger.testing.truth.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.junit4" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.junit4.FloggerTestRuleTest" />
-      <option name="METHOD_NAME" value="test" />
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.truth" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.truth.LogsSubjectTest" />
+      <option name="METHOD_NAME" value="testWithMetadata" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Log4jInterceptorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="log4j" />
+    <configuration name="MatchedLogsSubjectTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="api" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="net.goui.flogger.log4j2.*" />
+          <option name="PATTERN" value="net.goui.flogger.testing.truth.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.log4j2" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.log4j2.Log4jInterceptorTest" />
+      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.truth" />
+      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.truth.MatchedLogsSubjectTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestingApiTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="testing in api" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="api" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="net.goui.flogger.testing.api.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="net.goui.flogger.testing.api" />
-      <option name="MAIN_CLASS_NAME" value="net.goui.flogger.testing.api.TestingApiTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.Log4jInterceptorTest" />
-        <item itemvalue="JUnit.FloggerTestRuleTest" />
-        <item itemvalue="JUnit.FloggerTestExtensionTest" />
-        <item itemvalue="JUnit.FloggerTestRuleTest.test" />
-        <item itemvalue="JUnit.TestingApiTest" />
+        <item itemvalue="JUnit.testing in api" />
+        <item itemvalue="JUnit.LogsSubjectTest" />
+        <item itemvalue="JUnit.MatchedLogsSubjectTest" />
+        <item itemvalue="JUnit.LogsSubjectTest.testWithMetadata" />
+        <item itemvalue="JUnit.LogEntryTest" />
       </list>
     </recent_temporary>
   </component>
@@ -382,6 +391,16 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="14" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java</url>
+          <line>160</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java</url>
+          <line>144</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

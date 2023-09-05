@@ -25,8 +25,6 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class TestingApiTest {
-  private static final String PACKAGE_NAME = TestingApi.class.getPackage().getName();
-
   private static class TestInterceptor implements LogInterceptor {
     final HashMap<String, Level> attached = new HashMap<>();
 
@@ -94,8 +92,9 @@ public class TestingApiTest {
 
   @Test
   public void testLoggerName() {
-    assertThat(TestingApi.loggerNameOf(TestingApiTest.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest");
-    assertThat(TestingApi.loggerNameOf(Inner.class)).isEqualTo(PACKAGE_NAME + ".TestApiTest.Inner");
+    String classUnderTest = TestingApiTest.class.getName();
+    assertThat(TestingApi.loggerNameOf(TestingApiTest.class)).isEqualTo(classUnderTest);
+    assertThat(TestingApi.loggerNameOf(Inner.class)).isEqualTo(classUnderTest + ".Inner");
 
     // Don't expect to be given primitive/array class etc.
     assertThrows(IllegalArgumentException.class, () -> TestingApi.loggerNameOf(int.class));

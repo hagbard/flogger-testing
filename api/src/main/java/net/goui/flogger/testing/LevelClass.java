@@ -7,7 +7,8 @@ import java.util.logging.Level;
  * support.
  *
  * <p>Since assertions are carried out on logged values, it is important that the test API expresses
- * its contract in a way compatible with all backends. In particular, testing the log statements:
+ * its contract in a way that is compatible with all supported logging backends. In particular,
+ * testing the log statements:
  *
  * <pre>{@code
  * logger.atFine().log("Detailed message ...");
@@ -15,7 +16,7 @@ import java.util.logging.Level;
  * }</pre>
  *
  * <p>Cannot allow the use of {@link Level#FINE} and {@link Level#FINEST}, because some backends do
- * not distinguish these levels and assertions like.
+ * not distinguish these levels. And assertions like:
  *
  * <pre>{@code
  * assertThat(logs).everyLog().above(Level.FINEST).hasSomeProperty(...);
@@ -94,5 +95,14 @@ public enum LevelClass {
    * <p>(†) Since Flogger does not emit these log levels, it should not affect testing. Of course if
    * this API were used to test non-Flogger logs, this might become important.
    */
-  SEVERE,
+  SEVERE;
+
+  /** An alias for {@link #FINEST}, for users who wish to use Log4J style names in tests. */
+  public static final LevelClass TRACE = FINEST;
+
+  /** An alias for {@link #FINE}, for users who wish to use Log4J style names in tests. */
+  public static final LevelClass DEBUG = FINE;
+
+  /** An alias for {@link #SEVERE}, for users who wish to use Log4J style names in tests. */
+  public static final LevelClass ERROR = SEVERE;
 }

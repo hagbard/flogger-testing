@@ -1,11 +1,15 @@
 package net.goui.flogger.testing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Character.isHighSurrogate;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Instant;
+import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -116,14 +120,81 @@ public abstract class LogEntry {
   public abstract Throwable cause();
 
   /**
-   * Returns whether the log entry's metadata has the given key-value pair.
+   * Returns whether the log entry's metadata has the given key-value pair using comparison methods
+   * suitable for tests.
+   *
+   * <p>Since captured metadata has lost type information, this method does NOT simply check that
+   * the given value is in the metadata. Values are compared in 4 distinct classes; integrals,
+   * floating point, booleans and strings. So if, for example, the metadata contains a {@code Long}
+   * value, but this method is given an {@code Integer} of the same value, then it is considered to
+   * be contained in the metadata. However, if the metadata contains {@link Boolean#TRUE} but this
+   * method is given the string {@code "true"}, then it is NOT considered to be contained in the
+   * metadata.
+   *
+   * <p>Warning: While this method supports approximate comparisons with floating point values to
+   * allow floating point tests to be written, it is almost always a bad idea to do this, and users
+   * are strongly advised to find an alternative attribute of the log entry to test.
    *
    * @param key metadata key/label.
-   * @param value value to test (if null, only the existence of the key is tested).
+   * @param value value to test (if only the existence of a key is being tested, use {@link
+   *     #hasMetadataKey(String)}).
    */
-  public boolean hasMetadata(String key, @Nullable Object value) {
+  public boolean hasMetadata(String key, Object value) {
+    checkNotNull(value, "value must not be null (did you mean 'hasMetadataKey(...)'?)");
     ImmutableList<Object> values = metadata().get(key);
-    return value == null || (values != null && values.contains(value));
+    if (values == null) {
+      return false;
+    }
+    return values.stream().anyMatch(metadataValuePredicate(value));
+  }
+
+  /**
+   * Returns whether the log entry's metadata has the given key (even if there are no associated
+   * values). If you want to test that a key exists with some value, you should use {@link
+   * #hasMetadata(String, Object)} and provide a specific value.
+   */
+  public boolean hasMetadataKey(String key) {
+    return metadata().containsKey(key);
+  }
+
+  private static Predicate<Object> metadataValuePredicate(Object value) {
+    if (value instanceof Number) {
+      BigDecimal expected = toBigDecimal((Number) value);
+      // NOTE: Cannot use Object::equals for integrals since, due to scale/precision difference:
+      // BigDecimal.valueOf(10D) != BigDecimal.valueOf(10L)
+      Predicate<BigDecimal> equalityTest =
+          (value instanceof Float || value instanceof Double)
+              ? n -> closeEnoughToEqualForTesting(expected, n)
+              : n -> expected.compareTo(n) == 0;
+      return v -> v instanceof Number && equalityTest.test(toBigDecimal((Number) v));
+    }
+    if (value instanceof Boolean) {
+      return v -> v.equals(value);
+    }
+    String s = value.toString();
+    return v -> !(v instanceof Number || v instanceof Boolean) && v.toString().equals(s);
+  }
+
+  // Non-floating point values have integral decimal representation and can be compared exactly.
+  private static BigDecimal toBigDecimal(Number v) {
+    if (v instanceof BigDecimal) {
+      return (BigDecimal) v;
+    }
+    if (v instanceof BigInteger) {
+      return new BigDecimal((BigInteger) v);
+    }
+    return (v instanceof Float || v instanceof Double)
+        ? BigDecimal.valueOf(v.doubleValue())
+        : BigDecimal.valueOf(v.longValue());
+  }
+
+  private static boolean closeEnoughToEqualForTesting(BigDecimal a, BigDecimal b) {
+    BigDecimal abs = a.subtract(b).abs();
+    // The scale of 10 is arbitrary but not unreasonable for testing purposes. People should not
+    // be testing doubles much anyway and adding options to change this encourages bad behaviour.
+    // Don't scale up until we know the result will fit into a long (so we test it's less than 1).
+    int signum = abs.compareTo(BigDecimal.ONE);
+    return signum == 0 || (signum < 0 && abs.scaleByPowerOfTen(10).longValue() == 0);
   }
 
   /**
