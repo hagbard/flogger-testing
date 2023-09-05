@@ -25,6 +25,9 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class TestingApiTest {
+  private static final Instant TIMESTAMP = Instant.now();
+  private static final Object THREAD_ID = "<dummy>";
+
   private static class TestInterceptor implements LogInterceptor {
     final HashMap<String, Level> attached = new HashMap<>();
 
@@ -45,7 +48,8 @@ public class TestingApiTest {
           "method",
           "info",
           LevelClass.INFO,
-          Instant.now(),
+          TIMESTAMP,
+          THREAD_ID,
           message,
           ImmutableMap.of(),
           null);

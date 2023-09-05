@@ -4,22 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Nearly done.">
-      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogSubjectTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogsSubjectTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/MatchedLogsSubjectTest.java" afterDir="false" />
+    <list default="true" id="d2bd7380-6012-4b61-a1bd-d2360dcc6a33" name="Changes" comment="Close to finished with docs.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LevelClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LevelClass.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/api/TestingApi.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/AllLogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/MatchedLogsSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogSubject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/truth/LogsSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/jdk/JdkInterceptor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/LogEntryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/LogEntryTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/DefaultMetadataExtractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/DefaultFormatMetadataParserTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestingApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/api/TestingApiTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogSubjectTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogSubjectTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogsSubjectTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/LogsSubjectTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/MatchedLogsSubjectTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/test/java/net/goui/flogger/testing/truth/MatchedLogsSubjectTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/junit4/src/test/java/net/goui/flogger/testing/junit4/FloggerTestRuleTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/log4j2/src/main/java/net/goui/flogger/testing/log4j2/Log4jInterceptor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +26,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="Class" />
         <option value="JUnit4 Test Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -357,7 +353,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Working again!!" />
     <MESSAGE value="Config" />
     <MESSAGE value="Wooot, mostly done now." />
     <MESSAGE value="Fixed level mess." />
@@ -382,7 +377,8 @@
     <MESSAGE value="Extra method." />
     <MESSAGE value="More docs." />
     <MESSAGE value="Nearly done." />
-    <option name="LAST_COMMIT_MESSAGE" value="Nearly done." />
+    <MESSAGE value="Close to finished with docs." />
+    <option name="LAST_COMMIT_MESSAGE" value="Close to finished with docs." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -391,16 +387,6 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="14" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java</url>
-          <line>160</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/api/src/main/java/net/goui/flogger/testing/LogEntry.java</url>
-          <line>144</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

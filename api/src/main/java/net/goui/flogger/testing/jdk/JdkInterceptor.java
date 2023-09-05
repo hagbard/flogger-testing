@@ -18,6 +18,7 @@ import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.MessageAndMetadata;
 import net.goui.flogger.testing.api.MetadataExtractor;
 
+/** Log interceptor for JDK logging. */
 public final class JdkInterceptor implements LogInterceptor {
 
   public static class Factory extends AbstractLogInterceptorFactory {
@@ -69,6 +70,7 @@ public final class JdkInterceptor implements LogInterceptor {
       this.testId = testId;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void publish(LogRecord record) {
       Level level = record.getLevel();
@@ -81,6 +83,8 @@ public final class JdkInterceptor implements LogInterceptor {
                 level.getName(),
                 levelClassOf(level),
                 getBestTimestamp(record),
+                // Cannot use "getLongThreadId()" until supported JDK bumped to 16.
+                record.getThreadID(),
                 mm.message(),
                 mm.metadata(),
                 record.getThrown()));

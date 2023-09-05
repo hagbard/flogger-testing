@@ -20,6 +20,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class LogSubjectTest {
   private static final Instant TIMESTAMP = Instant.now();
+  private static final Object THREAD_ID = "<dummy>";
 
   @Test
   public void testMessage() {
@@ -99,7 +100,15 @@ public class LogSubjectTest {
 
   private static LogEntry log(LevelClass level, String message, @Nullable Throwable cause) {
     return LogEntry.of(
-        "<class>", "<method>", level.name(), level, TIMESTAMP, message, ImmutableMap.of(), cause);
+        "<class>",
+        "<method>",
+        level.name(),
+        level,
+        TIMESTAMP,
+        THREAD_ID,
+        message,
+        ImmutableMap.of(),
+        cause);
   }
 
   private static LogEntry logWithMetadata(String key, Object... values) {
@@ -118,6 +127,7 @@ public class LogSubjectTest {
         INFO.name(),
         INFO,
         TIMESTAMP,
+        THREAD_ID,
         "message",
         ImmutableMap.of(key, ImmutableList.copyOf(values)),
         null);

@@ -24,6 +24,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class LogsSubjectTest {
   private static final Instant TIMESTAMP = Instant.now();
+  private static final Object THREAD_ID = "<dummy>";
 
   static void assertMatched(LogsSubject subject, LogEntry... logs) {
     Truth.assertThat(subject.getAllMatches()).containsExactlyElementsIn(logs).inOrder();
@@ -164,7 +165,7 @@ public class LogsSubjectTest {
 
   private static LogEntry log(LevelClass level, String message) {
     return LogEntry.of(
-        "<class>", "<method>", level.name(), level, TIMESTAMP, message, ImmutableMap.of(), null);
+        "<class>", "<method>", level.name(), level, TIMESTAMP, THREAD_ID, message, ImmutableMap.of(), null);
   }
 
   private static LogEntry logWithCause(Throwable cause) {
@@ -174,6 +175,7 @@ public class LogsSubjectTest {
         WARNING.name(),
         WARNING,
         TIMESTAMP,
+        THREAD_ID,
         "error",
         ImmutableMap.of(),
         cause);
@@ -195,6 +197,7 @@ public class LogsSubjectTest {
         INFO.name(),
         INFO,
         TIMESTAMP,
+        THREAD_ID,
         "message",
         ImmutableMap.of(key, ImmutableList.copyOf(values)),
         null);

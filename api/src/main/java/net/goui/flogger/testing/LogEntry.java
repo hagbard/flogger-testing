@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Representation of a captured log entry for testing via the Truth based API.
+ * Immutable representation of a captured log entry for testing via the Truth based API.
  *
  * <p>This class is suitable for representing log entries for testing, in which some information may
  * be lost. The choices made in the design of this class exist to allow it to represent logged
@@ -62,6 +62,7 @@ public abstract class LogEntry {
       String levelName,
       LevelClass levelClass,
       Instant timestamp,
+      Object threadId,
       String message,
       ImmutableMap<String, ImmutableList<Object>> metadata,
       @Nullable Throwable cause) {
@@ -71,6 +72,7 @@ public abstract class LogEntry {
         levelName,
         levelClass,
         timestamp,
+        threadId,
         message,
         metadata,
         cause);
@@ -93,6 +95,12 @@ public abstract class LogEntry {
 
   /** The timestamp of the log message (used to assert relative order). */
   public abstract Instant timeStamp();
+
+  /**
+   * A mostly unique identifier for the thread in which logging occurred. This is deliberately not
+   * public, since we only need to compare instances for detecting log entries from the same thread.
+   */
+  abstract Object threadId();
 
   /**
    * Return the original log message (minus any metadata). Note that this is allowed to contain
@@ -118,6 +126,10 @@ public abstract class LogEntry {
   /** Returns the associated "cause" of this log entry (if present). */
   @Nullable
   public abstract Throwable cause();
+
+  public boolean isFromSafeThreadAs(LogEntry entry) {
+    return threadId().equals(threadId());
+  }
 
   /**
    * Returns whether the log entry's metadata has the given key-value pair using comparison methods

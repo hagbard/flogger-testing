@@ -15,7 +15,8 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LogEntryTest {
-  private static final Instant TEST_TIMESTAMP = Instant.now();
+  private static final Instant TIMESTAMP = Instant.now();
+  private static final Object THREAD_ID = "<dummy>";
 
   @Test
   public void testAllArguments() {
@@ -28,7 +29,8 @@ public class LogEntryTest {
             "<method>",
             "<info>",
             LevelClass.INFO,
-            TEST_TIMESTAMP,
+            TIMESTAMP,
+            THREAD_ID,
             "log message",
             metadata,
             cause);
@@ -36,7 +38,7 @@ public class LogEntryTest {
     assertThat(entry.methodName()).isEqualTo("<method>");
     assertThat(entry.levelName()).isEqualTo("<info>");
     assertThat(entry.levelClass()).isEqualTo(LevelClass.INFO);
-    assertThat(entry.timeStamp()).isEqualTo(TEST_TIMESTAMP);
+    assertThat(entry.timeStamp()).isEqualTo(TIMESTAMP);
     assertThat(entry.message()).isEqualTo("log message");
     assertThat(entry.metadata()).isEqualTo(metadata);
     assertThat(entry.cause()).isEqualTo(cause);
@@ -50,7 +52,8 @@ public class LogEntryTest {
             null,
             "<info>",
             LevelClass.INFO,
-            TEST_TIMESTAMP,
+            TIMESTAMP,
+            THREAD_ID,
             "log message",
             ImmutableMap.of(),
             null);
@@ -68,7 +71,8 @@ public class LogEntryTest {
             null,
             "<info>",
             LevelClass.INFO,
-            TEST_TIMESTAMP,
+            TIMESTAMP,
+            THREAD_ID,
             "<unused>",
             ImmutableMap.of(
                 "key", values("key", "false", "42.0", 123456L, 54321D, Math.PI, true),
@@ -127,7 +131,8 @@ public class LogEntryTest {
             "<method>",
             "<info>",
             LevelClass.INFO,
-            TEST_TIMESTAMP,
+            TIMESTAMP,
+            THREAD_ID,
             "log message",
             metadata,
             cause);

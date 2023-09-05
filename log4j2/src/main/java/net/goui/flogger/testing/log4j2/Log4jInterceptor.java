@@ -4,7 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
@@ -20,7 +25,9 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.LevelRangeFilter;
+import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
+/** Log interceptor for Log4J2 logging. */
 public final class Log4jInterceptor implements LogInterceptor {
   private static final int JDK_SEVERE_VALUE = java.util.logging.Level.SEVERE.intValue();
   private static final int JDK_WARNING_VALUE = java.util.logging.Level.WARNING.intValue();
@@ -122,15 +129,63 @@ public final class Log4jInterceptor implements LogInterceptor {
     Level log4jLevel = event.getLevel();
     var ts = event.getInstant();
     Instant timestamp = Instant.ofEpochSecond(ts.getEpochSecond(), ts.getNanoOfSecond());
+    ImmutableMap<String, ImmutableList<Object>> metadata = mergeMdcValues(event, mm.metadata());
     return LogEntry.of(
         source != null ? source.getClassName() : null,
         source != null ? source.getMethodName() : null,
         log4jLevel.name(),
         toLevelClass(log4jLevel),
         timestamp,
+        event.getThreadId(),
         mm.message(),
-        mm.metadata(),
+        metadata,
         event.getThrown());
+  }
+
+  private static ImmutableMap<String, ImmutableList<Object>> mergeMdcValues(
+      LogEvent event, ImmutableMap<String, ImmutableList<Object>> metadata) {
+    ReadOnlyStringMap mdc = event.getContextData();
+    if (!mdc.isEmpty()) {
+      LinkedHashMap<String, ImmutableList<Object>> withMdc = new LinkedHashMap<>(metadata);
+      mdc.forEach(
+          (k, v, b) -> {
+            Object safeValue = toSafeValue(v);
+            if (safeValue != null) {
+              ImmutableList<Object> values = withMdc.get(k);
+              if (values != null) {
+                // Since the MDC is NOT a multimap, each key only appears at most once, so we never
+                // see repeated resizing of the values list.
+                ArrayList<Object> appended = new ArrayList<>(values.size() + 1);
+                appended.add(safeValue);
+                withMdc.put(k, ImmutableList.copyOf(appended));
+              } else {
+                withMdc.put(k, ImmutableList.of(safeValue));
+              }
+            }
+          },
+          withMdc);
+      metadata = ImmutableMap.copyOf(withMdc);
+    }
+    return metadata;
+  }
+
+  // Convert arbitrary values into metadata compatible types (Double, Long, Boolean, String) to
+  // avoid carrying large/mutable instances into test logic.
+  private static Object toSafeValue(Object v) {
+    if (v instanceof Double || v instanceof Float || v instanceof BigDecimal) {
+      return ((Number) v).doubleValue();
+    }
+    if (v instanceof Number) {
+      return ((Number) v).longValue();
+    }
+    if (v instanceof Boolean) {
+      return v;
+    }
+    try {
+      return v.toString();
+    } catch (RuntimeException e) {
+      return null;
+    }
   }
 
   // WARNING: Log4J level values *decrease* with severity.

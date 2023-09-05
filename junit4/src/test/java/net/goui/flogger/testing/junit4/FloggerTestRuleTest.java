@@ -9,6 +9,7 @@ import com.google.common.flogger.LogContext.Key;
 import com.google.common.flogger.context.Tags;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.truth.LogsSubject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,29 +23,34 @@ public class FloggerTestRuleTest {
   public final FloggerTestRule logs =
       FloggerTestRule.forClass(FloggerTestRuleTest.class, Level.FINE);
 
-
-
+  private static void allWarningsHaveErrorMessage(LogsSubject assertLogs) {
+    assertLogs.withLevelAtLeast(WARNING).always().haveMessageContaining("Error");
+  }
 
   @Test
   public void test() {
-    logs.verify(logs -> logs.withLevelAtLeast(WARNING).always().haveMessageContaining("Warn"));
+    logs.verify(FloggerTestRuleTest::allWarningsHaveErrorMessage);
 
-
-
-
-
-
-
-
-    logger.atWarning().withCause(new IllegalArgumentException("Oopsie!")).log("Warning: foo");
-    logger.atInfo().log("Message: <long message that will be truncated for debugging>");
-    logger.atFine().with(Key.TAGS, Tags.of("foo", 123)).log("Message: bar");
+    logger.atWarning().log("Error: foo");
+    logger.atInfo().log("Message: <short message>");
+    logger.atWarning().withCause(new IllegalArgumentException("Oopsie!")).log("Error: bar");
+    logger.atInfo().with(Key.TAGS, Tags.of("tag", 123)).log("Extra info: <short message>");
+    logger
+        .atFine()
+        .with(Key.TAGS, Tags.of("tag", 123))
+        .log("Extra info: <long message that will be truncated for debugging>");
 
     // --------------------------------
 
-    LogEntry warn = logs.assertLogs().withMessageContaining("foo").withLevel(WARNING).getOnlyMatch();
-    logs.assertLogs().afterLog(warn).withMessageMatching("[Mm]es+age").withLevel(INFO).matchCount().isEqualTo(1);
+    LogEntry warn =
+        logs.assertLogs().withLevel(WARNING).withMessageContaining("bar").getOnlyMatch();
     assertThat(warn).hasCause(IllegalArgumentException.class);
+    logs.assertLogs()
+        .afterLog(warn)
+        .fromSameMethodAs(warn)
+        .withMessageContaining("Extra info")
+        .always()
+        .haveMetadata("tag", 123);
 
     LogEntry fine = logs.assertLogs().afterLog(warn).withMessageContaining("bar").getOnlyMatch();
     assertThat(fine).hasMetadata("foo", 123);

@@ -21,6 +21,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class MatchedLogsSubjectTest {
   private static final Instant TIMESTAMP = Instant.now();
+  private static final Object THREAD_ID = "<dummy>";
 
   private static MatchedLogsSubject assertNo(ImmutableList<LogEntry> logs) {
     return Truth.assertAbout(noMatchedLogs()).that(logs);
@@ -98,7 +99,15 @@ public class MatchedLogsSubjectTest {
 
   private static LogEntry log(LevelClass level, String message) {
     return LogEntry.of(
-        "<class>", "<method>", level.name(), level, TIMESTAMP, message, ImmutableMap.of(), null);
+        "<class>",
+        "<method>",
+        level.name(),
+        level,
+        TIMESTAMP,
+        THREAD_ID,
+        message,
+        ImmutableMap.of(),
+        null);
   }
 
   private static LogEntry logWithCause(Throwable cause) {
@@ -108,6 +117,7 @@ public class MatchedLogsSubjectTest {
         WARNING.name(),
         WARNING,
         TIMESTAMP,
+        THREAD_ID,
         "error",
         ImmutableMap.of(),
         cause);
@@ -129,6 +139,7 @@ public class MatchedLogsSubjectTest {
         INFO.name(),
         INFO,
         TIMESTAMP,
+        THREAD_ID,
         "message",
         ImmutableMap.of(key, ImmutableList.copyOf(values)),
         null);
