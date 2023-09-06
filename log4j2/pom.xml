@@ -14,30 +14,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>net.goui.flogger.testing</groupId>
         <artifactId>flogger-testing</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <packaging>jar</packaging>
 
     <artifactId>log4j</artifactId>
-
     <name>Flogger Log4j2 Test Integration</name>
-    <!-- FIXME change it to the project's website -->
-    <!-- <url>http://www.example.com</url> -->
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <url>${base.url}/${project.artifactId}</url>
 
     <dependencies>
         <dependency>
             <groupId>net.goui.flogger.testing</groupId>
             <artifactId>api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${version.api}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -50,12 +44,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.20.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger -->
-        <dependency>
-            <groupId>com.google.flogger</groupId>
-            <artifactId>flogger</artifactId>
-            <version>0.7.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
