@@ -12,6 +12,7 @@ package net.goui.flogger.testing.junit4;
 
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.truth.LogMatcher.after;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 
 import com.google.common.flogger.FluentLogger;
@@ -55,14 +56,12 @@ public class FloggerTestRuleTest {
     LogEntry warn =
         logs.assertLogs().withLevel(WARNING).withMessageContaining("bar").getOnlyMatch();
     assertThat(warn).hasCause(IllegalArgumentException.class);
-    logs.assertLogs()
-        .afterLog(warn)
-        .fromSameMethodAs(warn)
+    logs.assertLogs(after(warn))
         .withMessageContaining("Extra info")
         .always()
         .haveMetadata("tag", 123);
 
-    LogEntry fine = logs.assertLogs().afterLog(warn).withMessageContaining("bar").getOnlyMatch();
+    LogEntry fine = logs.assertLogs(after(warn)).withMessageContaining("bar").getOnlyMatch();
     assertThat(fine).hasMetadata("foo", 123);
 
     logs.assertLogs().withLevel(WARNING).always().haveMessageMatching("foo");
