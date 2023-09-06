@@ -111,8 +111,17 @@ public final class LogSubject extends Subject {
    */
   public void hasCause(Class<? extends Throwable> type) {
     checkNotNull(type, "cause type must not be null. Did you mean \"cause().isNull()\"?");
-    if (!type.isInstance(entry().cause())) {
+    if (entry().cause() == null) {
+      failWithActual("log was expected to have a cause of type", type.getName());
+    } else if (!type.isInstance(entry().cause())) {
       failWithActual("log cause was not of expected type", type.getName());
+    }
+  }
+
+  /** Asserts that a log entry has an associated "cause" of any type. */
+  public void hasCause() {
+    if (entry().cause() == null) {
+      failWithActual(Fact.simpleFact("log was expected to have a cause"));
     }
   }
 

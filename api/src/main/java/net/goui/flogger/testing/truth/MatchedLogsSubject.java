@@ -11,6 +11,7 @@
 package net.goui.flogger.testing.truth;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.function.BiPredicate;
@@ -72,42 +73,49 @@ public final class MatchedLogsSubject extends Subject {
   /** Asserts that matched log entries are at the given level. */
   public void haveLevel(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass() == level)) {
-      failWithActual(label + " matched logs were expected be at level", level);
+      failWithActual(label + " matched logs were expected to be at level", level);
     }
   }
 
   /** Asserts that matched log entries are above the given level. */
   public void haveLevelGreaterThan(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) > 0)) {
-      failWithActual(label + " matched logs were expected be at level", level);
+      failWithActual(label + " matched logs were expected to be at level", level);
     }
   }
 
   /** Asserts that matched log entries are at or above the given level. */
   public void haveLevelAtLeast(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) >= 0)) {
-      failWithActual(label + " matched logs were expected be at level", level);
+      failWithActual(label + " matched logs were expected to be at level", level);
     }
   }
 
   /** Asserts that matched log entries are below the given level. */
   public void haveLevelLessThan(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) < 0)) {
-      failWithActual(label + " matched logs were expected be at level", level);
+      failWithActual(label + " matched logs were expected to be at level", level);
     }
   }
 
   /** Asserts that matched log entries are at or below the given level. */
   public void haveLevelAtMost(LevelClass level) {
     if (!op.test(logs.stream(), e -> e.levelClass().compareTo(level) <= 0)) {
-      failWithActual(label + " matched logs were expected be at level", level);
+      failWithActual(label + " matched logs were expected to be at level", level);
     }
   }
 
   /** Asserts that matched log entries have a cause of the specified type. */
   public void haveCause(Class<? extends Throwable> clazz) {
     if (!op.test(logs.stream(), e -> clazz.isInstance(e.cause()))) {
-      failWithActual(label + " matched logs were expected have cause of type", clazz.getName());
+      failWithActual(label + " matched logs were expected to have a cause of type", clazz.getName());
+    }
+  }
+
+  /** Asserts that matched log entries have a cause of any type. */
+  public void haveCause() {
+    if (!op.test(logs.stream(), e -> e.cause() != null)) {
+      failWithActual(Fact.simpleFact(label + " matched logs were expected to have a cause"));
     }
   }
 

@@ -10,6 +10,11 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing;
 
+import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.truth.LogMatcher.before;
+import static net.goui.flogger.testing.truth.LogSubject.assertThat;
+import static org.junit.Assert.assertThrows;
+
 import com.google.common.flogger.FluentLogger;
 import java.util.logging.Level;
 import net.goui.flogger.testing.junit5.FloggerTestExtension;
@@ -17,20 +22,53 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+/**
+ * Unit tests for the JUnit5 integration of the logs testing API. Note that the core API itself is
+ * well tested separately, so this test only needs to deal with integration with JUnit5.
+ *
+ * <p>The code within the body of these tests should be <em>identical</em> to the code in the JUnit4
+ * tests, and only the test annotations should differ.
+ */
 public class FloggerTestExtensionTest {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @RegisterExtension
-  static final FloggerTestExtension logged =
-      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, Level.INFO)
-          .verify(logs -> logs.always().haveMessageContaining("Hello"));
+  public final FloggerTestExtension logs =
+      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, Level.INFO);
 
-  @ExtendWith(FloggerTestExtension.class)
   @Test
-  public void testFoo() {
-    logger.atInfo().log("Hello World!");
+  public void testBasicApi() {
+    logger.atInfo().log("Foo");
+    logger.atInfo().log("Bar");
+    logger.atWarning().withCause(new IllegalArgumentException()).log("Baz");
 
-    logged.assertLog(0).hasMessageContaining("Hello");
+    LogEntry warn = logs.assertLogs().withLevel(WARNING).getMatch(0);
+    assertThat(warn).hasMessageContaining("Baz");
+
+    var logsBeforeWarn = logs.assertLogs(before(warn));
+    logsBeforeWarn.matchCount().isEqualTo(2);
+    logsBeforeWarn.never().haveCause();
+  }
+
+  @Test
+  public void testIndexedLogs() {
+    logger.atInfo().log("Foo");
+    logger.atWarning().log("Bar");
+
+    logs.assertLogs().matchCount().isEqualTo(2);
+    logs.assertLog(0).hasMessageContaining("Foo");
+    logs.assertLog(1).hasMessageContaining("Bar");
+    assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
+  }
+
+  @Test
+  public void testVerifyFailure() {
+    logs.verify(assertLogs -> assertLogs.always().haveMessageContaining("Foo"));
+    logger.atInfo().log("Bar");
+
+    // A bit of a hack to call the lifecycle method manually (it relies on the logs extension not
+    // caring if it's given null), but it seems to work fine.
+    assertThrows(AssertionError.class, () -> logs.afterEach(null));
   }
 }

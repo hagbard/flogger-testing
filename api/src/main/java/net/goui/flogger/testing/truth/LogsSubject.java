@@ -172,6 +172,11 @@ public final class LogsSubject extends Subject {
         .that(filter(logs, e -> clazz.isInstance(e.cause())));
   }
 
+  /** Matches the subsequence of captured logs with a cause of any type. */
+  public LogsSubject withCause() {
+    return check("withCause()").about(logSequences()).that(filter(logs, e -> e.cause() != null));
+  }
+
   /** Matches the subsequence of captured logs with the specified metadata key-value pair. */
   public LogsSubject withMetadata(String key, @Nullable Object value) {
     return withMetadataImpl(key, value);

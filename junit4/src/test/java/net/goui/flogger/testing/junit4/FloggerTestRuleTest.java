@@ -10,71 +10,109 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.junit4;
 
-import static net.goui.flogger.testing.LevelClass.INFO;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.goui.flogger.testing.LevelClass.WARNING;
-import static net.goui.flogger.testing.truth.LogMatcher.after;
+import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.LogContext.Key;
-import com.google.common.flogger.context.Tags;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.logging.Level;
 import net.goui.flogger.testing.LogEntry;
-import net.goui.flogger.testing.truth.LogsSubject;
+import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.junit.runners.model.Statement;
 
+/**
+ * Unit tests for the JUnit4 integration of the logs testing API. Note that the core API itself is
+ * well tested separately, so this test only needs to deal with integration with JUnit4.
+ *
+ * <p>The code within the body of these tests should be <em>identical</em> to the code in the JUnit5
+ * tests, and only the test annotations should differ.
+ */
 @RunWith(JUnit4.class)
 public class FloggerTestRuleTest {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  @Rule
+  @Rule(order = 1) public ExpectTestFailureRule failureRule = new ExpectTestFailureRule();
+
+  @Rule(order = 2)
   public final FloggerTestRule logs =
       FloggerTestRule.forClass(FloggerTestRuleTest.class, Level.FINE);
 
-  private static void allWarningsHaveErrorMessage(LogsSubject assertLogs) {
-    assertLogs.withLevelAtLeast(WARNING).always().haveMessageContaining("Error");
+  @Test
+  public void testBasicApi() {
+    logger.atInfo().log("Foo");
+    logger.atInfo().log("Bar");
+    logger.atWarning().withCause(new IllegalArgumentException()).log("Baz");
+
+    LogEntry warn = logs.assertLogs().withLevel(WARNING).getMatch(0);
+    assertThat(warn).hasMessageContaining("Baz");
+
+    var logsBeforeWarn = logs.assertLogs(before(warn));
+    logsBeforeWarn.matchCount().isEqualTo(2);
+    logsBeforeWarn.never().haveCause();
   }
 
   @Test
-  public void test() {
-    logs.verify(FloggerTestRuleTest::allWarningsHaveErrorMessage);
+  public void testIndexedLogs() {
+    logger.atInfo().log("Foo");
+    logger.atWarning().log("Bar");
 
-    logger.atWarning().log("Error: foo");
-    logger.atInfo().log("Message: <short message>");
-    logger.atWarning().withCause(new IllegalArgumentException("Oopsie!")).log("Error: bar");
-    logger.atInfo().with(Key.TAGS, Tags.of("tag", 123)).log("Extra info: <short message>");
-    logger
-        .atFine()
-        .with(Key.TAGS, Tags.of("tag", 123))
-        .log("Extra info: <long message that will be truncated for debugging>");
+    logs.assertLogs().matchCount().isEqualTo(2);
+    logs.assertLog(0).hasMessageContaining("Foo");
+    logs.assertLog(1).hasMessageContaining("Bar");
+    assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
+  }
 
-    // --------------------------------
+  @Test
+  @ExpectTestFailure
+  public void testVerifyFailure() {
+    try {
+      // This should cause AssertionError *after* this method has finished.
+      logs.verify(assertLogs -> assertLogs.always().haveMessageContaining("Foo"));
+      logger.atInfo().log("Bar");
+    } catch (AssertionError e) {
+      throw new IllegalStateException("Test code should NOT fail!");
+    }
+  }
 
-    LogEntry warn =
-        logs.assertLogs().withLevel(WARNING).withMessageContaining("bar").getOnlyMatch();
-    assertThat(warn).hasCause(IllegalArgumentException.class);
-    logs.assertLogs(after(warn))
-        .withMessageContaining("Extra info")
-        .always()
-        .haveMetadata("tag", 123);
+  // NOTE: We cannot use "@Test(expected = ...)" since that tests only the test method, not any
+  // surrounding rules. So we make our own rule to catch expected failure in logging verification.
 
-    LogEntry fine = logs.assertLogs(after(warn)).withMessageContaining("bar").getOnlyMatch();
-    assertThat(fine).hasMetadata("foo", 123);
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(value = ElementType.METHOD)
+  public @interface ExpectTestFailure {}
 
-    logs.assertLogs().withLevel(WARNING).always().haveMessageMatching("foo");
-
-    logs.assertLog(0).hasLevel(WARNING);
-    logs.assertLog(0).hasCause(RuntimeException.class);
-
-    logs.assertLog(1).hasLevel(INFO);
-    logs.assertLog(1).hasMessageMatching("[Mm]es+age");
-
-    logs.assertLog(2).hasMetadata("foo", 123);
-
-    logs.assertLogs().withLevelAtLeast(WARNING).always().haveMessageContaining("Warning");
-    logs.assertLogs().withLevelLessThan(WARNING).never().haveCause(RuntimeException.class);
+  public static class ExpectTestFailureRule implements TestRule {
+    @Override
+    public Statement apply(Statement base, Description description) {
+      return new Statement() {
+        @Override
+        public void evaluate() throws Throwable {
+          boolean expectedToFail = description.getAnnotation(ExpectTestFailure.class) != null;
+          boolean failed = false;
+          try {
+            base.evaluate();
+          } catch (AssertionError fail) {
+            failed = true;
+            if (!expectedToFail) throw fail;
+          }
+          if (expectedToFail && !failed) {
+            Assert.fail("Test was expected to fail, but didn't");
+          }
+        }
+      };
+    }
   }
 }

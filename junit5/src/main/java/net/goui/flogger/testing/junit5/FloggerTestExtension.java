@@ -10,10 +10,12 @@
 
 package net.goui.flogger.testing.junit5;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.TestingApi;
@@ -67,17 +69,19 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
     return this;
   }
 
-  private ApiHook apiHook = null;
+  private final AtomicReference<ApiHook> apiHook = new AtomicReference<>();
 
   @Override
-  public void beforeEach(ExtensionContext extensionContext) throws Exception {
-    apiHook = install(true);
+  public void beforeEach(ExtensionContext extensionContext) {
+    checkState(apiHook.getAndSet(install(true)) == null, "API hook must never be installed twice");
   }
 
   @Override
-  public void afterEach(ExtensionContext extensionContext) throws Exception {
-    if (apiHook != null) {
-      apiHook.close();
+  public void afterEach(ExtensionContext extensionContext) {
+    // Permit "afterEach()" to be called more than once, but only call hook.close() once.
+    ApiHook hook = apiHook.getAndSet(null);
+    if (hook != null) {
+      hook.close();
     }
   }
 }
