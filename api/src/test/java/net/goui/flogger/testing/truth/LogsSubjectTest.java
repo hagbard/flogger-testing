@@ -1,3 +1,13 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
 package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -6,6 +16,8 @@ import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.SEVERE;
 import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.truth.LogMatcher.after;
+import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static net.goui.flogger.testing.truth.LogsSubject.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -26,9 +38,15 @@ public class LogsSubjectTest {
   private static final Instant TIMESTAMP = Instant.now();
   private static final Object THREAD_ID = "<dummy>";
 
-  static void assertMatched(LogsSubject subject, LogEntry... logs) {
-    Truth.assertThat(subject.getAllMatches()).containsExactlyElementsIn(logs).inOrder();
-    subject.matchCount().isEqualTo(logs.length);
+  @Test
+  public void testMatching() {
+    LogEntry first = log(INFO, "first");
+    LogEntry second = log(INFO, "second");
+    LogEntry third = log(INFO, "third");
+    ImmutableList<LogEntry> logs = ImmutableList.of(first, second, third);
+
+    assertMatched(assertThat(logs).matching(before(third)), first, second);
+    assertMatched(assertThat(logs).matching(after(first)), second, third);
   }
 
   @Test
@@ -86,20 +104,6 @@ public class LogsSubjectTest {
     assertMatched(assertThat(logs).withMetadata("key", 12345), strAndNum, numOnly);
 
     assertMatched(assertThat(logs).withMetadataKey("key"), strAndBool, strAndNum, numOnly);
-  }
-
-  @Test
-  public void testBeforeAndAfterLog() {
-    LogEntry first = log(INFO, "first");
-    LogEntry second = log(INFO, "second");
-    LogEntry third = log(INFO, "third");
-    LogEntry notPresent = log(INFO, "not present");
-    ImmutableList<LogEntry> logs = ImmutableList.of(first, second, third);
-
-    assertMatched(assertThat(logs).beforeLog(third), first, second);
-    assertMatched(assertThat(logs).afterLog(first), second, third);
-    assertThrows(IllegalArgumentException.class, () -> assertThat(logs).beforeLog(notPresent));
-    assertThrows(IllegalArgumentException.class, () -> assertThat(logs).afterLog(notPresent));
   }
 
   @Test
@@ -163,9 +167,22 @@ public class LogsSubjectTest {
     assertThrows(IllegalArgumentException.class, () -> assertThat(logs).getMatch(-1));
   }
 
+  private static void assertMatched(LogsSubject subject, LogEntry... logs) {
+    Truth.assertThat(subject.getAllMatches()).containsExactlyElementsIn(logs).inOrder();
+    subject.matchCount().isEqualTo(logs.length);
+  }
+
   private static LogEntry log(LevelClass level, String message) {
     return LogEntry.of(
-        "<class>", "<method>", level.name(), level, TIMESTAMP, THREAD_ID, message, ImmutableMap.of(), null);
+        "<class>",
+        "<method>",
+        level.name(),
+        level,
+        TIMESTAMP,
+        THREAD_ID,
+        message,
+        ImmutableMap.of(),
+        null);
   }
 
   private static LogEntry logWithCause(Throwable cause) {

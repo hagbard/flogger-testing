@@ -1,3 +1,13 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
 package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -5,6 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
+import static java.util.stream.Collectors.joining;
 import static net.goui.flogger.testing.truth.MatchedLogsSubject.*;
 
 import com.google.common.collect.ImmutableList;
@@ -12,12 +23,14 @@ import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Subject;
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.truth.LogMatcher.LogEntryFilter;
 
 /**
  * Fluent logs testing API for making assertions on a sequence of captured log entries.
@@ -84,6 +97,20 @@ public final class LogsSubject extends Subject {
     return logs.stream().filter(predicate).collect(toImmutableList());
   }
 
+  public LogsSubject matching(LogMatcher... matchers) {
+    if (matchers.length == 0) {
+      return this;
+    }
+    String label =
+        "matching"
+            + Arrays.stream(matchers).map(LogMatcher::getLabel).collect(joining(",", "(", ")"));
+    LogEntryFilter combined =
+        Arrays.stream(matchers).map(LogMatcher::getFilter).reduce(x -> x, LogEntryFilter::combine);
+    return check(label)
+        .about(logSequences())
+        .that(combined.apply(logs.stream()).collect(toImmutableList()));
+  }
+
   /** Matches the subsequence of captured logs with messages containing the specified substring. */
   public LogsSubject withMessageContaining(String fragment) {
     checkNotNull(fragment);
@@ -105,35 +132,35 @@ public final class LogsSubject extends Subject {
 
   /** Matches the subsequence of captured logs at the specified level. */
   public LogsSubject withLevel(LevelClass level) {
-    return check("atLevel('%s')", level)
+    return check("withLevel(%s)", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass() == level));
   }
 
   /** Matches the subsequence of captured logs strictly above the specified level. */
   public LogsSubject withLevelGreaterThan(LevelClass level) {
-    return check("GreaterThanLevel('%s')", level)
+    return check("withLevelGreaterThan(%s)", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) > 0));
   }
 
   /** Matches the subsequence of captured logs at or above the specified level. */
   public LogsSubject withLevelAtLeast(LevelClass level) {
-    return check("AtLeastLevel('%s')", level)
+    return check("withLevelAtLeast(%s)", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) >= 0));
   }
 
   /** Matches the subsequence of captured logs strictly below the specified level. */
   public LogsSubject withLevelLessThan(LevelClass level) {
-    return check("LessThanLevel('%s')", level)
+    return check("withLevelLessThan(%s)", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) < 0));
   }
 
   /** Matches the subsequence of captured logs at or below the specified level. */
   public LogsSubject withLevelAtMost(LevelClass level) {
-    return check("AtMostLevel('%s')", level)
+    return check("withLevelAtMost(%s)", level)
         .about(logSequences())
         .that(filter(logs, e -> e.levelClass().compareTo(level) <= 0));
   }
@@ -176,36 +203,6 @@ public final class LogsSubject extends Subject {
     return check("withMetadataKey('%s')", key)
         .about(logSequences())
         .that(filter(logs, e -> e.hasMetadataKey(key)));
-  }
-
-  /**
-   * Matches the subsequence of captured logs which came after the specified entry.
-   *
-   * <p>Note that when logs are captured in different threads, the order in which they appear may
-   * not be the same at the order or their timestamps. This method does not attempt to examine
-   * timestamps, and adheres only to the order in which logs are captured.
-   *
-   * @throws IllegalArgumentException if the given log entry is not in the currently matched
-   *     sequence of entries.
-   */
-  public LogsSubject afterLog(LogEntry entry) {
-    return check("afterLog('%s')", entry.snippet()).about(logSequences()).that(filterAfter(entry));
-  }
-
-  /**
-   * Matches the subsequence of captured logs which came before the specified entry.
-   *
-   * <p>Note that when logs are captured in different threads, the order in which they appear may
-   * not be the same at the order or their timestamps. This method does not attempt to examine
-   * timestamps, and adheres only to the order in which logs are captured.
-   *
-   * @throws IllegalArgumentException if the given log entry is not in the currently matched
-   *     sequence of entries.
-   */
-  public LogsSubject beforeLog(LogEntry entry) {
-    return check("beforeLog('%s')", entry.snippet())
-        .about(logSequences())
-        .that(filterBefore(entry));
   }
 
   /** Allows a following assertion to be applied to every matched log entry. */

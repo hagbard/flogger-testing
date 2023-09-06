@@ -1,3 +1,13 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
 package net.goui.flogger.testing.api;
 
 import static com.google.common.base.Preconditions.*;
@@ -29,6 +39,7 @@ import java.util.stream.Stream;
 import javax.annotation.CheckReturnValue;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
+import net.goui.flogger.testing.truth.LogMatcher;
 import net.goui.flogger.testing.truth.LogSubject;
 import net.goui.flogger.testing.truth.LogsSubject;
 import net.goui.flogger.testing.truth.MatchedLogsSubject;
@@ -135,6 +146,19 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   /**
    * Begins a fluent assertion for a snapshot of the currently captured logs.
    *
+   * <p>An assertion can be started with an optional list of matchers to restrict the set of log
+   * entries on which assertions are made. This allows custom matchers and comparative matchers
+   * (e.g. {@link LogMatcher#after(LogEntry)}) to be used in conjunction with the built in event
+   * matcher methods (e.g. {@link LogsSubject#withMessageContaining(String)}. For example:
+   *
+   * <pre>{@code
+   * LogEntry debugStart = logs.assertLogs().withMessageContaining("Debug start").getOnlyMatch();
+   * logs.assertLogs(after(debugStart))
+   *     .withLevelAtLeast(WARNING)
+   *     .always()
+   *     .haveMetadataKey("debug_id");
+   * }</pre>
+   *
    * <p>Because {@code LogsSubject} and {@code LogEntry} instances are immutable, it is safe to
    * "split" a fluent assertion for readability. For example:
    *
@@ -147,8 +171,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * assertWarnings.withMessageContaining("Read error").always().haveCause(IOException.class);
    * }</pre>
    */
-  public LogsSubject assertLogs() {
-    return LogsSubject.assertThat(logged());
+  public LogsSubject assertLogs(LogMatcher... matchers) {
+    return LogsSubject.assertThat(logged()).matching(matchers);
   }
 
   /**
@@ -179,8 +203,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    *
    * <p>This method is provided for cases where exact log ordering is very well-defined, and
    * essential for correct testing. In general however, it is often better to use {@link
-   * LogsSubject} via {@link #assertLogs()} to identify expected log statements, regardless of their
-   * exact index.
+   * LogsSubject} via {@link #TestingApi#assertLogs(LogMatcher...) assertLogs()} to identify
+   * expected log statements, regardless of their exact index.
    *
    * <p>Instead of writing a test like:
    *

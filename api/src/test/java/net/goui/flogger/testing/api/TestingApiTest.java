@@ -1,14 +1,28 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
 package net.goui.flogger.testing.api;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import static net.goui.flogger.testing.LevelClass.INFO;
+import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.truth.LogMatcher.after;
+import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.context.Tags;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,6 +34,7 @@ import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.TestingApi.TestId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -29,34 +44,29 @@ public class TestingApiTest {
   private static final Object THREAD_ID = "<dummy>";
 
   private static class TestInterceptor implements LogInterceptor {
-    final HashMap<String, Level> attached = new HashMap<>();
+    private final HashMap<String, Level> attached = new HashMap<>();
+    private Consumer<LogEntry> logCollector = null;
 
     @Override
     public Recorder attachTo(
         String loggerName, Level level, Consumer<LogEntry> collector, String testId) {
+      if (logCollector == null) {
+        logCollector = checkNotNull(collector);
+      }
       attached.put(loggerName, level);
-      collector.accept(logEntry("attach: " + loggerName));
+      logCollector.accept(log(INFO, "attach: " + loggerName));
       return () -> {
-        collector.accept(logEntry("detach: " + loggerName));
+        logCollector.accept(log(INFO, "detach: " + loggerName));
         attached.remove(loggerName);
       };
     }
 
-    private static LogEntry logEntry(String message) {
-      return LogEntry.of(
-          "class",
-          "method",
-          "info",
-          LevelClass.INFO,
-          TIMESTAMP,
-          THREAD_ID,
-          message,
-          ImmutableMap.of(),
-          null);
+    void addLogs(LogEntry... entries) {
+      Arrays.stream(entries).forEach(logCollector);
     }
   }
 
-  static class FooApi extends TestingApi<FooApi> {
+  private static class FooApi extends TestingApi<FooApi> {
     protected FooApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
       super(levelMap, interceptor);
     }
@@ -68,8 +78,8 @@ public class TestingApiTest {
   }
 
   @Test
-  public void testApi() {
-    ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", INFO, "bar", WARNING);
+  public void testApiInstall() {
+    ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", Level.INFO, "bar", Level.WARNING);
     TestInterceptor interceptor = new TestInterceptor();
     FooApi myApi = new FooApi(levelMap, interceptor);
 
@@ -116,5 +126,70 @@ public class TestingApiTest {
       assertThat(ids.add(id)).isTrue();
     }
     ids.forEach(TestId::release);
+  }
+
+  @Test
+  public void testAssertLogs_basicApi() {
+    TestInterceptor interceptor = new TestInterceptor();
+    // Level map must have at least one entry to cause the injector to be attached.
+    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
+    try (var unused = logs.install(/* useTestId= */ true)) {
+      // Remember that (for now) the test API also "logs" something when it's attached.
+      interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+
+      logs.assertLogs().withMessageContaining("foo").matchCount().isEqualTo(2);
+      logs.assertLogs().withMessageContaining("bar").matchCount().isEqualTo(2);
+      LogEntry foobar = logs.assertLogs().withMessageContaining("foobar").getOnlyMatch();
+
+      logs.assertLogs(before(foobar)).always().haveLevel(INFO);
+      logs.assertLogs(before(foobar)).never().haveMessageContaining("quux");
+      logs.assertLogs(after(foobar)).doNotOccur();
+    }
+  }
+
+  @Test
+  public void testAssertLogs_failureMessages() {
+    TestInterceptor interceptor = new TestInterceptor();
+    // Level map must have at least one entry to cause the injector to be attached.
+    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
+    try (var unused = logs.install(/* useTestId= */ true)) {
+      // Remember that (for now) the test API also "logs" something when it's attached.
+      interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+
+      assertFailureContains(
+          () -> logs.assertLogs().withMessageContaining("foo").doNotOccur(),
+          "logs.withMessageContaining('foo')",
+          "was expected to be empty");
+
+      assertFailureContains(
+          () -> logs.assertLogs().withLevel(INFO).always().haveMessageContaining("foo"),
+          "logs.withLevel(INFO).always()",
+          "all matched logs were expected to contain");
+
+      assertFailureContains(
+          () -> logs.assertLogs().withLevel(INFO).never().haveMessageContaining("foo"),
+          "logs.withLevel(INFO).never()",
+          "no matched logs were expected to contain");
+    }
+  }
+
+  private static void assertFailureContains(ThrowingRunnable fn, String... fragments) {
+    AssertionError failure = assertThrows(AssertionError.class, fn);
+    for (String s : fragments) {
+      assertThat(failure).hasMessageThat().contains(s);
+    }
+  }
+
+  private static LogEntry log(LevelClass level, String message) {
+    return LogEntry.of(
+        "class",
+        "method",
+        level.name(),
+        level,
+        TIMESTAMP,
+        THREAD_ID,
+        message,
+        ImmutableMap.of(),
+        null);
   }
 }
