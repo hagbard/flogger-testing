@@ -81,11 +81,11 @@ public class TestingApiTest {
   public void testApiInstall() {
     ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", Level.INFO, "bar", Level.WARNING);
     TestInterceptor interceptor = new TestInterceptor();
-    FooApi myApi = new FooApi(levelMap, interceptor);
+    FooApi logs = new FooApi(levelMap, interceptor);
 
     // Loggers are attached only while the API hook is active.
     assertThat(interceptor.attached).isEmpty();
-    try (var unused = myApi.install(/* useTestId= */ true)) {
+    try (var unused = logs.install(/* useTestId= */ true)) {
       assertThat(interceptor.attached).isEqualTo(levelMap);
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.
@@ -94,11 +94,11 @@ public class TestingApiTest {
     }
     assertThat(interceptor.attached).isEmpty();
 
-    myApi.assertLogs().matchCount().isEqualTo(4);
-    myApi.assertLog(0).hasMessageContaining("attach: foo");
-    myApi.assertLog(1).hasMessageContaining("attach: bar");
-    myApi.assertLog(2).hasMessageContaining("detach: foo");
-    myApi.assertLog(3).hasMessageContaining("detach: bar");
+    logs.assertLogs().matchCount().isEqualTo(4);
+    logs.assertLog(0).hasMessageContaining("attach: foo");
+    logs.assertLog(1).hasMessageContaining("attach: bar");
+    logs.assertLog(2).hasMessageContaining("detach: foo");
+    logs.assertLog(3).hasMessageContaining("detach: bar");
   }
 
   // Not static since we want to test inner class names.
