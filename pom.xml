@@ -18,9 +18,18 @@
 
     <artifactId>flogger-testing</artifactId>
     <name>Flogger Testing API</name>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <url>https://github.com/hagbard/flogger-testing</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <base.url>https://github.com/hagbard/flogger-testing/tree/main</base.url>
+        <!-- For when the API is depended upon by the other artifacts. -->
+        <version.api>1.0.0</version.api>
+    </properties>
 
     <modules>
         <module>api</module>
@@ -29,16 +38,17 @@
         <module>log4j2</module>
     </modules>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <base.url>https://github.com/hagbard/flogger-testing/tree/main</base.url>
-        <version.api>1.0.0</version.api>
-    </properties>
+    <licenses>
+        <license>
+            <name>EPL-2.0</name>
+        </license>
+        <license>
+            <name>Apache-2.0</name>
+        </license>
+    </licenses>
 
     <build>
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <pluginManagement>
             <plugins>
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
                 <plugin>
@@ -141,7 +151,7 @@
                     <configuration>
                         <serverId>ossrh</serverId>
                         <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
             </plugins>
