@@ -1,6 +1,6 @@
 # Flogger Logs Testing API
 
-A powerful fluent API for testing Flogger log statements.
+A powerful fluent API for testing Flogger log statements, and more.
 
 #### Easy to Install
 
@@ -66,7 +66,7 @@ logs.assertLogs().withMessageContaining("Expected log message").matchCount().isA
 ```java
 var debugStart = logs.assertLogs()
     .withMessageContaining("Start debug")
-    .withMetadata("debug_id",TEST_ID)
+    .withMetadata("debug_id", TEST_ID)
     .getOnlyMatch();
 assertLogs(after(debugStart).inSameThread()).always().haveMetadata("debug_id", TEST_ID);
 ```
@@ -122,37 +122,49 @@ This principle is supported with the following features:
 
 Convenience methods for the commonest cases:
 
+<!-- @formatter:off -->
 ```java
-public final FloggerTestExtension logs=FloggerTestExtension.forClassUnderTest(INFO);
+public final FloggerTestExtension logs = FloggerTestExtension.forClassUnderTest(INFO);
 ```
+<!-- @formatter:on -->
 
+<!-- @formatter:off -->
 ```java
-public final FloggerTestExtension logs=FloggerTestExtension.forPackageUnderTest(INFO);
+public final FloggerTestExtension logs = FloggerTestExtension.forPackageUnderTest(INFO);
 ```
+<!-- @formatter:on -->
 
 Flexible methods for unusual situations:
 
+<!-- @formatter:off -->
 ```java
-public final FloggerTestExtension logs=FloggerTestExtension.forLevelMap(LEVEL_MAP);
+public final FloggerTestExtension logs = FloggerTestExtension.forLevelMap(LEVEL_MAP);
 ```
+<!-- @formatter:on -->
 
 #### Powerful filtering of captured logs in assertions
 
 Matching on attributes of log entries:
 
+<!-- @formatter:off -->
 ```java
 logs.assertLogs().withLevelAtLeast(WARNING)...
 ```
+<!-- @formatter:on -->
 
 Comparative filtering relative to other log entries:
 
+<!-- @formatter:off -->
 ```java
 logs.assertLogs(after(otherEntry))...
 ```
+<!-- @formatter:on -->
 
+<!-- @formatter:off -->
 ```java
 logs.assertLogs(isSameThreadAs(otherEntry))...
 ```
+<!-- @formatter:on -->
 
 ### Principle: Don't over-test logging.
 
@@ -177,6 +189,32 @@ This principle is supported with the following features:
 
 #### Targeted assertion APIs
 
+This API encourage testing simple attributes of log entries, rather than everything about them.
+
+There is no method to test that a log message is exactly equal to a string, only that it
+contains some sequence or fragments, or matches a regular expression.
+
+<!-- @formatter:off -->
+```java
+logs.assertLogs()
+    .withMessageContaining("Debug start", "user-ID", TEST_USER_ID)
+    .always()
+    .haveMetadata("debug_id", DEBUG_ID);
+```
+<!-- @formatter:on -->
+
+expresses its intent far more clearly, and is far less brittle than:
+
+<!-- @formatter:off -->
+```java
+assertLogged(
+    String.format("[INFO] Debug start (timestamp=%s) user-ID='%s' [CONTEXT debug_id=%s ]",
+    FAKE_TIMESTAMP,
+    TEST_USER_ID,
+    DEBUG_ID)...
+```
+<!-- @formatter:on -->
+
 ### Principle: Test that unwanted logs do not occur.
 
 The other principle of logs testing (which is often ignored) is to ensure that unwanted logs,
@@ -196,11 +234,59 @@ This principle is supported with the following features:
 
 #### Simple exclusion of log entries
 
+If you want to test that certain logs are not created, it's simple to do:
+
+<!-- @formatter:off -->
+```java
+logs.assertLogs().withLevel(SEVERE).doNotOccur();
+```
+<!-- @formatter:on -->
+
+But you can also test the non-existence of logs before or after a certain log event:
+
+<!-- @formatter:off -->
+```java
+LogEntry problemStart = logs.assertLogs()
+    .withCause(IOException.class)
+    .withMessageContaining("Bad file access")
+    .getOnlyMatch();
+logs.assertLogs(before(problemStart).inSameThread()).withLevelAtLeast(WARNING).doNotOccur();
+```
+<!-- @formatter:on -->
+
 #### Easy to control post-test verification
+
+Any assertion you can write in your test can be set as a verification for one or all tests:
+
+<!-- @formatter:off -->
+```java
+// No JUnit5 tests will cause warning logs from the class we are testing...
+@RegisterExtension
+public final FloggerTestExtension logs =
+    FloggerTestExtension.forClassUnderTest(INFO)
+        .verify(logs -> logs.withLevelAtLeast(WARNING).doNotOccur());
+```
+<!-- @formatter:on -->
+
+<!-- @formatter:off -->
+```java
+@Test
+public void testSomeTask() {
+  // Assert that everything logged in this test has the expected metadata key. 
+  logs.verify(logs -> logs.always().haveMetadataKey("task_id"));
+  
+  runTestTask("test_id", 0xF00B4D);
+  
+  logs.assertLogs(...);
+  ...
+}
+```
+<!-- @formatter:on -->
 
 ### Principle: Don't Inject Mock Loggers for Testing
 
-(and perhaps more strongly "Don't Inject Loggers into your code at all")
+This principle comes from a core Flogger design principle, which is that it's essentially an 
+anti-pattern to inject loggers into code for any reason.
 
 A common, but in my opinion undesirable, pattern is to inject a mock logger in unit tests for
 testing logs. This mimics the use of mocks for testing other aspects of code, and is often easy when
