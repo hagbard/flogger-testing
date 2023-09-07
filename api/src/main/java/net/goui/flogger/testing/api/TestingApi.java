@@ -149,7 +149,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * <p>An assertion can be started with an optional list of matchers to restrict the set of log
    * entries on which assertions are made. This allows custom matchers and comparative matchers
    * (e.g. {@link LogMatcher#after(LogEntry)}) to be used in conjunction with the built in event
-   * matcher methods (e.g. {@link LogsSubject#withMessageContaining(String)}. For example:
+   * matcher methods (e.g. {@link LogsSubject#withMessageContaining(String,String...)}. For example:
    *
    * <pre>{@code
    * LogEntry debugStart = logs.assertLogs().withMessageContaining("Debug start").getOnlyMatch();

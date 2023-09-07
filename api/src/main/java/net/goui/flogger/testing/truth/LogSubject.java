@@ -13,6 +13,8 @@ package net.goui.flogger.testing.truth;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
+import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
+import static net.goui.flogger.testing.truth.LogFilters.joinFragments;
 
 import com.google.common.truth.*;
 import net.goui.flogger.testing.LevelClass;
@@ -41,13 +43,23 @@ public final class LogSubject extends Subject {
   }
 
   /**
-   * Asserts that a log entry has a message which contains a specific substring. Tests should assert
-   * only important information in a log message and avoid testing for content which is prone to
-   * change through normal refactoring.
+   * Asserts that a log entry has a message containing all the specified text fragments in the given
+   * order. Matches are case-sensitive and do not delimit word boundaries.
+   *
+   * <p>A log entry is only matched if its message contains all the given fragments in the given
+   * order (not including cases where overlap occurs). For example:
+   *
+   * <ul>
+   *   <li>"Hello World" is matched by {@code ("Hello", "World")}, but not {@code ("World",
+   *       "Hello")}.
+   *   <li>"Foo Bar Baz" is matched by {@code ("Ba", "Ba")}, but not {@code ("Fo", "Fo")}.
+   *   <li>"Information" is not matched by {@code ("Inform", "formation")}.
+   * </ul>
    */
-  public void hasMessageContaining(String substring) {
-    checkArgument(!substring.isEmpty(), "message fragment cannot be empty");
-    message().contains(substring);
+  public void hasMessageContaining(String fragment, String... rest) {
+    if (!containsAllFragmentsInOrder(entry().message(), fragment, rest)) {
+      failWithActual("expected to contain fragment(s)", joinFragments(fragment, rest));
+    }
   }
 
   /**

@@ -38,7 +38,8 @@ public class LogSubjectTest {
     assertThat(e).hasMessageContaining("brown fox");
     assertThat(e).hasMessageMatching("quick.*fox");
 
-    assertThat(e).hasMessageContaining("row");
+    assertThat(e).hasMessageContaining("the", "brown", "jumps");
+    assertThat(e).hasMessageContaining("he", "row", "jump");
     assertThat(e).hasMessageMatching("\\bquick brown\\b");
 
     assertThrows(AssertionError.class, () -> assertThat(e).hasMessageContaining("orange"));
@@ -48,6 +49,8 @@ public class LogSubjectTest {
     assertThrows(NullPointerException.class, () -> assertThat(e).hasMessageMatching(null));
 
     assertThrows(IllegalArgumentException.class, () -> assertThat(e).hasMessageContaining(""));
+    assertThrows(
+        IllegalArgumentException.class, () -> assertThat(e).hasMessageContaining("foo", ""));
     assertThrows(IllegalArgumentException.class, () -> assertThat(e).hasMessageMatching(""));
   }
 

@@ -11,11 +11,12 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static java.util.stream.Collectors.joining;
+import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
+import static net.goui.flogger.testing.truth.LogFilters.joinFragments;
 import static net.goui.flogger.testing.truth.MatchedLogsSubject.*;
 
 import com.google.common.collect.ImmutableList;
@@ -36,7 +37,7 @@ import net.goui.flogger.testing.truth.LogMatcher.LogEntryFilter;
  * Fluent logs testing API for making assertions on a sequence of captured log entries.
  *
  * <p>The first part of a test assertion will typically filter captured logs using assertions such
- * as {@link #withMessageContaining(String)} or {@link #withLevelAtLeast(LevelClass)}.
+ * as {@link #withMessageContaining(String, String...)} or {@link #withLevelAtLeast(LevelClass)}.
  *
  * <p>Then assertions can be made by:
  *
@@ -111,12 +112,24 @@ public final class LogsSubject extends Subject {
         .that(combined.apply(logs.stream()).collect(toImmutableList()));
   }
 
-  /** Matches the subsequence of captured logs with messages containing the specified substring. */
-  public LogsSubject withMessageContaining(String fragment) {
-    checkNotNull(fragment);
-    return check("withMessageContaining('%s')", fragment)
+  /**
+   * Matches the subsequence of captured logs with messages containing all the specified text
+   * fragments in the given order. Matches are case-sensitive and do not delimit word boundaries.
+   *
+   * <p>A log entry is only matched if its message contains all the given fragments in the given
+   * order (not including cases where overlap occurs). For example:
+   *
+   * <ul>
+   *   <li>"Hello World" is matched by {@code ("Hello", "World")}, but not {@code ("World",
+   *       "Hello")}.
+   *   <li>"Foo Bar Baz" is matched by {@code ("Ba", "Ba")}, but not {@code ("Fo", "Fo")}.
+   *   <li>"Information" is not matched by {@code ("Inform", "formation")}.
+   * </ul>
+   */
+  public LogsSubject withMessageContaining(String fragment, String... rest) {
+    return check("withMessageContaining(%s)", joinFragments(fragment, rest))
         .about(logSequences())
-        .that(filter(logs, e -> e.message().contains(fragment)));
+        .that(filter(logs, e -> containsAllFragmentsInOrder(e.message(), fragment, rest)));
   }
 
   /**
@@ -261,18 +274,6 @@ public final class LogsSubject extends Subject {
   /** Returns the list of current matches without making any assertions. */
   public ImmutableList<LogEntry> getAllMatches() {
     return logs;
-  }
-
-  private ImmutableList<LogEntry> filterAfter(LogEntry entry) {
-    int index = logs.indexOf(entry);
-    checkArgument(index >= 0, "Provided log entry does not exist: %s", entry);
-    return logs.subList(index + 1, logs.size());
-  }
-
-  private ImmutableList<LogEntry> filterBefore(LogEntry entry) {
-    int index = logs.indexOf(entry);
-    checkArgument(index >= 0, "Provided log entry does not exist: %s", entry);
-    return logs.subList(0, index);
   }
 
   private static String quoteIfString(Object value) {

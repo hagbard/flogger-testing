@@ -52,15 +52,19 @@ public class LogsSubjectTest {
   @Test
   public void testWithMessage() {
     LogEntry foo = log(INFO, "foo");
-    LogEntry bar = log(INFO, "bar");
-    LogEntry foobar = log(INFO, "foobar");
+    LogEntry bar = log(INFO, "bar bar");
+    LogEntry foobar = log(INFO, "foobar foo bar");
     ImmutableList<LogEntry> logs = ImmutableList.of(foo, bar, foobar);
 
     assertMatched(assertThat(logs).withMessageContaining("foo"), foo, foobar);
     assertMatched(assertThat(logs).withMessageContaining("bar"), bar, foobar);
     assertMatched(assertThat(logs).withMessageContaining("foobar"), foobar);
 
-    assertMatched(assertThat(logs).withMessageMatching("\\b[a-z]{3}\\b"), foo, bar);
+    assertMatched(assertThat(logs).withMessageContaining("foo", "foo"), foobar);
+    assertMatched(assertThat(logs).withMessageContaining("bar", "bar"), bar, foobar);
+    assertThat(logs).withMessageContaining("foobar", "foobar").doNotOccur();
+
+    assertMatched(assertThat(logs).withMessageMatching("\\b[a-z]{3}\\b"), foo, bar, foobar);
     assertMatched(assertThat(logs).withMessageMatching("fo.*ar"), foobar);
   }
 

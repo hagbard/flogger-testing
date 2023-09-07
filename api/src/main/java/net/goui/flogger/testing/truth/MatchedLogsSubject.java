@@ -22,6 +22,8 @@ import javax.annotation.Nullable;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 
+import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
+
 /** Logs testing API for making assertions about every item in a sequence of matched log entries. */
 public final class MatchedLogsSubject extends Subject {
   static Factory<MatchedLogsSubject, ImmutableList<LogEntry>> allMatchedLogs() {
@@ -52,9 +54,22 @@ public final class MatchedLogsSubject extends Subject {
     this.op = op;
   }
 
-  /** Asserts that matched log entries have messages containing the specified substring. */
-  public void haveMessageContaining(String fragment) {
-    if (!op.test(logs.stream(), e -> e.message().contains(fragment))) {
+  /**
+   * Asserts that all matched log entries have messages containing all the specified text fragments
+   * in the given order. Matches are case-sensitive and do not delimit word boundaries.
+   *
+   * <p>A log entry is only matched if its message contains all the given fragments in the given
+   * order (not including cases where overlap occurs). For example:
+   *
+   * <ul>
+   *   <li>"Hello World" is matched by {@code ("Hello", "World")}, but not {@code ("World",
+   *       "Hello")}.
+   *   <li>"Foo Bar Baz" is matched by {@code ("Ba", "Ba")}, but not {@code ("Fo", "Fo")}.
+   *   <li>"Information" is not matched by {@code ("Inform", "formation")}.
+   * </ul>
+   */
+  public void haveMessageContaining(String fragment, String... rest) {
+    if (!op.test(logs.stream(), e -> containsAllFragmentsInOrder(e.message(), fragment, rest))) {
       failWithActual(label + " matched logs were expected to contain", fragment);
     }
   }

@@ -43,12 +43,13 @@ public class MatchedLogsSubjectTest {
 
   @Test
   public void haveMessageContaining() {
-    LogEntry foo = log(INFO, "foo");
-    LogEntry fooBar = log(INFO, "foo bar");
-    LogEntry fooBaz = log(INFO, "foo baz");
+    LogEntry foo = log(INFO, "foo foo");
+    LogEntry fooBar = log(INFO, "foo foo bar");
+    LogEntry fooBaz = log(INFO, "foo foo baz");
     ImmutableList<LogEntry> logs = ImmutableList.of(foo, fooBar, fooBaz);
 
     assertAll(logs).haveMessageContaining("foo");
+    assertAll(logs).haveMessageContaining("foo", "foo");
     assertAll(logs).haveMessageMatching("\\bfoo\\b");
     assertNo(logs).haveMessageContaining("quux");
     assertNo(logs).haveMessageMatching("[0-9]");
