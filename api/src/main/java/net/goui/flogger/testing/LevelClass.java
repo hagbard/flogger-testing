@@ -54,7 +54,7 @@ public enum LevelClass {
    * differences between {@code FINEST} and {@code FINER} logs. However, users should probably not
    * being trying to write tests which care about this distinction as they are likely to be brittle.
    */
-  FINEST,
+  FINEST(Level.FINEST),
   /**
    * A level class indicating logs suitable for high level debugging and are typically disabled
    * under normal circumstances.
@@ -67,7 +67,7 @@ public enum LevelClass {
    *   <li>Android log level {@code DEBUG}.
    * </ul>
    */
-  FINE,
+  FINE(Level.FINE),
   /**
    * A level class indicating informational logs which require no action but are typically always
    * enabled.
@@ -80,7 +80,7 @@ public enum LevelClass {
    *   <li>Android log level {@code INFO}.
    * </ul>
    */
-  INFO,
+  INFO(Level.INFO),
   /**
    * A level class indicating warnings that are actionable, but not as urgent as {@link #SEVERE}.
    *
@@ -92,7 +92,7 @@ public enum LevelClass {
    *   <li>Android log level {@code WARN}.
    * </ul>
    */
-  WARNING,
+  WARNING(Level.WARNING),
   /**
    * The highest level class, indicating serious and urgent problems.
    *
@@ -105,7 +105,17 @@ public enum LevelClass {
    * <p>(†) Since Flogger does not emit these log levels, it should not affect testing. Of course if
    * this API were used to test non-Flogger logs, this might become important.
    */
-  SEVERE;
+  SEVERE(Level.SEVERE);
+
+  private final Level jdkLevel;
+
+  LevelClass(Level jdkLevel) {
+    this.jdkLevel = jdkLevel;
+  }
+
+  public Level toJdkLogLevel() {
+    return jdkLevel;
+  }
 
   /** An alias for {@link #FINEST}, for users who wish to use Log4J style names in tests. */
   public static final LevelClass TRACE = FINEST;

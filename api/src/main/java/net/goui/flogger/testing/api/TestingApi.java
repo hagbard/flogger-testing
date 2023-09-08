@@ -14,10 +14,13 @@ import static com.google.common.base.Preconditions.*;
 import static com.google.common.flogger.StackSize.MEDIUM;
 import static com.google.common.truth.StreamSubject.streams;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static net.goui.flogger.testing.SetLogLevel.Scope.UNDEFINED;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.context.LogLevelMap;
 import com.google.common.flogger.context.ScopedLoggingContext.LoggingContextCloseable;
@@ -27,6 +30,7 @@ import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -34,10 +38,13 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.annotation.CheckReturnValue;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.truth.LogMatcher;
 import net.goui.flogger.testing.truth.LogSubject;
@@ -97,16 +104,15 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   // Tag label for a unique ID set for tests to support parallel testing.
   @VisibleForTesting static final String TEST_ID = "test_id";
 
-  private final ImmutableMap<String, ? extends Level> levelMap;
+  private final ImmutableMap<String, LevelClass> defaultLevelMap;
   private LogInterceptor interceptor;
   // Captured logs (thread safe).
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private Consumer<LogsSubject> verification;
 
-  protected TestingApi(
-      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
-    this.levelMap = ImmutableMap.copyOf(levelMap);
+  protected TestingApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
+    this.defaultLevelMap = ImmutableMap.copyOf(levelMap);
     this.interceptor = interceptor;
     this.verification = s -> {};
   }
@@ -251,8 +257,9 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     return api();
   }
 
-  protected final ApiHook install(boolean useTestId) {
-    return new ApiHook(useTestId);
+  protected final ApiHook install(
+      boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
+    return new ApiHook(useTestId, extralevelMap);
   }
 
   public final class ApiHook implements AutoCloseable {
@@ -260,19 +267,21 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     private final LoggingContextCloseable context;
     private final String testId;
 
-    private ApiHook(boolean useTestId) {
+    private ApiHook(boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
       if (interceptor == null) {
         interceptor = BestInterceptorFactory.get();
       }
       // Empty string is a safe no-op value for the test ID.
       testId = useTestId ? TestId.claim() : "";
+      Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extralevelMap);
       levelMap.forEach(
           (name, level) -> recorders.add(interceptor.attachTo(name, level, logs::add, testId)));
       // Skip adding test tags if the given ID is empty.
       Tags testTag = !testId.isEmpty() ? Tags.of(TEST_ID, testId) : Tags.empty();
       context =
           ScopedLoggingContexts.newContext()
-              .withLogLevelMap(LogLevelMap.create(levelMap))
+              .withLogLevelMap(
+                  LogLevelMap.create(Maps.transformValues(levelMap, LevelClass::toJdkLogLevel)))
               .withTags(testTag)
               .install();
     }
@@ -298,6 +307,95 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     // Assume logs without a detected test ID should still be collected (this may get interesting
     // in multi-threaded parallel tests, but it prevents in tagged logs being ignored).
     return values == null || values.contains(testId);
+  }
+
+  // Matches an expected text class name and captures the assumed class-under-test.
+  private static final Pattern EXPECTED_TEST_CLASS_NAME =
+      Pattern.compile("((?:[^.]+\\.)*[^.]+)Test");
+
+  protected static String guessClassUnderTest(Class<?> caller) {
+    String testClassName = caller.getName();
+    Matcher matcher = EXPECTED_TEST_CLASS_NAME.matcher(testClassName);
+    checkArgument(
+        matcher.matches(),
+        "Cannot infer class-under-test (test classes must be named 'XxxTest'): %s",
+        testClassName);
+    return matcher.group(1);
+  }
+
+  protected static String guessPackageUnderTest(Class<?> caller) {
+    String packageName = caller.getPackage().getName();
+    checkArgument(
+        !packageName.isEmpty(),
+        "Cannot infer package-under-test (test classes must not be in the root package): %s",
+        caller.getName());
+    return packageName;
+  }
+
+  // Approximate matcher to package names in Java:
+  // Avoids bare class names, allows nested and inner classes (with '$').
+  private static final Pattern PACKAGE_OR_CLASS_NAME =
+      Pattern.compile("(?:[A-Z0-9_$]+\\.)+[A-Z0-9_$]+", CASE_INSENSITIVE);
+
+  protected static ImmutableMap<String, LevelClass> getLevelMap(
+      Class<?> testClass, ImmutableList<SetLogLevel> levels) {
+    if (levels.isEmpty()) {
+      return ImmutableMap.of();
+    }
+    ImmutableMap.Builder<String, LevelClass> builder = ImmutableMap.builder();
+    for (SetLogLevel e : levels) {
+      builder.put(extractTargetName(testClass, e), e.level());
+    }
+    return builder.buildOrThrow();
+  }
+
+  private static String extractTargetName(Class<?> testClass, SetLogLevel e) {
+    String targetName;
+    if (e.target() != Object.class) {
+      checkArgument(
+          e.name().isEmpty() && e.scope() == UNDEFINED,
+          "specify only one of 'target', 'name' or 'scope': %s",
+          e);
+      targetName = e.target().getName();
+    } else if (!e.name().isEmpty()) {
+      checkArgument(
+          e.scope() == UNDEFINED, "specify only one of 'target', 'name' or 'scope': %s", e);
+
+      targetName = e.name();
+    } else if (e.scope() != UNDEFINED) {
+      switch (e.scope()) {
+        case CLASS_UNDER_TEST:
+          targetName = guessClassUnderTest(testClass);
+          break;
+        case PACKAGE_UNDER_TEST:
+          targetName = guessPackageUnderTest(testClass);
+          break;
+        default:
+          throw new AssertionError("unknown scope: " + e.scope());
+      }
+    } else {
+      throw new IllegalArgumentException("specify one of 'target', 'name' or 'scope': " + e);
+    }
+    checkArgument(
+        PACKAGE_OR_CLASS_NAME.matcher(targetName).matches(),
+        "invalid target class or name (expected xxx.yyy.Zzz): %s",
+        targetName);
+    return targetName.replace('$', '.');
+  }
+
+  private static Map<String, LevelClass> mergeLevelMaps(
+      ImmutableMap<String, LevelClass> defaultMap, ImmutableMap<String, LevelClass> extraMap) {
+    if (extraMap.isEmpty()) {
+      // Not a copy, but serves to narrow the value type.
+      return ImmutableMap.copyOf(defaultMap);
+    }
+    if (defaultMap.isEmpty()) {
+      return ImmutableMap.copyOf(extraMap);
+    }
+    HashMap<String, LevelClass> map = new HashMap<>();
+    map.putAll(defaultMap);
+    map.putAll(extraMap);
+    return map;
   }
 
   // Lazy holder for caching the loaded interceptor.

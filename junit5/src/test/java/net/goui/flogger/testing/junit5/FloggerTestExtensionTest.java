@@ -10,18 +10,16 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.junit5;
 
-import static com.google.common.truth.Truth.assertThat;
+import static net.goui.flogger.testing.LevelClass.FINE;
+import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.WARNING;
-import static net.goui.flogger.testing.junit5.FloggerTestExtension.guessClassUnderTest;
-import static net.goui.flogger.testing.junit5.FloggerTestExtension.guessPackageUnderTest;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.truth.Truth;
-import java.util.logging.Level;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.SetLogLevel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -38,11 +36,12 @@ public class FloggerTestExtensionTest {
 
   @RegisterExtension
   public final FloggerTestExtension logs =
-      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, Level.INFO);
+      FloggerTestExtension.forClass(FloggerTestExtensionTest.class, INFO);
 
   @Test
   public void testBasicApi() {
     logger.atInfo().log("Foo");
+    logger.atFine().log("Ignored");
     logger.atInfo().log("Bar");
     logger.atWarning().withCause(new IllegalArgumentException()).log("Baz");
 
@@ -50,8 +49,23 @@ public class FloggerTestExtensionTest {
     assertThat(warn).hasMessageContaining("Baz");
 
     var logsBeforeWarn = logs.assertLogs(before(warn));
+    // Match count is 2 because we are not logging at level FINE in this test.
     logsBeforeWarn.matchCount().isEqualTo(2);
     logsBeforeWarn.never().haveCause();
+  }
+
+  @Test
+  @SetLogLevel(target = FloggerTestExtensionTest.class, level = FINE)
+  public void testExtraLogLevel() {
+    logger.atInfo().log("Foo");
+    logger.atFine().log("Not Ignored");
+    logger.atFinest().log("Ignored");
+    logger.atWarning().log("Bar");
+
+    logs.assertLogs().matchCount().isEqualTo(3);
+    logs.assertLogs().withLevelLessThan(FINE).doNotOccur();
+    LogEntry fine = logs.assertLogs().withLevel(FINE).getOnlyMatch();
+    assertThat(fine).message().isEqualTo("Not Ignored");
   }
 
   @Test
@@ -63,21 +77,6 @@ public class FloggerTestExtensionTest {
     logs.assertLog(0).hasMessageContaining("Foo");
     logs.assertLog(1).hasMessageContaining("Bar");
     assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
-  }
-
-  @Test
-  public void testGuessClassUnderTest() {
-    // a.b.XxxTest.class --> "a.b.Xxx"
-    assertThat(guessClassUnderTest(FloggerTestExtensionTest.class))
-        .isEqualTo(FloggerTestExtension.class.getName());
-    assertThrows(IllegalArgumentException.class, () -> guessClassUnderTest(String.class));
-  }
-
-  @Test
-  public void testGuessPackageUnderTest() {
-    // a.b.XxxTest.class --> "a.b"
-    Truth.assertThat(guessPackageUnderTest(FloggerTestExtensionTest.class))
-        .isEqualTo(getClass().getPackage().getName());
   }
 
   @Test

@@ -12,15 +12,24 @@ package net.goui.flogger.testing.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
+import static net.goui.flogger.testing.LevelClass.SEVERE;
 import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.SetLogLevel.Scope.CLASS_UNDER_TEST;
+import static net.goui.flogger.testing.SetLogLevel.Scope.PACKAGE_UNDER_TEST;
+import static net.goui.flogger.testing.api.TestingApi.getLevelMap;
+import static net.goui.flogger.testing.api.TestingApi.guessClassUnderTest;
+import static net.goui.flogger.testing.api.TestingApi.guessPackageUnderTest;
 import static net.goui.flogger.testing.truth.LogMatcher.after;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.context.Tags;
+import com.google.common.truth.Truth;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +37,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.TestingApi.TestId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
@@ -44,12 +53,12 @@ public class TestingApiTest {
   private static final Object THREAD_ID = "<dummy>";
 
   private static class TestInterceptor implements LogInterceptor {
-    private final HashMap<String, Level> attached = new HashMap<>();
+    private final HashMap<String, LevelClass> attached = new HashMap<>();
     private Consumer<LogEntry> logCollector = null;
 
     @Override
     public Recorder attachTo(
-        String loggerName, Level level, Consumer<LogEntry> collector, String testId) {
+        String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
       if (logCollector == null) {
         logCollector = checkNotNull(collector);
       }
@@ -67,7 +76,7 @@ public class TestingApiTest {
   }
 
   private static class FooApi extends TestingApi<FooApi> {
-    protected FooApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+    protected FooApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
       super(levelMap, interceptor);
     }
 
@@ -79,13 +88,13 @@ public class TestingApiTest {
 
   @Test
   public void testApiInstall() {
-    ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", Level.INFO, "bar", Level.WARNING);
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("foo", INFO, "bar", INFO);
     TestInterceptor interceptor = new TestInterceptor();
     FooApi logs = new FooApi(levelMap, interceptor);
 
     // Loggers are attached only while the API hook is active.
     assertThat(interceptor.attached).isEmpty();
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       assertThat(interceptor.attached).isEqualTo(levelMap);
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.
@@ -95,10 +104,16 @@ public class TestingApiTest {
     assertThat(interceptor.attached).isEmpty();
 
     logs.assertLogs().matchCount().isEqualTo(4);
-    logs.assertLog(0).hasMessageContaining("attach: foo");
-    logs.assertLog(1).hasMessageContaining("attach: bar");
-    logs.assertLog(2).hasMessageContaining("detach: foo");
-    logs.assertLog(3).hasMessageContaining("detach: bar");
+    LogEntry fooAttach = logs.assertLogs().withMessageContaining("attach: foo").getOnlyMatch();
+    LogEntry barAttach = logs.assertLogs().withMessageContaining("attach: bar").getOnlyMatch();
+    logs.assertLogs(after(fooAttach))
+        .withMessageContaining("detach: foo")
+        .matchCount()
+        .isEqualTo(1);
+    logs.assertLogs(after(barAttach))
+        .withMessageContaining("detach: bar")
+        .matchCount()
+        .isEqualTo(1);
   }
 
   // Not static since we want to test inner class names.
@@ -132,8 +147,9 @@ public class TestingApiTest {
   public void testAssertLogs_basicApi() {
     TestInterceptor interceptor = new TestInterceptor();
     // Level map must have at least one entry to cause the injector to be attached.
-    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+    FooApi logs = new FooApi(levelMap, interceptor);
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Remember that (for now) the test API also "logs" something when it's attached.
       interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
@@ -151,8 +167,9 @@ public class TestingApiTest {
   public void testAssertLogs_failureMessages() {
     TestInterceptor interceptor = new TestInterceptor();
     // Level map must have at least one entry to cause the injector to be attached.
-    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+    FooApi logs = new FooApi(levelMap, interceptor);
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Remember that (for now) the test API also "logs" something when it's attached.
       interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
@@ -171,6 +188,68 @@ public class TestingApiTest {
           "logs.withLevel(INFO).never()",
           "no matched logs were expected to contain");
     }
+  }
+
+  @Test
+  public void testGuessClassUnderTest() {
+    // a.b.XxxTest.class --> "a.b.Xxx"
+    assertThat(guessClassUnderTest(TestingApiTest.class)).isEqualTo(TestingApi.class.getName());
+    assertThrows(IllegalArgumentException.class, () -> guessClassUnderTest(String.class));
+  }
+
+  @Test
+  public void testGuessPackageUnderTest() {
+    // a.b.XxxTest.class --> "a.b"
+    Truth.assertThat(guessPackageUnderTest(TestingApiTest.class))
+        .isEqualTo(getClass().getPackage().getName());
+  }
+
+  @Test
+  public void testGetLevelMap() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    ImmutableMap<String, LevelClass> levelMap =
+        getLevelMap(
+            testClass,
+            ImmutableList.of(
+                TestSetLogLevel.of(testClass, SEVERE),
+                TestSetLogLevel.of("foo.bar", WARNING),
+                TestSetLogLevel.of(PACKAGE_UNDER_TEST, INFO),
+                TestSetLogLevel.of(CLASS_UNDER_TEST, FINE)));
+    assertThat(levelMap).containsEntry(testClass.getName(), SEVERE);
+    assertThat(levelMap).containsEntry("foo.bar", WARNING);
+    assertThat(levelMap).containsEntry(testClass.getPackage().getName(), INFO);
+    assertThat(levelMap).containsEntry(TestingApi.class.getName(), FINE);
+  }
+
+  @Test
+  public void testGetLevelMap_duplicateTarget() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            getLevelMap(
+                testClass,
+                ImmutableList.of(
+                    TestSetLogLevel.of(TestingApi.class, SEVERE),
+                    TestSetLogLevel.of(CLASS_UNDER_TEST, FINE))));
+  }
+
+  @Test
+  public void testGetLevelMap_badName() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    SetLogLevel badAnnotation = TestSetLogLevel.of("ClassOnly", INFO);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> getLevelMap(testClass, ImmutableList.of(badAnnotation)));
+  }
+
+  @Test
+  public void testGetLevelMap_badAnnotation() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    SetLogLevel badAnnotation = TestSetLogLevel.of(testClass, "foo.Class", null, INFO);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> getLevelMap(testClass, ImmutableList.of(badAnnotation)));
   }
 
   private static void assertFailureContains(ThrowingRunnable fn, String... fragments) {

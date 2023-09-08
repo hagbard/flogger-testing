@@ -10,16 +10,17 @@
 
 package net.goui.flogger.testing.junit5;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.goui.flogger.testing.LevelClass;
+import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -29,35 +30,34 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
     implements BeforeEachCallback, AfterEachCallback {
-  public static FloggerTestExtension forClassUnderTest(Level level) {
+  public static FloggerTestExtension forClassUnderTest(LevelClass level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClassOrPackage(guessClassUnderTest(caller), level);
   }
 
-  public static FloggerTestExtension forPackageUnderTest(Level level) {
+  public static FloggerTestExtension forPackageUnderTest(LevelClass level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClassOrPackage(guessPackageUnderTest(caller), level);
   }
 
-  public static FloggerTestExtension forClass(Class<?> clazz, Level level) {
+  public static FloggerTestExtension forClass(Class<?> clazz, LevelClass level) {
     return forClassOrPackage(loggerNameOf(clazz), level);
   }
 
-  public static FloggerTestExtension forPackage(Package pkg, Level level) {
+  public static FloggerTestExtension forPackage(Package pkg, LevelClass level) {
     return forClassOrPackage(pkg.getName(), level);
   }
 
-  public static FloggerTestExtension forClassOrPackage(String loggerName, Level level) {
-    return forLevelMap(ImmutableMap.of(loggerName, level), null);
+  public static FloggerTestExtension forClassOrPackage(String loggerName, LevelClass level) {
+    return forLevelMap(ImmutableMap.of(loggerName, level));
   }
 
-  public static FloggerTestExtension forLevelMap(
-      Map<String, ? extends Level> levelMap, Level level) {
+  public static FloggerTestExtension forLevelMap(Map<String, LevelClass> levelMap) {
     return create(levelMap, null);
   }
 
   public static FloggerTestExtension create(
-      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+      Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     return new FloggerTestExtension(levelMap, interceptor);
   }
 
@@ -65,27 +65,8 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
   private static final Pattern EXPECTED_TEST_CLASS_NAME =
       Pattern.compile("((?:[^.]+\\.)*[^.]+)Test");
 
-  static String guessClassUnderTest(Class<?> caller) {
-    String testClassName = caller.getName();
-    Matcher matcher = EXPECTED_TEST_CLASS_NAME.matcher(testClassName);
-    checkArgument(
-        matcher.matches(),
-        "Cannot infer class-under-test (class name should be XxxTest): %s",
-        testClassName);
-    return matcher.group(1);
-  }
-
-  static String guessPackageUnderTest(Class<?> caller) {
-    String packageName = caller.getPackage().getName();
-    checkArgument(
-        !packageName.isEmpty(),
-        "Cannot infer package-under-test (test classes must not be in the root package): %s",
-        caller.getName());
-    return packageName;
-  }
-
   private FloggerTestExtension(
-      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+      Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     super(levelMap, interceptor);
   }
 
@@ -98,7 +79,16 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
 
   @Override
   public void beforeEach(ExtensionContext extensionContext) {
-    checkState(apiHook.getAndSet(install(true)) == null, "API hook must never be installed twice");
+    ImmutableMap<String, LevelClass> extraLogLevels =
+        getLevelMap(
+            extensionContext.getTestClass().orElseThrow(),
+            Arrays.stream(extensionContext.getTestMethod().orElseThrow().getAnnotations())
+                .filter(SetLogLevel.class::isInstance)
+                .map(SetLogLevel.class::cast)
+                .collect(toImmutableList()));
+    checkState(
+        apiHook.getAndSet(install(true, extraLogLevels)) == null,
+        "API hook must never be installed twice");
   }
 
   @Override
