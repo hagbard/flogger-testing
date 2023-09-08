@@ -40,7 +40,7 @@ public class Log4jInterceptorTest {
     Logger logger = (Logger) LogManager.getLogger(name);
     // DO NOT use `logger.setLevel()` in tests because the state it sets is undone when the appender
     // is added. We assume that in testing users are not using loggers with transient state set.
-    Configurator.setLevel(logger, Level.TRACE);
+    Configurator.setLevel(logger.getName(), Level.TRACE);
     return logger;
   }
 
