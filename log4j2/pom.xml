@@ -23,7 +23,7 @@
 
     <artifactId>log4j</artifactId>
     <name>Flogger Log4j2 Test Integration</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <url>${base.url}/${project.artifactId}</url>
 
