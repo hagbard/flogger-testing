@@ -74,11 +74,10 @@ assertLogs(after(debugStart).inSameThread()).always().haveMetadata("debug_id", T
 
 ## Introduction
 
-The testing of debug log statements and logging behaviour has never really has a single,
-comprehensive, testing API.
-In many cases users end up writing brittle assertions in unit tests (e.g. by assuming that log
-statements correspond to
-specific indices within some list). The usually results in users:
+The testing of debug log statements and logging behaviour has never really had a single,
+comprehensive, testing API. In many cases users end up writing brittle assertions in unit tests
+(e.g. by assuming that log statements correspond to specific indices within some list). The usually
+results in users:
 
 * Writing brittle tests for their logs, which creates an ongoing maintenance burden.
 * Writing few or no tests for their logs, which risks severe logging issues going unnoticed.
@@ -89,8 +88,7 @@ specific indices within some list). The usually results in users:
 We've all seen at least one (if not all) the situations described above.
 
 As Flogger's creator and API designer, I decided to do something about it for Flogger users, but I
-didn't want to stop
-there, so I made a library which can work with any logging API.
+didn't want to stop there, so I made a library which can work with any logging API.
 
 ## Why Testing Logs Properly is Hard
 
