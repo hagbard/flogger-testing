@@ -2,8 +2,6 @@ package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import net.goui.flogger.testing.LogEntry;
-
 /** Internal shared static log entry filtering methods. */
 final class LogFilters {
   /** Support method for things like {@link LogSubject#hasMessageContaining(String, String...)}. */

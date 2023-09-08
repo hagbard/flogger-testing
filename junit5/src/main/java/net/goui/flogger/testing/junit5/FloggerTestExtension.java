@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
