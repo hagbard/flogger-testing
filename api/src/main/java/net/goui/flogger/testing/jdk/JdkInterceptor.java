@@ -57,9 +57,9 @@ public final class JdkInterceptor implements LogInterceptor {
 
   @Override
   public Recorder attachTo(
-      String loggerName, Level level, Consumer<LogEntry> collector, String testId) {
+      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
     CapturingHandler handler = new CapturingHandler(collector, testId);
-    handler.setLevel(level);
+    handler.setLevel(level.toJdkLogLevel());
     Logger jdkLogger = Logger.getLogger(loggerName);
     jdkLogger.addHandler(handler);
     return () -> {

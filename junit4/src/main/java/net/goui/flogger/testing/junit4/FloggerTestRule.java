@@ -11,14 +11,18 @@
 package net.goui.flogger.testing.junit4;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.api.LogInterceptor;
+import net.goui.flogger.testing.api.SetLogLevel;
 import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.rules.TestRule;
@@ -41,37 +45,37 @@ import org.junit.runners.model.Statement;
  *
  * <p>Some methods in this class assume that a logger's name is the name of the class which uses it.
  * If this is not the case, specify logger names directly via {@link #forClassOrPackage(String,
- * Level)}.
+ * LevelClass)}.
  */
 public final class FloggerTestRule extends TestingApi<FloggerTestRule> implements TestRule {
-  public static FloggerTestRule forClassUnderTest(Level level) {
+  public static FloggerTestRule forClassUnderTest(LevelClass level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClassOrPackage(guessClassUnderTest(caller), level);
   }
 
-  public static FloggerTestRule forPackageUnderTest(Level level) {
+  public static FloggerTestRule forPackageUnderTest(LevelClass level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
     return forClassOrPackage(guessPackageUnderTest(caller), level);
   }
 
-  public static FloggerTestRule forClass(Class<?> clazz, Level level) {
+  public static FloggerTestRule forClass(Class<?> clazz, LevelClass level) {
     return forClassOrPackage(loggerNameOf(clazz), level);
   }
 
-  public static FloggerTestRule forPackage(Package pkg, Level level) {
+  public static FloggerTestRule forPackage(Package pkg, LevelClass level) {
     return forClassOrPackage(pkg.getName(), level);
   }
 
-  public static FloggerTestRule forClassOrPackage(String loggerName, Level level) {
-    return forLevelMap(ImmutableMap.of(loggerName, level), null);
+  public static FloggerTestRule forClassOrPackage(String loggerName, LevelClass level) {
+    return forLevelMap(ImmutableMap.of(loggerName, level));
   }
 
-  public static FloggerTestRule forLevelMap(Map<String, ? extends Level> levelMap, Level level) {
+  public static FloggerTestRule forLevelMap(Map<String, LevelClass> levelMap) {
     return create(levelMap, null);
   }
 
   public static FloggerTestRule create(
-      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+      Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     return new FloggerTestRule(levelMap, interceptor);
   }
 
@@ -98,8 +102,7 @@ public final class FloggerTestRule extends TestingApi<FloggerTestRule> implement
     return packageName;
   }
 
-  private FloggerTestRule(
-      Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+  private FloggerTestRule(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     super(levelMap, interceptor);
   }
 
@@ -110,13 +113,47 @@ public final class FloggerTestRule extends TestingApi<FloggerTestRule> implement
 
   @Override
   public Statement apply(Statement statement, Description description) {
+    ImmutableMap<String, LevelClass> extraLogLevels =
+        getLevelMap(
+            description.getAnnotations().stream()
+                .filter(SetLogLevel.class::isInstance)
+                .map(SetLogLevel.class::cast)
+                .collect(toImmutableList()));
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        try (var ctx = install(true)) {
+        try (var ctx = install(true, extraLogLevels)) {
           statement.evaluate();
         }
       }
     };
+  }
+
+  // Approximate matcher to package names in Java:
+  // Avoids bare class names, allows nested and inner classes (with '$').
+  private static final Pattern PACKAGE_OR_CLASS_NAME =
+      Pattern.compile("(?:[A-Z0-9_$]+\\.)+[A-Z0-9_$]+", CASE_INSENSITIVE);
+
+  private static ImmutableMap<String, LevelClass> getLevelMap(ImmutableList<SetLogLevel> levels) {
+    if (levels.isEmpty()) {
+      return ImmutableMap.of();
+    }
+    ImmutableMap.Builder<String, LevelClass> builder = ImmutableMap.builder();
+    for (SetLogLevel e : levels) {
+      String targetName;
+      if (e.target() != Object.class) {
+        checkArgument(e.name().isEmpty(), "specify only one of 'target' or 'name': %s", e);
+        targetName = e.target().getName();
+      } else {
+        checkArgument(!e.name().isEmpty(), "specify either 'target' or 'name': %s", e);
+        targetName = e.name();
+      }
+      checkArgument(
+          PACKAGE_OR_CLASS_NAME.matcher(targetName).matches(),
+          "invalid target class or name (expected xxx.yyy.Zzz): %s",
+          targetName);
+      builder.put(targetName.replace('$', '.'), e.level());
+    }
+    return builder.buildOrThrow();
   }
 }

@@ -12,7 +12,7 @@ package net.goui.flogger.testing.api;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 
 /**
@@ -86,15 +86,16 @@ public interface LogInterceptor {
    * @return a closeable "recorder" which encapsulated the attachment to the specific logger and
    *     which will be removed once testing is complete.
    */
-  Recorder attachTo(String loggerName, Level level, Consumer<LogEntry> collector, String testId);
+  Recorder attachTo(
+      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId);
 
   static boolean shouldCollect(MessageAndMetadata mm, String testId) {
     return TestingApi.hasMatchingTestId(mm, testId);
   }
 
   /**
-   * Detaches the interceptor from the logger for which the original {@link #attachTo(String, Level,
-   * Consumer, String)} call was made.
+   * Detaches the interceptor from the logger for which the original {@link #attachTo(String,
+   * LevelClass, Consumer, String)} call was made.
    */
   interface Recorder extends AutoCloseable {
     @Override

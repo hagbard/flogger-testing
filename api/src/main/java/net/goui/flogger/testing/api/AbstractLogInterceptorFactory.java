@@ -11,13 +11,15 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 package net.goui.flogger.testing.api;
 
 import static java.lang.Boolean.TRUE;
+import static net.goui.flogger.testing.LevelClass.FINE;
+import static net.goui.flogger.testing.LevelClass.FINEST;
+import static net.goui.flogger.testing.LevelClass.INFO;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor.Support;
@@ -47,7 +49,7 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
     RuntimeException testCause = new RuntimeException();
     List<LogEntry> logged = new ArrayList<>();
     try (LogInterceptor.Recorder r =
-        interceptor.attachTo(EXPECTED_LOGGER_NAME, Level.FINE, logged::add, "DUMMY_TEST_ID")) {
+        interceptor.attachTo(EXPECTED_LOGGER_NAME, FINE, logged::add, "DUMMY_TEST_ID")) {
       // Rare case where we only want the logger in one method and don't want to initialize
       // logging until we get here. We could also use a lazy holder if needed.
       FluentLogger testFluentLogger = FluentLogger.forEnclosingClass();
@@ -61,14 +63,11 @@ public abstract class AbstractLogInterceptorFactory implements LogInterceptor.Fa
     // Support can only go down as checks fail.
     Support support = Support.FULL;
     LogEntry enabledLog = logged.get(0);
-    support =
-        min(
-            support,
-            testBasicSupport(enabledLog, LevelClass.INFO, "<<enabled message>>", testCause));
+    support = min(support, testBasicSupport(enabledLog, INFO, "<<enabled message>>", testCause));
     if (logged.size() == 2) {
       LogEntry forcedLog = logged.get(1);
       support =
-          min(support, testBasicSupport(forcedLog, LevelClass.FINEST, "<<forced message>>", null));
+          min(support, testBasicSupport(forcedLog, FINEST, "<<forced message>>", null));
       // As well as basic support, test for the expected "forced=true" metadata.
       ImmutableList<Object> values = forcedLog.metadata().get("forced");
       if (values == null || !values.contains(TRUE)) {

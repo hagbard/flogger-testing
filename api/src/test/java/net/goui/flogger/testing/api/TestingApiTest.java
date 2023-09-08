@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.TestingApi.TestId;
@@ -44,12 +43,12 @@ public class TestingApiTest {
   private static final Object THREAD_ID = "<dummy>";
 
   private static class TestInterceptor implements LogInterceptor {
-    private final HashMap<String, Level> attached = new HashMap<>();
+    private final HashMap<String, LevelClass> attached = new HashMap<>();
     private Consumer<LogEntry> logCollector = null;
 
     @Override
     public Recorder attachTo(
-        String loggerName, Level level, Consumer<LogEntry> collector, String testId) {
+        String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
       if (logCollector == null) {
         logCollector = checkNotNull(collector);
       }
@@ -67,7 +66,7 @@ public class TestingApiTest {
   }
 
   private static class FooApi extends TestingApi<FooApi> {
-    protected FooApi(Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
+    protected FooApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
       super(levelMap, interceptor);
     }
 
@@ -79,13 +78,13 @@ public class TestingApiTest {
 
   @Test
   public void testApiInstall() {
-    ImmutableMap<String, Level> levelMap = ImmutableMap.of("foo", Level.INFO, "bar", Level.WARNING);
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("foo", INFO, "bar", INFO);
     TestInterceptor interceptor = new TestInterceptor();
     FooApi logs = new FooApi(levelMap, interceptor);
 
     // Loggers are attached only while the API hook is active.
     assertThat(interceptor.attached).isEmpty();
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       assertThat(interceptor.attached).isEqualTo(levelMap);
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.
@@ -95,10 +94,16 @@ public class TestingApiTest {
     assertThat(interceptor.attached).isEmpty();
 
     logs.assertLogs().matchCount().isEqualTo(4);
-    logs.assertLog(0).hasMessageContaining("attach: foo");
-    logs.assertLog(1).hasMessageContaining("attach: bar");
-    logs.assertLog(2).hasMessageContaining("detach: foo");
-    logs.assertLog(3).hasMessageContaining("detach: bar");
+    LogEntry fooAttach = logs.assertLogs().withMessageContaining("attach: foo").getOnlyMatch();
+    LogEntry barAttach = logs.assertLogs().withMessageContaining("attach: bar").getOnlyMatch();
+    logs.assertLogs(after(fooAttach))
+        .withMessageContaining("detach: foo")
+        .matchCount()
+        .isEqualTo(1);
+    logs.assertLogs(after(barAttach))
+        .withMessageContaining("detach: bar")
+        .matchCount()
+        .isEqualTo(1);
   }
 
   // Not static since we want to test inner class names.
@@ -132,8 +137,9 @@ public class TestingApiTest {
   public void testAssertLogs_basicApi() {
     TestInterceptor interceptor = new TestInterceptor();
     // Level map must have at least one entry to cause the injector to be attached.
-    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+    FooApi logs = new FooApi(levelMap, interceptor);
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Remember that (for now) the test API also "logs" something when it's attached.
       interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
@@ -151,8 +157,9 @@ public class TestingApiTest {
   public void testAssertLogs_failureMessages() {
     TestInterceptor interceptor = new TestInterceptor();
     // Level map must have at least one entry to cause the injector to be attached.
-    FooApi logs = new FooApi(ImmutableMap.of("<anything>", Level.INFO), interceptor);
-    try (var unused = logs.install(/* useTestId= */ true)) {
+    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+    FooApi logs = new FooApi(levelMap, interceptor);
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Remember that (for now) the test API also "logs" something when it's attached.
       interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
