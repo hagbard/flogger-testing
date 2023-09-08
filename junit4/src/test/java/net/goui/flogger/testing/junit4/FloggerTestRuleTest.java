@@ -10,22 +10,24 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.junit4;
 
+import static net.goui.flogger.testing.LevelClass.FINE;
+import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.WARNING;
-import static net.goui.flogger.testing.junit4.FloggerTestRule.guessClassUnderTest;
-import static net.goui.flogger.testing.junit4.FloggerTestRule.guessPackageUnderTest;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.truth.Truth;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.SetLogLevel;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -45,15 +47,21 @@ import org.junit.runners.model.Statement;
 public class FloggerTestRuleTest {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  @Rule(order = 1) public ExpectTestFailureRule failureRule = new ExpectTestFailureRule();
+  @Rule(order = 1)
+  public ExpectTestFailureRule failureRule = new ExpectTestFailureRule();
 
   @Rule(order = 2)
-  public final FloggerTestRule logs =
-      FloggerTestRule.forClass(FloggerTestRuleTest.class, Level.FINE);
+  public final FloggerTestRule logs = FloggerTestRule.forClass(FloggerTestRuleTest.class, INFO);
+
+  @BeforeClass
+  public static void enableInfoLogs() {
+    Logger.getLogger(FloggerTestRuleTest.class.getName()).setLevel(Level.INFO);
+  }
 
   @Test
   public void testBasicApi() {
     logger.atInfo().log("Foo");
+    logger.atFine().log("Ignored");
     logger.atInfo().log("Bar");
     logger.atWarning().withCause(new IllegalArgumentException()).log("Baz");
 
@@ -61,8 +69,23 @@ public class FloggerTestRuleTest {
     assertThat(warn).hasMessageContaining("Baz");
 
     var logsBeforeWarn = logs.assertLogs(before(warn));
+    // Match count is 2 because we are not logging at level FINE in this test.
     logsBeforeWarn.matchCount().isEqualTo(2);
     logsBeforeWarn.never().haveCause();
+  }
+
+  @Test
+  @SetLogLevel(target = FloggerTestRuleTest.class, level = FINE)
+  public void testExtraLogLevel() {
+    logger.atInfo().log("Foo");
+    logger.atFine().log("Not Ignored");
+    logger.atFinest().log("Ignored");
+    logger.atWarning().log("Bar");
+
+    logs.assertLogs().matchCount().isEqualTo(3);
+    logs.assertLogs().withLevelLessThan(FINE).doNotOccur();
+    LogEntry fine = logs.assertLogs().withLevel(FINE).getOnlyMatch();
+    assertThat(fine).message().isEqualTo("Not Ignored");
   }
 
   @Test
@@ -74,21 +97,6 @@ public class FloggerTestRuleTest {
     logs.assertLog(0).hasMessageContaining("Foo");
     logs.assertLog(1).hasMessageContaining("Bar");
     assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
-  }
-
-  @Test
-  public void testGuessClassUnderTest() {
-    // a.b.XxxTest.class --> "a.b.Xxx"
-    Truth.assertThat(guessClassUnderTest(FloggerTestRuleTest.class))
-        .isEqualTo(FloggerTestRule.class.getName());
-    assertThrows(IllegalArgumentException.class, () -> guessClassUnderTest(String.class));
-  }
-
-  @Test
-  public void testGuessPackageUnderTest() {
-    // a.b.XxxTest.class --> "a.b"
-    Truth.assertThat(guessPackageUnderTest(FloggerTestRuleTest.class))
-        .isEqualTo(getClass().getPackage().getName());
   }
 
   @Test

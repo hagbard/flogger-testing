@@ -11,11 +11,12 @@
 package net.goui.flogger.testing.jdk;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.logging.Level.INFO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
@@ -29,7 +30,7 @@ public class JdkInterceptorTest {
 
   private static Logger logger(String name) {
     Logger logger = Logger.getLogger(name);
-    logger.setLevel(INFO);
+    logger.setLevel(Level.INFO);
     return logger;
   }
 
@@ -42,7 +43,8 @@ public class JdkInterceptorTest {
 
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder =
+        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
       assertThat(logged).isEmpty();
       jdkLogger.info("Log message");
       childLogger.info("Child message");
@@ -62,7 +64,8 @@ public class JdkInterceptorTest {
     Logger jdkLogger = logger("foo.bar.Baz");
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder =
+        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
       jdkLogger.warning("Message [CONTEXT foo=true ]");
       jdkLogger.warning("Message [CONTEXT bar=1234 ]");
       jdkLogger.warning("Message [CONTEXT bar=1.23e6 ]");
@@ -82,7 +85,8 @@ public class JdkInterceptorTest {
     Logger jdkLogger = logger("foo.bar.Baz");
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder =
+        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
       jdkLogger.warning(
           "Message [CONTEXT foo=true foo=1234 foo=1.23e6 foo=\"\\tline1\\n\\t\\\"line2\\\"\" ]");
 
@@ -97,7 +101,8 @@ public class JdkInterceptorTest {
 
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder =
+        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
       assertThat(logged).isEmpty();
       jdkLogger.info("No test ID");
       jdkLogger.info("Valid test ID [CONTEXT test_id=\"" + TEST_ID + "\" ]");

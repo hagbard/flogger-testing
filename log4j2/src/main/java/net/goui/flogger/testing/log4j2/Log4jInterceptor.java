@@ -39,11 +39,6 @@ import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
 /** Log interceptor for Log4J2 logging. */
 public final class Log4jInterceptor implements LogInterceptor {
-  private static final int JDK_SEVERE_VALUE = java.util.logging.Level.SEVERE.intValue();
-  private static final int JDK_WARNING_VALUE = java.util.logging.Level.WARNING.intValue();
-  private static final int JDK_INFO_VALUE = java.util.logging.Level.INFO.intValue();
-  private static final int JDK_FINE_VALUE = java.util.logging.Level.FINE.intValue();
-
   @AutoService(LogInterceptor.Factory.class)
   public static final class Factory extends AbstractLogInterceptorFactory {
     @Override
@@ -78,13 +73,10 @@ public final class Log4jInterceptor implements LogInterceptor {
 
   @Override
   public Recorder attachTo(
-      String loggerName,
-      java.util.logging.Level jdkLevel,
-      Consumer<LogEntry> collector,
-      String testId) {
+      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
     // WARNING: Log4J is unintuitive with log level ordering (compared to JDK). A "high" level means
     // high verbosity (i.e. what most people call "low level logging").
-    Level log4JLevel = toLog4JLevel(jdkLevel);
+    Level log4JLevel = toLog4JLevel(level);
     LevelRangeFilter specifiedLevelAndAbove =
         LevelRangeFilter.createFilter(
             /* minLevel (null ==> max) */ null,
@@ -207,12 +199,20 @@ public final class Log4jInterceptor implements LogInterceptor {
     return LevelClass.FINEST;
   }
 
-  private static org.apache.logging.log4j.Level toLog4JLevel(java.util.logging.Level level) {
-    int jdkLevelValue = level.intValue();
-    if (jdkLevelValue >= JDK_SEVERE_VALUE) return Level.ERROR;
-    if (jdkLevelValue >= JDK_WARNING_VALUE) return Level.WARN;
-    if (jdkLevelValue >= JDK_INFO_VALUE) return Level.INFO;
-    if (jdkLevelValue >= JDK_FINE_VALUE) return Level.DEBUG;
-    return org.apache.logging.log4j.Level.TRACE;
+  private static Level toLog4JLevel(LevelClass level) {
+    switch (level) {
+      case FINEST:
+        return Level.TRACE;
+      case FINE:
+        return Level.DEBUG;
+      case INFO:
+        return Level.INFO;
+      case WARNING:
+        return Level.WARN;
+      case SEVERE:
+        return Level.ERROR;
+      default:
+        throw new AssertionError("unknown level: " + level);
+    }
   }
 }
