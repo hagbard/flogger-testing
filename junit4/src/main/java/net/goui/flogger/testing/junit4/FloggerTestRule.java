@@ -10,11 +10,14 @@
 
 package net.goui.flogger.testing.junit4;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,7 +33,7 @@ import org.junit.runners.model.Statement;
  *
  * <pre>{@code
  * @Rule
- * FloggerTestRule logs = FloggerTestRule.forClaóssUnderTest(INFO);
+ * FloggerTestRule logs = FloggerTestRule.forClassUnderTest(INFO);
  * }</pre>
  *
  * <p>The test rule listed above will ensure that {@code INFO} logs (and above) are enabled, and
@@ -41,15 +44,14 @@ import org.junit.runners.model.Statement;
  * Level)}.
  */
 public final class FloggerTestRule extends TestingApi<FloggerTestRule> implements TestRule {
-
   public static FloggerTestRule forClassUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-    return forClass(caller, level);
+    return forClassOrPackage(guessClassUnderTest(caller), level);
   }
 
   public static FloggerTestRule forPackageUnderTest(Level level) {
     Class<?> caller = StackWalker.getInstance(RETAIN_CLASS_REFERENCE).getCallerClass();
-    return forPackage(caller.getPackage(), level);
+    return forClassOrPackage(guessPackageUnderTest(caller), level);
   }
 
   public static FloggerTestRule forClass(Class<?> clazz, Level level) {
@@ -71,6 +73,29 @@ public final class FloggerTestRule extends TestingApi<FloggerTestRule> implement
   public static FloggerTestRule create(
       Map<String, ? extends Level> levelMap, @Nullable LogInterceptor interceptor) {
     return new FloggerTestRule(levelMap, interceptor);
+  }
+
+  // Matches an expected text class name and captures the assumed class-under-test.
+  private static final Pattern EXPECTED_TEST_CLASS_NAME =
+      Pattern.compile("((?:[^.]+\\.)*[^.]+)Test");
+
+  static String guessClassUnderTest(Class<?> caller) {
+    String testClassName = caller.getName();
+    Matcher matcher = EXPECTED_TEST_CLASS_NAME.matcher(testClassName);
+    checkArgument(
+        matcher.matches(),
+        "Cannot infer class-under-test (test classes must be named 'XxxTest'): %s",
+        testClassName);
+    return matcher.group(1);
+  }
+
+  static String guessPackageUnderTest(Class<?> caller) {
+    String packageName = caller.getPackage().getName();
+    checkArgument(
+        !packageName.isEmpty(),
+        "Cannot infer package-under-test (test classes must not be in the root package): %s",
+        caller.getName());
+    return packageName;
   }
 
   private FloggerTestRule(

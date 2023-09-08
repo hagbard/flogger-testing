@@ -54,7 +54,7 @@ public final class Log4jInterceptor implements LogInterceptor {
     @Override
     protected void configureUnderlyingLoggerForInfoLogging(String loggerName) {
       Logger underlyingLogger = (Logger) LogManager.getLogger(loggerName);
-      Configurator.setLevel(underlyingLogger, Level.INFO);
+      Configurator.setLevel(underlyingLogger.getName(), Level.INFO);
       underlyingLogger.setAdditive(false);
     }
   }

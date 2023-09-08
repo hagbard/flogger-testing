@@ -1,14 +1,16 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
 
- This program and the accompanying materials are made available under the terms of the
- Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
- Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
 
- SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 package net.goui.flogger.testing.truth;
+
+import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
@@ -21,8 +23,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
-
-import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
 
 /** Logs testing API for making assertions about every item in a sequence of matched log entries. */
 public final class MatchedLogsSubject extends Subject {
@@ -123,7 +123,8 @@ public final class MatchedLogsSubject extends Subject {
   /** Asserts that matched log entries have a cause of the specified type. */
   public void haveCause(Class<? extends Throwable> clazz) {
     if (!op.test(logs.stream(), e -> clazz.isInstance(e.cause()))) {
-      failWithActual(label + " matched logs were expected to have a cause of type", clazz.getName());
+      failWithActual(
+          label + " matched logs were expected to have a cause of type", clazz.getName());
     }
   }
 
