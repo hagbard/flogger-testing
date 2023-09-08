@@ -10,23 +10,18 @@
 
 package net.goui.flogger.testing.junit5;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.goui.flogger.testing.LevelClass;
+import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.LogInterceptor;
-import net.goui.flogger.testing.api.SetLogLevel;
 import net.goui.flogger.testing.api.TestingApi;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -70,25 +65,6 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
   private static final Pattern EXPECTED_TEST_CLASS_NAME =
       Pattern.compile("((?:[^.]+\\.)*[^.]+)Test");
 
-  static String guessClassUnderTest(Class<?> caller) {
-    String testClassName = caller.getName();
-    Matcher matcher = EXPECTED_TEST_CLASS_NAME.matcher(testClassName);
-    checkArgument(
-        matcher.matches(),
-        "Cannot infer class-under-test (class name should be XxxTest): %s",
-        testClassName);
-    return matcher.group(1);
-  }
-
-  static String guessPackageUnderTest(Class<?> caller) {
-    String packageName = caller.getPackage().getName();
-    checkArgument(
-        !packageName.isEmpty(),
-        "Cannot infer package-under-test (test classes must not be in the root package): %s",
-        caller.getName());
-    return packageName;
-  }
-
   private FloggerTestExtension(
       Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     super(levelMap, interceptor);
@@ -105,7 +81,8 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
   public void beforeEach(ExtensionContext extensionContext) {
     ImmutableMap<String, LevelClass> extraLogLevels =
         getLevelMap(
-            Arrays.stream(extensionContext.getTestMethod().get().getAnnotations())
+            extensionContext.getTestClass().orElseThrow(),
+            Arrays.stream(extensionContext.getTestMethod().orElseThrow().getAnnotations())
                 .filter(SetLogLevel.class::isInstance)
                 .map(SetLogLevel.class::cast)
                 .collect(toImmutableList()));
@@ -121,33 +98,5 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
     if (hook != null) {
       hook.close();
     }
-  }
-
-  // Approximate matcher to package names in Java:
-  // Avoids bare class names, allows nested and inner classes (with '$').
-  private static final Pattern PACKAGE_OR_CLASS_NAME =
-      Pattern.compile("(?:[A-Z0-9_$]+\\.)+[A-Z0-9_$]+", CASE_INSENSITIVE);
-
-  private static ImmutableMap<String, LevelClass> getLevelMap(ImmutableList<SetLogLevel> levels) {
-    if (levels.isEmpty()) {
-      return ImmutableMap.of();
-    }
-    ImmutableMap.Builder<String, LevelClass> builder = ImmutableMap.builder();
-    for (SetLogLevel e : levels) {
-      String targetName;
-      if (e.target() != Object.class) {
-        checkArgument(e.name().isEmpty(), "specify only one of 'target' or 'name': %s", e);
-        targetName = e.target().getName();
-      } else {
-        checkArgument(!e.name().isEmpty(), "specify either 'target' or 'name': %s", e);
-        targetName = e.name();
-      }
-      checkArgument(
-          PACKAGE_OR_CLASS_NAME.matcher(targetName).matches(),
-          "invalid target class or name (expected xxx.yyy.Zzz): %s",
-          targetName);
-      builder.put(targetName.replace('$', '.'), e.level());
-    }
-    return builder.buildOrThrow();
   }
 }

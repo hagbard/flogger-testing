@@ -13,14 +13,11 @@ package net.goui.flogger.testing.junit4;
 import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.WARNING;
-import static net.goui.flogger.testing.junit4.FloggerTestRule.guessClassUnderTest;
-import static net.goui.flogger.testing.junit4.FloggerTestRule.guessPackageUnderTest;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.truth.Truth;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,7 +25,7 @@ import java.lang.annotation.Target;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.goui.flogger.testing.LogEntry;
-import net.goui.flogger.testing.api.SetLogLevel;
+import net.goui.flogger.testing.SetLogLevel;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -100,21 +97,6 @@ public class FloggerTestRuleTest {
     logs.assertLog(0).hasMessageContaining("Foo");
     logs.assertLog(1).hasMessageContaining("Bar");
     assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
-  }
-
-  @Test
-  public void testGuessClassUnderTest() {
-    // a.b.XxxTest.class --> "a.b.Xxx"
-    Truth.assertThat(guessClassUnderTest(FloggerTestRuleTest.class))
-        .isEqualTo(FloggerTestRule.class.getName());
-    assertThrows(IllegalArgumentException.class, () -> guessClassUnderTest(String.class));
-  }
-
-  @Test
-  public void testGuessPackageUnderTest() {
-    // a.b.XxxTest.class --> "a.b"
-    Truth.assertThat(guessPackageUnderTest(FloggerTestRuleTest.class))
-        .isEqualTo(getClass().getPackage().getName());
   }
 
   @Test

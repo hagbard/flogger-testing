@@ -12,15 +12,24 @@ package net.goui.flogger.testing.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
+import static net.goui.flogger.testing.LevelClass.SEVERE;
 import static net.goui.flogger.testing.LevelClass.WARNING;
+import static net.goui.flogger.testing.SetLogLevel.Scope.CLASS_UNDER_TEST;
+import static net.goui.flogger.testing.SetLogLevel.Scope.PACKAGE_UNDER_TEST;
+import static net.goui.flogger.testing.api.TestingApi.getLevelMap;
+import static net.goui.flogger.testing.api.TestingApi.guessClassUnderTest;
+import static net.goui.flogger.testing.api.TestingApi.guessPackageUnderTest;
 import static net.goui.flogger.testing.truth.LogMatcher.after;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.context.Tags;
+import com.google.common.truth.Truth;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +39,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
+import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.TestingApi.TestId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
@@ -178,6 +188,68 @@ public class TestingApiTest {
           "logs.withLevel(INFO).never()",
           "no matched logs were expected to contain");
     }
+  }
+
+  @Test
+  public void testGuessClassUnderTest() {
+    // a.b.XxxTest.class --> "a.b.Xxx"
+    assertThat(guessClassUnderTest(TestingApiTest.class)).isEqualTo(TestingApi.class.getName());
+    assertThrows(IllegalArgumentException.class, () -> guessClassUnderTest(String.class));
+  }
+
+  @Test
+  public void testGuessPackageUnderTest() {
+    // a.b.XxxTest.class --> "a.b"
+    Truth.assertThat(guessPackageUnderTest(TestingApiTest.class))
+        .isEqualTo(getClass().getPackage().getName());
+  }
+
+  @Test
+  public void testGetLevelMap() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    ImmutableMap<String, LevelClass> levelMap =
+        getLevelMap(
+            testClass,
+            ImmutableList.of(
+                TestSetLogLevel.of(testClass, SEVERE),
+                TestSetLogLevel.of("foo.bar", WARNING),
+                TestSetLogLevel.of(PACKAGE_UNDER_TEST, INFO),
+                TestSetLogLevel.of(CLASS_UNDER_TEST, FINE)));
+    assertThat(levelMap).containsEntry(testClass.getName(), SEVERE);
+    assertThat(levelMap).containsEntry("foo.bar", WARNING);
+    assertThat(levelMap).containsEntry(testClass.getPackage().getName(), INFO);
+    assertThat(levelMap).containsEntry(TestingApi.class.getName(), FINE);
+  }
+
+  @Test
+  public void testGetLevelMap_duplicateTarget() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            getLevelMap(
+                testClass,
+                ImmutableList.of(
+                    TestSetLogLevel.of(TestingApi.class, SEVERE),
+                    TestSetLogLevel.of(CLASS_UNDER_TEST, FINE))));
+  }
+
+  @Test
+  public void testGetLevelMap_badName() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    SetLogLevel badAnnotation = TestSetLogLevel.of("ClassOnly", INFO);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> getLevelMap(testClass, ImmutableList.of(badAnnotation)));
+  }
+
+  @Test
+  public void testGetLevelMap_badAnnotation() {
+    Class<TestingApiTest> testClass = TestingApiTest.class;
+    SetLogLevel badAnnotation = TestSetLogLevel.of(testClass, "foo.Class", null, INFO);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> getLevelMap(testClass, ImmutableList.of(badAnnotation)));
   }
 
   private static void assertFailureContains(ThrowingRunnable fn, String... fragments) {

@@ -65,7 +65,7 @@ logs.assertLogs().withMessageContaining("Expected log message").matchCount().isA
 <!-- @formatter:off -->
 ```java
 var debugStart = logs.assertLogs()
-    .withMessageContaining("Start debug")
+    .withMessageContaining("Start Task", "[DEBUG]")
     .withMetadata("debug_id", TEST_ID)
     .getOnlyMatch();
 assertLogs(after(debugStart).inSameThread()).always().haveMetadata("debug_id", TEST_ID);
@@ -107,7 +107,7 @@ logs.
 Good logs testing ends up being a combination of several "best practice" principles, and those
 principles need to be supported properly in a good logs testing API:
 
-### Principle: Test only the logs you care about.
+### Principle: Test the logs you care about.
 
 In order to test logs at all, you need to know which logs are in scope for testing.
 Typically, but not always, these are the logs created by the code-under-test.
@@ -166,6 +166,22 @@ logs.assertLogs(isSameThreadAs(otherEntry))...
 ```
 <!-- @formatter:on -->
 
+#### Automatic bypassing of rate limited logs 
+
+When you set up a test fixture for logs capture, such as `FloggerTestRule` or 
+`FloggerTestExtension`, the test library automatically "forces" log statements at the requested 
+levels. Forced log statements bypass any rate-limiting checks and are guaranteed to appear in 
+test logs.
+
+<!-- @formatter:off -->
+```java
+// Log statements at INFO and above for the class-under-test will always be emitted, even if 
+// they are rate limited (e.g. via 'atMostEvery(...)' or 'every(...)'). All captured logs at
+// or above INFO will have the additional "force=true" metadata key-value pair.
+public final FloggerTestExtension logs = FloggerTestExtension.forClassUnderTest(INFO);
+```
+<!-- @formatter:on -->
+
 ### Principle: Don't over-test logging.
 
 While it's tempting to test for the exact contents of a log statement (after all, you can just
@@ -214,6 +230,37 @@ assertLogged(
     DEBUG_ID)...
 ```
 <!-- @formatter:on -->
+
+#### Annotations to control log level during tests
+
+If you want to ensure that "fine" logs are being testing but don't want to have to deal with 
+their output in every test, use the `@SetLogLevel` annotation on test methods to add additional 
+logging for selected tests:
+
+<!-- @formatter:off -->
+```java
+// Sets the default logging level for most tests.
+@Rule public final FloggerTestRule logs = FloggerTestRule.forClassUnderTest(INFO);
+
+@Test
+public void testNormalLogging() {
+  // Only normal logging is captured in this test.
+  runCodeUnderTest(...);
+}
+
+@Test
+@SetLogLevel(scope = CLASS_UNDER_TEST, level = FINE)
+public void testDebugLogging() {
+  // Debug logging is captured in this test.
+  runCodeUnderTest(...);
+}
+```
+<!-- @formatter:on -->
+
+> **Note:**
+> Even though different tests are producing different output, the use of Flogger's "scoped 
+> logging contexts" and a unique metadata ID per tests means that it's perfectly safe to run these 
+> tests in parallel.
 
 ### Principle: Test that unwanted logs do not occur.
 
