@@ -203,7 +203,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    *
    * <p>This method is provided for cases where exact log ordering is very well-defined, and
    * essential for correct testing. In general however, it is often better to use {@link
-   * LogsSubject} via {@link #TestingApi#assertLogs(LogMatcher...) assertLogs()} to identify
+   * LogsSubject} via {@link TestingApi#assertLogs(LogMatcher...) assertLogs()} to identify
    * expected log statements, regardless of their exact index.
    *
    * <p>Instead of writing a test like:
