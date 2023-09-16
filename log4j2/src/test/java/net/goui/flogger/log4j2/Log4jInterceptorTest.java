@@ -14,12 +14,15 @@ import static com.google.common.flogger.LogContext.Key.TAGS;
 import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
+import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.context.Tags;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.truth.Truth;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.SetLogLevel;
@@ -31,6 +34,7 @@ import net.goui.flogger.testing.log4j2.Log4jInterceptor;
 import net.goui.flogger.testing.truth.LogSubject;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Rule;
@@ -109,7 +113,7 @@ public class Log4jInterceptorTest {
   }
 
   @Test
-  public void testTestIdFiltering() {
+  public void testIdFiltering() {
     Logger logger = logger("foo.bar.Baz");
 
     LogInterceptor interceptor = Log4jInterceptor.create();
@@ -125,6 +129,35 @@ public class Log4jInterceptorTest {
       assertThat(logged.get(0).message()).isEqualTo("No test ID");
       assertThat(logged.get(1).message()).isEqualTo("Valid test ID");
       assertThat(logged.get(2).message()).isEqualTo("Multiple test IDs");
+    }
+  }
+
+  @Test
+  public void testWithMdc() {
+    Logger logger = logger("foo.bar.Baz");
+
+    // MDC values set before the interceptor is added must be captured.
+    ThreadContext.put("first", "value");
+
+    LogInterceptor interceptor = Log4jInterceptor.create();
+    List<LogEntry> logged = new ArrayList<>();
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+      logger.info("With one MDC");
+
+      // And values added between log statements must be captured.
+      ThreadContext.put("second", "other");
+      logger.info("With two MDC");
+
+      assertThat(logged).hasSize(2);
+      assertThat(logged.get(0)).hasMessageContaining("one", "MDC");
+      assertThat(logged.get(0)).hasMetadata("first", "value");
+      // Special case assertions go directly to the log entry.
+      assertThat(logged.get(0).metadata()).hasSize(1);
+
+      assertThat(logged.get(1)).hasMessageContaining("two", "MDC");
+      assertThat(logged.get(1)).hasMetadata("first", "value");
+      assertThat(logged.get(1)).hasMetadata("second", "other");
+      assertThat(logged.get(1).metadata()).hasSize(2);
     }
   }
 
@@ -152,6 +185,6 @@ public class Log4jInterceptorTest {
     logs.assertLogs().matchCount().isEqualTo(3);
     logs.assertLogs().withLevelLessThan(FINE).doNotOccur();
     LogEntry fine = logs.assertLogs().withLevel(FINE).getOnlyMatch();
-    LogSubject.assertThat(fine).message().isEqualTo("Not Ignored");
+    assertThat(fine).message().isEqualTo("Not Ignored");
   }
 }

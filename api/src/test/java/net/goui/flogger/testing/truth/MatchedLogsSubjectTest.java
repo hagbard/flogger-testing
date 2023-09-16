@@ -11,7 +11,11 @@
 package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static net.goui.flogger.testing.LevelClass.*;
+import static net.goui.flogger.testing.LevelClass.FINE;
+import static net.goui.flogger.testing.LevelClass.FINEST;
+import static net.goui.flogger.testing.LevelClass.INFO;
+import static net.goui.flogger.testing.LevelClass.SEVERE;
+import static net.goui.flogger.testing.LevelClass.WARNING;
 import static net.goui.flogger.testing.truth.MatchedLogsSubject.allMatchedLogs;
 import static net.goui.flogger.testing.truth.MatchedLogsSubject.noMatchedLogs;
 import static org.junit.Assert.assertThrows;

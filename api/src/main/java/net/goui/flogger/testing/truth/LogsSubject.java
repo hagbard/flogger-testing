@@ -17,7 +17,8 @@ import static com.google.common.truth.Truth.assertAbout;
 import static java.util.stream.Collectors.joining;
 import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
 import static net.goui.flogger.testing.truth.LogFilters.joinFragments;
-import static net.goui.flogger.testing.truth.MatchedLogsSubject.*;
+import static net.goui.flogger.testing.truth.MatchedLogsSubject.allMatchedLogs;
+import static net.goui.flogger.testing.truth.MatchedLogsSubject.noMatchedLogs;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Fact;
