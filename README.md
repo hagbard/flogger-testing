@@ -225,7 +225,7 @@ assertLogged(
     String.format("[INFO] Debug start (timestamp=%s) user-ID='%s' [CONTEXT debug_id=%s ]",
     FAKE_TIMESTAMP,
     TEST_USER_ID,
-    DEBUG_ID)...
+    DEBUG_ID);
 ```
 <!-- @formatter:on -->
 
@@ -242,7 +242,7 @@ logging for selected tests:
 
 @Test
 public void testNormalLogging() {
-  // Only normal logging is captured in this test.
+  // Only "normal" logging is captured in this test.
   runCodeUnderTest(...);
 }
 
