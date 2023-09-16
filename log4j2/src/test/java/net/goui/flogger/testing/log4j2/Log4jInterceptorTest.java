@@ -1,37 +1,28 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
 
- This program and the accompanying materials are made available under the terms of the
- Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
- Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
 
- SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-package net.goui.flogger.log4j2;
+package net.goui.flogger.testing.log4j2;
 
-import static com.google.common.flogger.LogContext.Key.TAGS;
 import static com.google.common.truth.Truth.assertThat;
-import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.context.Tags;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.truth.Truth;
-import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
-import net.goui.flogger.testing.SetLogLevel;
+import net.goui.flogger.testing.api.FloggerBinding;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
-import net.goui.flogger.testing.api.LogInterceptor.Support;
 import net.goui.flogger.testing.junit4.FloggerTestRule;
-import net.goui.flogger.testing.log4j2.Log4jInterceptor;
-import net.goui.flogger.testing.truth.LogSubject;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.ThreadContext;
@@ -46,8 +37,6 @@ import org.junit.runners.JUnit4;
 public class Log4jInterceptorTest {
   private static final String TEST_ID = "Test ID";
 
-  private static final FluentLogger flogger = FluentLogger.forEnclosingClass();
-
   @Rule
   public final FloggerTestRule logs =
       FloggerTestRule.create(
@@ -59,11 +48,6 @@ public class Log4jInterceptorTest {
     // is added. We assume that in testing users are not using loggers with transient state set.
     Configurator.setLevel(logger.getName(), Level.INFO);
     return logger;
-  }
-
-  @Test
-  public void testFactory_fullSupport() {
-    assertThat(new Log4jInterceptor.Factory().getSupportLevel()).isEqualTo(Support.FULL);
   }
 
   @Test
@@ -159,32 +143,5 @@ public class Log4jInterceptorTest {
       assertThat(logged.get(1)).hasMetadata("second", "other");
       assertThat(logged.get(1).metadata()).hasSize(2);
     }
-  }
-
-  @Test
-  public void testWithFlogger() {
-    flogger.atWarning().withCause(new IllegalStateException("Oopsie!")).log("Warning: Badness");
-    flogger.atInfo().with(TAGS, Tags.of("foo", "bar")).log("Hello World");
-    flogger.atFine().log("Ignore me!");
-
-    logs.assertLogs().matchCount().isEqualTo(2);
-    logs.assertLog(0).hasMessageContaining("Badness");
-    logs.assertLog(0).hasCause(IllegalStateException.class);
-    logs.assertLog(1).hasMessageContaining("Hello");
-    logs.assertLog(1).hasMetadata("foo", "bar");
-  }
-
-  @Test
-  @SetLogLevel(target = Log4jInterceptorTest.class, level = LevelClass.FINE)
-  public void testSetLogLevel() {
-    flogger.atInfo().log("Foo");
-    flogger.atFine().log("Not Ignored");
-    flogger.atFinest().log("Ignored");
-    flogger.atWarning().log("Bar");
-
-    logs.assertLogs().matchCount().isEqualTo(3);
-    logs.assertLogs().withLevelLessThan(FINE).doNotOccur();
-    LogEntry fine = logs.assertLogs().withLevel(FINE).getOnlyMatch();
-    assertThat(fine).message().isEqualTo("Not Ignored");
   }
 }

@@ -11,13 +11,13 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 package net.goui.flogger.testing.api;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,12 +90,6 @@ public final class DefaultFormatMetadataParser {
           // Give up and just use the value as a string (not ideal, but it retains useful debug
           // information at least).
           foundProblems = true;
-          Lazy.logger
-              .atFine()
-              .log(
-                  "Failed to parse metadata value '%s' from log message\n"
-                      + "It was expected to be one of boolean, long or double",
-                  value);
           value = valueString;
         }
       }
@@ -114,9 +108,6 @@ public final class DefaultFormatMetadataParser {
     do {
       if (end == lastIndex) {
         foundProblems = true;
-        Lazy.logger
-            .atFine()
-            .log("Unexpected trailing backslash found in value string: %s", valueString);
         // This still adds the final chunk (with the trailing backslash in).
         break;
       }
@@ -128,10 +119,6 @@ public final class DefaultFormatMetadataParser {
         buf.append("\\\"\n\r\t".charAt(i));
       } else {
         foundProblems = true;
-        Lazy.logger
-            .atFine()
-            .log(
-                "Unexpected escaped character '\\%c' in metadata value string: %s", c, valueString);
         buf.append(c);
       }
       start = end + 2;
@@ -139,18 +126,15 @@ public final class DefaultFormatMetadataParser {
     } while (end != -1);
     String unescaped = buf.append(jsonString, start, jsonString.length()).toString();
     if (foundProblems) {
-      Lazy.logger
-          .atWarning()
-          .log(
-              "Problems found while parsing metadata value string: '%s'\n"
-                  + "Unescaped value '%s' may not be accurate and could affect test results."
-                  + "To debug further, enable FINE logging for class: %s",
-              valueString, unescaped, MetadataExtractor.class.getName());
+      Logger.getLogger(DefaultFormatMetadataParser.class.getName())
+          .warning(
+              "Problems found while parsing metadata value string: '"
+                  + valueString
+                  + "'\n"
+                  + "Unescaped value '"
+                  + unescaped
+                  + "' may not be accurate and could affect test results.");
     }
     return unescaped;
-  }
-
-  private static final class Lazy {
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   }
 }
