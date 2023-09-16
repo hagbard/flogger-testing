@@ -11,7 +11,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 package net.goui.flogger.testing.api;
 
 import com.google.common.flogger.FluentLogger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import net.goui.flogger.testing.api.LogInterceptor.Factory;
 import net.goui.flogger.testing.jdk.JdkInterceptor;

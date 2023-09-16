@@ -10,7 +10,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.api;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.flogger.StackSize.MEDIUM;
 import static com.google.common.truth.StreamSubject.streams;
 import static java.util.concurrent.TimeUnit.SECONDS;

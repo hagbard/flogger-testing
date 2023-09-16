@@ -11,7 +11,9 @@
 package net.goui.flogger.testing.jdk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.common.flogger.backend.system.AbstractLogRecord;
 import java.time.Instant;
