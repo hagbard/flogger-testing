@@ -1,22 +1,17 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
+Copyright (c) 2023, David Beaumont (https://github.com/hagbard).
 
- This program and the accompanying materials are made available under the terms of the
- Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
- Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v. 2.0 available at https://www.eclipse.org/legal/epl-2.0, or the
+Apache License, Version 2.0 available at https://www.apache.org/licenses/LICENSE-2.0.
 
- SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 package net.goui.flogger.testing.jdk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
-import com.google.common.flogger.backend.system.AbstractLogRecord;
-import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -26,14 +21,20 @@ import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.AbstractLogInterceptorFactory;
 import net.goui.flogger.testing.api.DefaultFormatMetadataParser;
+import net.goui.flogger.testing.api.FloggerBinding;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.MessageAndMetadata;
 import net.goui.flogger.testing.api.MetadataExtractor;
 
 /** Log interceptor for JDK logging. */
 public final class JdkInterceptor implements LogInterceptor {
+  private static final JdkInterceptor.Factory FACTORY = new JdkInterceptor.Factory();
 
-  public static class Factory extends AbstractLogInterceptorFactory {
+  public static AbstractLogInterceptorFactory getFactory() {
+    return FACTORY;
+  }
+
+  private static class Factory extends AbstractLogInterceptorFactory {
     @Override
     public LogInterceptor get() {
       return JdkInterceptor.create();
@@ -94,7 +95,7 @@ public final class JdkInterceptor implements LogInterceptor {
                 record.getSourceMethodName(),
                 level.getName(),
                 levelClassOf(level),
-                getBestTimestamp(record),
+                FloggerBinding.getBestTimestamp(record),
                 // Cannot use "getLongThreadId()" until supported JDK bumped to 16.
                 record.getThreadID(),
                 mm.message(),
@@ -122,20 +123,5 @@ public final class JdkInterceptor implements LogInterceptor {
     if (levelValue >= INFO_VALUE) return LevelClass.INFO;
     if (levelValue >= FINE_VALUE) return LevelClass.FINE;
     return LevelClass.FINEST;
-  }
-
-  private static Instant getBestTimestamp(LogRecord record) {
-    Instant bestTimestamp;
-    if (record instanceof AbstractLogRecord) {
-      long timestampNanos = ((AbstractLogRecord) record).getLogData().getTimestampNanos();
-      long seconds = NANOSECONDS.toSeconds(timestampNanos);
-      bestTimestamp = Instant.ofEpochSecond(seconds, timestampNanos - SECONDS.toNanos(seconds));
-    } else {
-      long timestampMillis = record.getMillis();
-      long seconds = MILLISECONDS.toSeconds(timestampMillis);
-      long millis = timestampMillis - SECONDS.toMillis(seconds);
-      bestTimestamp = Instant.ofEpochSecond(seconds, MILLISECONDS.toNanos(millis));
-    }
-    return bestTimestamp;
   }
 }
