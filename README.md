@@ -8,8 +8,9 @@ A powerful fluent API for testing Flogger log statements, and more.
 ```xml
 <dependency>
     <groupId>net.goui.flogger-testing</groupId>
-    <artifactId>junit4</artifactId>  <!-- or junit5 -->
+    <artifactId>junit4</artifactId>  <!-- or "junit5" -->
     <version>1.0.4</version>
+    <scope>test</scope>
 </dependency>
 ```
 <!-- @formatter:on -->
@@ -21,9 +22,36 @@ And if you are using `Log4J2`:
     <groupId>net.goui.flogger-testing</groupId>
     <artifactId>log4j</artifactId>
     <version>1.0.4</version>
+    <scope>test</scope>
 </dependency>
 ```
 <!-- @formatter:on -->
+
+> **Note**
+> While this API can be used without Flogger installed, and will provide most of the functionality
+> you need for good logs testing, it works much better when dealing with Flogger, and especially
+> with the use of logging contents to permit forced logging and other advanced features.
+
+As such it is recommended that you also install the following dependencies and start getting the
+best out of your debug logging.
+
+<!-- @formatter:off -->
+```xml
+<!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-xxx-backend -->
+<dependency>
+    <groupId>com.google.flogger</groupId>
+    <artifactId>flogger-xxx-backend</artifactId>  <!-- xxx = "log4j2" or "system" -->
+    <version>0.7.4</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
+<dependency>
+    <groupId>com.google.flogger</groupId>
+    <artifactId>flogger-grpc-context</artifactId>
+    <version>0.7.4</version>
+</dependency>
+```
+<!-- @formatter:on -->
+
 
 #### Easy to Setup
 
@@ -317,10 +345,10 @@ public final FloggerTestExtension logs =
 ```java
 @Test
 public void testSomeTask() {
-  // Assert that everything logged in this test has the expected metadata key. 
-  logs.verify(logs -> logs.always().haveMetadataKey("task_id"));
+  // Assert that everything logged in this test has the expected metadata. 
+  logs.verify(logs -> logs.always().haveMetadata("task_id", TASK_ID));
   
-  runTestTask("test_id", 0xF00B4D);
+  runTestTask(TASK_ID);
   
   logs.assertLogs(...);
   ...
