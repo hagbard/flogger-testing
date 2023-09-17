@@ -16,7 +16,12 @@ import static com.google.common.truth.Truth.assertAbout;
 import static net.goui.flogger.testing.truth.LogFilters.containsAllFragmentsInOrder;
 import static net.goui.flogger.testing.truth.LogFilters.joinFragments;
 
-import com.google.common.truth.*;
+import com.google.common.truth.ComparableSubject;
+import com.google.common.truth.Fact;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.StringSubject;
+import com.google.common.truth.Subject;
+import com.google.common.truth.ThrowableSubject;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;

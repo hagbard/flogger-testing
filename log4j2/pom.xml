@@ -18,26 +18,75 @@
     <parent>
         <groupId>net.goui.flogger-testing</groupId>
         <artifactId>flogger-testing</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
 
     <artifactId>log4j</artifactId>
     <name>Flogger Log4j2 Test Integration</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <url>${base.url}/${project.artifactId}</url>
+
+    <!-- Use separate profiles to test Log4J integration with and without a Flogger dependency. -->
+    <!-- Core functionality is still present even when logging directly (including Metadata). -->
+    <profiles>
+        <profile>
+            <id>withoutFlogger</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>withFlogger</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>test/main/flogger</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-log4j2-backend -->
+                <dependency>
+                    <groupId>com.google.flogger</groupId>
+                    <artifactId>flogger-log4j2-backend</artifactId>
+                    <version>0.7.4</version>
+                    <scope>test</scope>
+                </dependency>
+                <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
+                <dependency>
+                    <groupId>com.google.flogger</groupId>
+                    <artifactId>flogger-grpc-context</artifactId>
+                    <version>0.7.4</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
             <groupId>net.goui.flogger-testing</groupId>
             <artifactId>api</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>net.goui.flogger-testing</groupId>
-            <artifactId>junit4</artifactId>
-            <version>1.0.3</version>
-            <scope>test</scope>
+            <version>1.0.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -57,17 +106,11 @@
             <artifactId>guava</artifactId>
             <version>31.1-jre</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.auto.service/auto-service-annotations -->
+        <!-- https://mvnrepository.com/artifact/net.goui.flogger-testing/junit4 -->
         <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service-annotations</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-log4j2-backend -->
-        <dependency>
-            <groupId>com.google.flogger</groupId>
-            <artifactId>flogger-log4j2-backend</artifactId>
-            <version>0.7.4</version>
+            <groupId>net.goui.flogger-testing</groupId>
+            <artifactId>junit4</artifactId>
+            <version>1.0.4</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/junit/junit -->

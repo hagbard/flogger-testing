@@ -9,7 +9,7 @@ A powerful fluent API for testing Flogger log statements, and more.
 <dependency>
     <groupId>net.goui.flogger-testing</groupId>
     <artifactId>junit4</artifactId>  <!-- or junit5 -->
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 <!-- @formatter:on -->
@@ -20,7 +20,7 @@ And if you are using `Log4J2`:
 <dependency>
     <groupId>net.goui.flogger-testing</groupId>
     <artifactId>log4j</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 <!-- @formatter:on -->
@@ -225,7 +225,7 @@ assertLogged(
     String.format("[INFO] Debug start (timestamp=%s) user-ID='%s' [CONTEXT debug_id=%s ]",
     FAKE_TIMESTAMP,
     TEST_USER_ID,
-    DEBUG_ID)...
+    DEBUG_ID);
 ```
 <!-- @formatter:on -->
 
@@ -242,7 +242,7 @@ logging for selected tests:
 
 @Test
 public void testNormalLogging() {
-  // Only normal logging is captured in this test.
+  // Only "normal" logging is captured in this test.
   runCodeUnderTest(...);
 }
 

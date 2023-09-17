@@ -10,21 +10,40 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.api;
 
-import com.google.common.flogger.FluentLogger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
+
+import com.google.common.collect.ImmutableList;
 import net.goui.flogger.testing.api.LogInterceptor.Factory;
 import net.goui.flogger.testing.jdk.JdkInterceptor;
 
 final class LogInterceptorLoader {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  private static final ServiceLoader<Factory> loader = ServiceLoader.load(Factory.class);
+  private static final Logger logger = Logger.getLogger(LogInterceptorLoader.class.getName());
 
   public static Supplier<LogInterceptor> loadBestInterceptorFactory() {
+    ImmutableList<Factory> factories = ImmutableList.copyOf(ServiceLoader.load(Factory.class));
+    if (!FloggerBinding.isFloggerAvailable()) {
+      logger.info(
+          "Flogger API unavailable, log interceptors cannot be tested.\n"
+              + "Depending on the logging API you are using, some features may not work as expected.");
+      Factory factory = !factories.isEmpty() ? factories.get(0) : JdkInterceptor.getFactory();
+      if (factories.size() > 1) {
+        logger.warning(
+            "Multiple log interceptors found; using first available service: "
+                + factory.getClass().getName());
+      } else {
+        logger.info(
+            "Using log interceptor factory: " + factory.getClass().getName());
+      }
+      return factory;
+    }
+
     List<Factory> fullSupport = new ArrayList<>();
     List<Factory> partialSupport = new ArrayList<>();
-    for (Factory factory : loader) {
+    for (Factory factory : factories) {
       switch (factory.getSupportLevel()) {
         case FULL:
           fullSupport.add(factory);
@@ -38,29 +57,28 @@ final class LogInterceptorLoader {
     if (!fullSupport.isEmpty()) {
       factory = fullSupport.get(0);
       if (fullSupport.size() > 1) {
-        logger.atWarning().log(
-            "Multiple log interceptors found; using factory '%s'", factory.getClass().getName());
+        logger.warning(
+            "Multiple suitable log interceptors found; using factory class: "
+                + factory.getClass().getName());
       }
     } else if (!partialSupport.isEmpty()) {
       factory = partialSupport.get(0);
-      logger.atSevere().log(
-          "Detected log interceptor factory '%s' only has partial capture support.\n"
-              + "Logging tests may fail spuriously!",
-          factory.getClass().getName());
+      logger.warning(
+          "Log interceptor only has partial support, logging tests may fail spuriously: "
+              + factory.getClass().getName());
     } else {
-      factory = new JdkInterceptor.Factory();
+      // No provided interceptors, so try the JDK one.
+      factory = JdkInterceptor.getFactory();
       switch (factory.getSupportLevel()) {
         case FULL:
           break;
         case PARTIAL:
-          logger.atSevere().log(
-              "Detected log interceptor factory '%s' only has partial capture support.\n"
-                  + "Logging tests may fail spuriously!",
-              JdkInterceptor.class.getName());
+          logger.warning(
+              "Default log interceptor only has partial support, logging tests may fail spuriously: "
+                  + factory.getClass().getName());
           break;
         case NONE:
-          logger.atSevere().log(
-              "No suitable log interceptor detected; logging tests are likely to fail!");
+          logger.warning("No suitable log interceptor detected; logging tests are likely to fail!");
           break;
       }
     }

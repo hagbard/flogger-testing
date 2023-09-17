@@ -17,29 +17,16 @@
     <parent>
         <groupId>net.goui.flogger-testing</groupId>
         <artifactId>flogger-testing</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
 
     <artifactId>api</artifactId>
     <name>Flogger Testing API</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <url>${base.url}/${project.artifactId}</url>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-system-backend -->
-        <dependency>
-            <groupId>com.google.flogger</groupId>
-            <artifactId>flogger-system-backend</artifactId>
-            <version>0.7.4</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
-        <dependency>
-            <groupId>com.google.flogger</groupId>
-            <artifactId>flogger-grpc-context</artifactId>
-            <version>0.7.4</version>
-            <scope>test</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.truth/truth -->
         <dependency>
             <groupId>com.google.truth</groupId>
@@ -64,12 +51,26 @@
             <artifactId>auto-service</artifactId>
             <version>1.0.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-system-backend -->
+        <dependency>
+            <groupId>com.google.flogger</groupId>
+            <artifactId>flogger-system-backend</artifactId>
+            <version>0.7.4</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.auto.value/auto-value-annotations -->
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value-annotations</artifactId>
             <version>1.10.1</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
+        <dependency>
+            <groupId>com.google.flogger</groupId>
+            <artifactId>flogger-grpc-context</artifactId>
+            <version>0.7.4</version>
+            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>

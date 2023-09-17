@@ -10,24 +10,20 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.api;
 
-import static com.google.common.base.Preconditions.*;
-import static com.google.common.flogger.StackSize.MEDIUM;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.truth.StreamSubject.streams;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static net.goui.flogger.testing.SetLogLevel.Scope.UNDEFINED;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.context.LogLevelMap;
-import com.google.common.flogger.context.ScopedLoggingContext.LoggingContextCloseable;
-import com.google.common.flogger.context.ScopedLoggingContexts;
-import com.google.common.flogger.context.Tags;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,8 +32,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -94,14 +92,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>A subclass of this class will be installed per test case according to a specific test
  * framework (e.g. JUnit4 or JUnit5). One instance of this class is created and installed per test
  * case, before it is invoked. This means that in order to affect the state of the API during a
- * test, the instance must be mutable. It also means that things like the {@link LogLevelMap} cannot
- * be modified after the instance is installed.
+ * test, the instance must be mutable. It also means that things like the log-level map cannot be
+ * modified after the instance is installed.
  */
 @CheckReturnValue
 public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  // Tag label for a unique ID set for tests to support parallel testing.
+  // Tag label for a unique ID set for tests to support parallel testing with Flogger.
   @VisibleForTesting static final String TEST_ID = "test_id";
 
   private final ImmutableMap<String, LevelClass> defaultLevelMap;
@@ -209,8 +205,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    *
    * <p>This method is provided for cases where exact log ordering is very well-defined, and
    * essential for correct testing. In general however, it is often better to use {@link
-   * LogsSubject} via {@link TestingApi#assertLogs(LogMatcher...) assertLogs()} to identify
-   * expected log statements, regardless of their exact index.
+   * LogsSubject} via {@link TestingApi#assertLogs(LogMatcher...) assertLogs()} to identify expected
+   * log statements, regardless of their exact index.
    *
    * <p>Instead of writing a test like:
    *
@@ -264,8 +260,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
 
   public final class ApiHook implements AutoCloseable {
     private final List<Recorder> recorders = new ArrayList<>();
-    private final LoggingContextCloseable context;
     private final String testId;
+    private Closeable context = null;
 
     private ApiHook(boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
       if (interceptor == null) {
@@ -276,19 +272,19 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extralevelMap);
       levelMap.forEach(
           (name, level) -> recorders.add(interceptor.attachTo(name, level, logs::add, testId)));
-      // Skip adding test tags if the given ID is empty.
-      Tags testTag = !testId.isEmpty() ? Tags.of(TEST_ID, testId) : Tags.empty();
-      context =
-          ScopedLoggingContexts.newContext()
-              .withLogLevelMap(
-                  LogLevelMap.create(Maps.transformValues(levelMap, LevelClass::toJdkLogLevel)))
-              .withTags(testTag)
-              .install();
+      context = FloggerBinding.maybeInstallFloggerContext(levelMap, testId);
     }
 
     @Override
     public void close() {
-      context.close();
+      if (context != null) {
+        try {
+          context.close();
+        } catch (IOException e) {
+          throw new AssertionError("context closeable cannot fail: ", e);
+        }
+        context = null;
+      }
       // Recorders are defined to catch/ignore their own exceptions on close.
       recorders.forEach(Recorder::close);
       TestId.release(testId);
@@ -412,6 +408,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   @VisibleForTesting
   static class TestId {
     private static final ConcurrentSkipListSet<String> ids = new ConcurrentSkipListSet<>();
+    private static final AtomicBoolean hasWarned = new AtomicBoolean();
 
     static String claim() {
       String id = "";
@@ -420,10 +417,11 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
           int n = ThreadLocalRandom.current().nextInt(0x10000);
           id = String.format("%04X", n);
         } while (!ids.add(id));
-      } else {
-        logger.atWarning().atMostEvery(30, SECONDS).withStackTrace(MEDIUM).log(
-            "Too many test IDs were generated; returning empty ID.\n"
-                + "This may cause multi-threaded logging test failures.");
+      } else if (hasWarned.compareAndSet(false, true)) {
+        Logger.getLogger(TestingApi.class.getName())
+            .warning(
+                "Too many test IDs were generated; returning empty ID.\n"
+                    + "This may cause multi-threaded logging test failures.");
       }
       return id;
     }

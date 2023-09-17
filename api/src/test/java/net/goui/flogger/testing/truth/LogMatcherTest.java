@@ -10,6 +10,8 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
 package net.goui.flogger.testing.truth;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.truth.LogMatcher.after;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
@@ -18,7 +20,6 @@ import static net.goui.flogger.testing.truth.LogMatcher.orderedByTimestamp;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.truth.Truth8;
 import java.time.Duration;
 import java.time.Instant;
 import net.goui.flogger.testing.LevelClass;
@@ -75,9 +76,9 @@ public class LogMatcherTest {
 
   private static void assertMatched(
       LogMatcher matcher, ImmutableList<LogEntry> logs, LogEntry... expected) {
-    Truth8.assertThat(matcher.getFilter().apply(logs.stream()))
-        .containsExactly((Object[]) expected)
-        .inOrder();
+    ImmutableList<LogEntry> filtered =
+        matcher.getFilter().apply(logs.stream()).collect(toImmutableList());
+    assertThat(filtered).containsExactly((Object[]) expected).inOrder();
   }
 
   private static LogEntry log(LevelClass level, String message, Object threadId) {
