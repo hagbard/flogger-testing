@@ -41,7 +41,7 @@ import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.TestingApi.TestId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.goui.flogger.testing.truth.LogsSubject;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -75,14 +75,29 @@ public class TestingApiTest {
     }
   }
 
-  private static class FooApi extends TestingApi<FooApi> {
-    protected FooApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
+  private static class TestApi extends TestingApi<TestApi> {
+    // Most tests only need the simplest test API constructed.
+    static TestApi create() {
+      TestInterceptor interceptor = new TestInterceptor();
+      // Level map must have at least one entry to cause the injector to be attached.
+      ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+      return new TestApi(levelMap, interceptor);
+    }
+
+    private final TestInterceptor interceptor;
+
+    TestApi(Map<String, LevelClass> levelMap, TestInterceptor interceptor) {
       super(levelMap, interceptor);
+      this.interceptor = interceptor;
     }
 
     @Override
-    protected FooApi api() {
+    protected TestApi api() {
       return this;
+    }
+
+    void addTestLogs(LogEntry... entries) {
+      interceptor.addLogs(entries);
     }
   }
 
@@ -90,7 +105,7 @@ public class TestingApiTest {
   public void testApiInstall() {
     ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("foo", INFO, "bar", INFO);
     TestInterceptor interceptor = new TestInterceptor();
-    FooApi logs = new FooApi(levelMap, interceptor);
+    TestApi logs = new TestApi(levelMap, interceptor);
 
     // Loggers are attached only while the API hook is active.
     assertThat(interceptor.attached).isEmpty();
@@ -145,13 +160,9 @@ public class TestingApiTest {
 
   @Test
   public void testAssertLogs_basicApi() {
-    TestInterceptor interceptor = new TestInterceptor();
-    // Level map must have at least one entry to cause the injector to be attached.
-    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
-    FooApi logs = new FooApi(levelMap, interceptor);
+    TestApi logs = TestApi.create();
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      // Remember that (for now) the test API also "logs" something when it's attached.
-      interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
       logs.assertLogs().withMessageContaining("foo").matchCount().isEqualTo(2);
       logs.assertLogs().withMessageContaining("bar").matchCount().isEqualTo(2);
@@ -165,13 +176,9 @@ public class TestingApiTest {
 
   @Test
   public void testAssertLogs_failureMessages() {
-    TestInterceptor interceptor = new TestInterceptor();
-    // Level map must have at least one entry to cause the injector to be attached.
-    ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
-    FooApi logs = new FooApi(levelMap, interceptor);
+    TestApi logs = TestApi.create();
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      // Remember that (for now) the test API also "logs" something when it's attached.
-      interceptor.addLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
 
       assertFailureContains(
           () -> logs.assertLogs().withMessageContaining("foo").doNotOccur(),
@@ -187,6 +194,98 @@ public class TestingApiTest {
           () -> logs.assertLogs().withLevel(INFO).never().haveMessageContaining("foo"),
           "logs.withLevel(INFO).never()",
           "no matched logs were expected to contain");
+    }
+  }
+
+  @Test
+  public void testVerification_pass() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      // No warning logs, so verification passes.
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"));
+    }
+  }
+
+  @Test
+  public void testVerification_fail() {
+    TestApi logs = TestApi.create();
+    boolean testFailed = false;
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      // Adding a warning log makes verification fail.
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+    } catch (AssertionError expected) {
+      testFailed = true;
+    }
+    assertThat(testFailed).isTrue();
+  }
+
+  @Test
+  public void testVerification_clearVerification() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+
+      // Without this, the warning would cause verification failure when the api is closed, but no
+      // other logs are verified either.
+      logs.clearVerification();
+    }
+  }
+
+  @Test
+  public void testVerification_exclude() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+
+      LogEntry warning =
+          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getOnlyMatch();
+
+      // Without this, the warning would cause verification failure when the api is closed.
+      logs.excludeFromVerification(warning);
+    }
+  }
+
+  @Test
+  public void testVerification_excludedLogsAreUniqueInstances_fail() {
+    TestApi logs = TestApi.create();
+    boolean testFailed = false;
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      // The logs here have identical contents but are not considered equal.
+      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+
+      LogEntry firstWarning =
+          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getMatch(0);
+
+      // Only excluding the first warning means that the second one causes verification to fail.
+      logs.excludeFromVerification(firstWarning);
+    } catch (AssertionError expected) {
+      testFailed = true;
+    }
+    assertThat(testFailed).isTrue();
+  }
+
+  @Test
+  public void testVerification_excludedLogsAreUniqueInstances_pass() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+
+      LogsSubject warnings = logs.assertLogs().withLevel(WARNING).withMessageContaining("warning");
+
+      // Excluding all warnings makes the verification pass.
+      logs.excludeFromVerification(warnings.getAllMatches());
     }
   }
 
