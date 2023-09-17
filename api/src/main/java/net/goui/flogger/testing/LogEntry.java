@@ -239,6 +239,21 @@ public abstract class LogEntry {
   }
 
   /**
+   * Treat log entries as unique instances when using in sets or as keys. Nothing in a log instance
+   * is guaranteed to be unique, and having two logs with the same message, and even timestamp, is
+   * quite possible; and if this happens, these must be considered distinct instances.
+   */
+  @Override
+  public final boolean equals(Object obj) {
+    return super.equals(obj);
+  }
+
+  @Override
+  public final int hashCode() {
+    return super.hashCode();
+  }
+
+  /**
    * A one line snippet aimed at identifying a log entry as part of an error message.
    *
    * <p>It is going to be very common that this is shown for errors in assertions near to the test

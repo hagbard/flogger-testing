@@ -14,6 +14,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.truth.StreamSubject.streams;
+import static java.util.Arrays.asList;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static net.goui.flogger.testing.SetLogLevel.Scope.UNDEFINED;
 
@@ -27,8 +28,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
@@ -106,6 +109,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private Consumer<LogsSubject> verification;
+  private final Set<LogEntry> excluded = new HashSet<>();
 
   protected TestingApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     this.defaultLevelMap = ImmutableMap.copyOf(levelMap);
@@ -253,6 +257,50 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     return api();
   }
 
+  /**
+   * Excludes one or more log entries from any post-test log verification. This method is useful
+   * when you have a common logging policy (e.g. no warning logs) which you are deliberately
+   * violating in a small number of cases.
+   *
+   * <p>Once a log entry is removed from verification, it cannot be reinstated, but you can still
+   * make assertions on it within the test.
+   */
+  public final void excludeFromVerification(LogEntry entry, LogEntry... rest) {
+    excluded.add(entry);
+    excluded.addAll(asList(rest));
+  }
+
+  /**
+   * Excludes a sequence of log entries from any post-test log verification. This method is useful
+   * when you have a common logging policy (e.g. no warning logs) which you are deliberately
+   * violating in a small number of cases.
+   *
+   * <p>Once a log entry is removed from verification, it cannot be reinstated, but you can still
+   * make assertions on it within the test.
+   */
+  public final void excludeFromVerification(Iterable<LogEntry> entries) {
+    entries.forEach(excluded::add);
+  }
+
+  /**
+   * Removes all verification from this logs testing fixture. Unless new verification is added using
+   * {@link #verify(Consumer)}, no additional assertions will be made after the test in which this
+   * was called has exited.
+   *
+   * <p>Often, when only a small number of expected log entries are going to fail verification (e.g.
+   * an explicitly expected warning log) it is better to call {@link
+   * #excludeFromVerification(LogEntry, LogEntry...)} to avoid accidentally allowing other,
+   * unexpected logs to go unverified.
+   *
+   * <p>This method will NOT remove any log entries from the "excluded" list, and any such entries
+   * will also be ignored for any new post-test verification that's added. In general, it is not
+   * recommended to use both {@link #excludeFromVerification}() and {@code clearVerification()} in
+   * the same test as it is likely to make tests less readable.
+   */
+  public final void clearVerification() {
+    this.verification = s -> {};
+  }
+
   protected final ApiHook install(
       boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
     return new ApiHook(useTestId, extralevelMap);
@@ -288,7 +336,13 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       // Recorders are defined to catch/ignore their own exceptions on close.
       recorders.forEach(Recorder::close);
       TestId.release(testId);
-      verification.accept(TestingApi.this.assertLogs());
+      LogsSubject subject = TestingApi.this.assertLogs();
+      if (!excluded.isEmpty()) {
+        subject =
+            subject.matching(
+                LogMatcher.of("notIn(<excluded>)", s -> s.filter(e -> !excluded.contains(e))));
+      }
+      verification.accept(subject);
     }
   }
 
