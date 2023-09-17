@@ -10,13 +10,12 @@
 
 package net.goui.flogger.testing.api;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-
-import com.google.common.collect.ImmutableList;
 import net.goui.flogger.testing.api.LogInterceptor.Factory;
 import net.goui.flogger.testing.jdk.JdkInterceptor;
 
