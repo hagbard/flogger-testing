@@ -16,7 +16,6 @@ import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.context.Tags;
 import net.goui.flogger.testing.LogEntry;

@@ -17,9 +17,7 @@ import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
-
 import net.goui.flogger.testing.LogEntry;
-import net.goui.flogger.testing.api.FloggerBinding;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
 import net.goui.flogger.testing.junit4.FloggerTestRule;
