@@ -110,8 +110,7 @@ results in users:
 * Writing brittle tests for their logs, which creates an ongoing maintenance burden.
 * Writing few or no tests for their logs, which risks severe logging issues going unnoticed.
 * Writing logs tests with ad-hoc logger specific APIs, which complicates any work to update or
-  migrate logging
-  libraries.
+  migrate logging libraries.
 
 We've all seen at least one (if not all) the situations described above.
 
@@ -375,20 +374,20 @@ downsides.
    logging in static methods is limiting.
 3. **Testing the log statement (via a mock) is less useful than testing the log output.** Log
    output is what's useful about debug log statements, so you should be testing that as closely as
-   reasonably possible. Using mocks to test fine-grained logging APIs creates brittle, and hard
-   to maintain tests.
+   reasonably possible, including any effects of formatting the logged arguments. Using mocked
+   loggers to test logging APIs creates brittle, hard to maintain tests.
 4. **Injecting logger implementations is never necessary.** All commonly used logging libraries
    provide a way to test their log output at some reasonable level. This ensures that what you
    test is "close" to what will appear in log files.
 
 I think that the difficulty in setting up good logs testing in unit tests is one of the primary
 reasons people chose to inject loggers in their code at all. With a well-designed logs testing
-library, this problem no longer exists, and so injecting loggers at all no longer has any real
+library, this problem no longer exists, and so injecting loggers _at all_ no longer has any real
 benefits.
 
-This principle is supported in the core design of the library, which is agnostic to the
-underlying logger implementation used and carefully designed to minimize implicit dependencies
-on specific implementation behaviour.
+This principle is supported by the core design of this library, which is agnostic to the
+underlying logger implementation, and carefully designed to minimize implicit dependencies on
+specific implementation behaviour.
 
 If you use this library and wish to migrate your logging (e.g. from Log4J to Flogger, or JUnit4 
 to JUnit5), your tests will remain essentially unchanged.
