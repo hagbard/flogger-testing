@@ -18,12 +18,12 @@
     <parent>
         <groupId>net.goui.flogger-testing</groupId>
         <artifactId>flogger-testing</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
 
     <artifactId>log4j</artifactId>
     <name>Flogger Log4j2 Test Integration</name>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
     <url>${base.url}/${project.artifactId}</url>
 
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>net.goui.flogger-testing</groupId>
             <artifactId>api</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>net.goui.flogger-testing</groupId>
             <artifactId>junit4</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/junit/junit -->
