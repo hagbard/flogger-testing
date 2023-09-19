@@ -104,6 +104,49 @@ public class LogMatcher {
   }
 
   /**
+   * Matches the subsequence of logs from the same outer class as the specified entry.
+   *
+   * <p>This is the default recommended way to test for logs "from the same source file" as other
+   * logs, and while you can test for exact class matching (distinguishing nested and inner classes)
+   * or even exact method matching, these risk making your tests more brittle than necessary.
+   *
+   * <p>Log entries with unknown class names are never considered equal (even to themselves).
+   */
+  public static LogMatcher fromSameOuterClassAs(LogEntry entry) {
+    return simple(
+        label("fromSameOuterClassAs", entry), e -> LogFilters.hasSameOuterClass(e, entry));
+  }
+
+  /**
+   * Matches the subsequence of logs from the same class as the specified entry. Log statements
+   * executed in lambdas or anonymous inner classes are considered to come from the first
+   * non-synthetic (i.e. named) containing class, which can itself be a nested or inner class.
+   *
+   * <p>Warning: Using this matcher may make some tests more brittle than necessary in the face of
+   * normal refactoring, so you may prefer to use {@link #fromSameOuterClassAs(LogEntry)} instead.
+   *
+   * <p>Log entries with unknown class names are never considered equal (even to themselves).
+   */
+  public static LogMatcher fromSameClassAs(LogEntry entry) {
+    return simple(label("fromSameClassAs", entry), e -> LogFilters.hasSameClass(e, entry));
+  }
+
+  /**
+   * Matches the subsequence of logs from the same class and method as the specified entry. Log
+   * statements executed in lambdas or anonymous inner classes are considered to come from the first
+   * non-synthetic (i.e. named) containing method.
+   *
+   * <p>Warning: Using this matcher may make some tests more brittle than necessary in the face of
+   * normal refactoring, so you may prefer to use {@link #fromSameOuterClassAs(LogEntry)} instead.
+   *
+   * <p>Log entries with unknown class/method names are never considered equal (even to themselves).
+   */
+  public static LogMatcher fromSameMethodAs(LogEntry entry) {
+    return simple(
+        label("fromSameMethodAs", entry), e -> LogFilters.hasSameClassAndMethod(e, entry));
+  }
+
+  /**
    * Orders log entries for subsequent match operations in timestamp order. Note that if log entries
    * have identical timestamps, no guarantees are made about their eventual relative ordering.
    *

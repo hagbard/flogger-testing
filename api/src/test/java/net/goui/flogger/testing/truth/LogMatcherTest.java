@@ -15,6 +15,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.truth.LogMatcher.after;
 import static net.goui.flogger.testing.truth.LogMatcher.before;
+import static net.goui.flogger.testing.truth.LogMatcher.fromSameClassAs;
+import static net.goui.flogger.testing.truth.LogMatcher.fromSameMethodAs;
+import static net.goui.flogger.testing.truth.LogMatcher.fromSameOuterClassAs;
 import static net.goui.flogger.testing.truth.LogMatcher.inSameThreadAs;
 import static net.goui.flogger.testing.truth.LogMatcher.orderedByTimestamp;
 
@@ -52,7 +55,7 @@ public class LogMatcherTest {
   }
 
   @Test
-  public void testInSameThread() {
+  public void testInSameThreadAs() {
     LogEntry first = log(INFO, "first", THREAD_FOO);
     LogEntry second = log(INFO, "second", THREAD_FOO);
     LogEntry other = log(INFO, "other thread", THREAD_BAR);
@@ -61,6 +64,53 @@ public class LogMatcherTest {
 
     assertMatched(inSameThreadAs(first), logs, first, second, third);
     assertMatched(inSameThreadAs(other), logs, other);
+  }
+
+  static class Nested {}
+
+  @Test
+  public void testFromSameOuterClassAs() {
+    LogEntry first = logInClass("first", LogMatcherTest.class, "method");
+    LogEntry second = logInClass("second", LogMatcherTest.class, "method");
+    LogEntry nestedFoo = logInClass("foo", LogMatcherTest.Nested.class, "fooMethod");
+    LogEntry nestedBar = logInClass("bar", LogMatcherTest.Nested.class, "barMethod");
+    ImmutableList<LogEntry> logs = ImmutableList.of(first, second, nestedFoo, nestedBar);
+
+    assertMatched(fromSameOuterClassAs(first), logs, first, second, nestedFoo, nestedBar);
+    assertMatched(fromSameOuterClassAs(nestedFoo), logs, first, second, nestedFoo, nestedBar);
+    assertMatched(fromSameOuterClassAs(nestedBar), logs, first, second, nestedFoo, nestedBar);
+
+    assertMatched(before(nestedFoo).fromSameOuterClass(), logs, first, second);
+  }
+
+  @Test
+  public void testFromSameClassAs() {
+    LogEntry first = logInClass("first", LogMatcherTest.class, "method");
+    LogEntry second = logInClass("second", LogMatcherTest.class, "method");
+    LogEntry nestedFoo = logInClass("foo", LogMatcherTest.Nested.class, "fooMethod");
+    LogEntry nestedBar = logInClass("bar", LogMatcherTest.Nested.class, "barMethod");
+    ImmutableList<LogEntry> logs = ImmutableList.of(first, second, nestedFoo, nestedBar);
+
+    assertMatched(fromSameClassAs(first), logs, first, second);
+    assertMatched(fromSameClassAs(nestedFoo), logs, nestedFoo, nestedBar);
+    assertMatched(fromSameClassAs(nestedBar), logs, nestedFoo, nestedBar);
+
+    assertMatched(after(nestedFoo).fromSameClass(), logs, nestedBar);
+  }
+
+  @Test
+  public void testFromMethodClassAs() {
+    LogEntry first = logInClass("first", LogMatcherTest.class, "method");
+    LogEntry second = logInClass("second", LogMatcherTest.class, "method");
+    LogEntry nestedFoo = logInClass("foo", LogMatcherTest.Nested.class, "fooMethod");
+    LogEntry nestedBar = logInClass("bar", LogMatcherTest.Nested.class, "barMethod");
+    ImmutableList<LogEntry> logs = ImmutableList.of(first, second, nestedFoo, nestedBar);
+
+    assertMatched(fromSameMethodAs(first), logs, first, second);
+    assertMatched(fromSameMethodAs(nestedFoo), logs, nestedFoo);
+    assertMatched(fromSameMethodAs(nestedBar), logs, nestedBar);
+
+    assertMatched(after(first).fromSameMethod(), logs, second);
   }
 
   @Test
@@ -101,6 +151,19 @@ public class LogMatcherTest {
         INFO.name(),
         INFO,
         TIMESTAMP.plus(delay),
+        "<thread ID>",
+        message,
+        ImmutableMap.of(),
+        null);
+  }
+
+  private static LogEntry logInClass(String message, Class<?> clazz, String methodName) {
+    return LogEntry.of(
+        clazz.getName(),
+        methodName,
+        INFO.name(),
+        INFO,
+        TIMESTAMP,
         "<thread ID>",
         message,
         ImmutableMap.of(),

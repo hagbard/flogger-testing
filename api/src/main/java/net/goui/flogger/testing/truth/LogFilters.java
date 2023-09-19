@@ -12,6 +12,8 @@ package net.goui.flogger.testing.truth;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import net.goui.flogger.testing.LogEntry;
+
 /** Internal shared static log entry filtering methods. */
 final class LogFilters {
   /** Support method for things like {@link LogSubject#hasMessageContaining(String, String...)}. */
@@ -39,5 +41,31 @@ final class LogFilters {
       return "'" + fragment + "'";
     }
     return "'" + fragment + "', '" + String.join("', '", rest) + "'";
+  }
+
+  static boolean hasSameOuterClass(LogEntry a, LogEntry b) {
+    return eq(outerClassName(a), outerClassName(b));
+  }
+
+  static boolean hasSameClass(LogEntry a, LogEntry b) {
+    return eq(a.className(), b.className());
+  }
+
+  static boolean hasSameClassAndMethod(LogEntry a, LogEntry b) {
+    return hasSameClass(a, b) && eq(a.methodName(), b.methodName());
+  }
+
+  // Returns if a pair of class/method names are known and equal.
+  private static boolean eq(String classOrMethodNameA, String classOrMethodNameB) {
+    // "<unknown>" is what class/method names are given by Flogger if they cannot be determined.
+    return !classOrMethodNameA.equals("<unknown>") && classOrMethodNameA.equals(classOrMethodNameB);
+  }
+
+  private static String outerClassName(LogEntry e) {
+    String name = e.className();
+    // In all known JDKs, the outer class is everything until the first '$', regardless of synthetic
+    // naming conventions. This is much safer than inferring nested classes and/or method names.
+    int suffixStart = name.indexOf("$");
+    return suffixStart == -1 ? name : name.substring(0, suffixStart);
   }
 }
