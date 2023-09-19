@@ -302,22 +302,22 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   }
 
   protected final ApiHook install(
-      boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
-    return new ApiHook(useTestId, extralevelMap);
+      boolean useTestId, ImmutableMap<String, LevelClass> extraLevelMap) {
+    return new ApiHook(useTestId, extraLevelMap);
   }
 
   public final class ApiHook implements AutoCloseable {
     private final List<Recorder> recorders = new ArrayList<>();
     private final String testId;
-    private Closeable context = null;
+    private Closeable context;
 
-    private ApiHook(boolean useTestId, ImmutableMap<String, LevelClass> extralevelMap) {
+    private ApiHook(boolean useTestId, ImmutableMap<String, LevelClass> extraLevelMap) {
       if (interceptor == null) {
         interceptor = BestInterceptorFactory.get();
       }
       // Empty string is a safe no-op value for the test ID.
       testId = useTestId ? TestId.claim() : "";
-      Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extralevelMap);
+      Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extraLevelMap);
       levelMap.forEach(
           (name, level) -> recorders.add(interceptor.attachTo(name, level, logs::add, testId)));
       context = FloggerBinding.maybeInstallFloggerContext(levelMap, testId);

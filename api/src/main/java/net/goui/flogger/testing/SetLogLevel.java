@@ -66,6 +66,6 @@ public @interface SetLogLevel {
     /** Applies the associated log level to the inferred class under test. */
     CLASS_UNDER_TEST,
     /** Applies the associated log level to the inferred package under test. */
-    PACKAGE_UNDER_TEST;
+    PACKAGE_UNDER_TEST
   }
 }

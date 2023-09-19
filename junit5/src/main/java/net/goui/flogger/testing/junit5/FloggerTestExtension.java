@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.SetLogLevel;
 import net.goui.flogger.testing.api.LogInterceptor;
@@ -93,10 +92,6 @@ public final class FloggerTestExtension extends TestingApi<FloggerTestExtension>
       Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
     return new FloggerTestExtension(levelMap, interceptor);
   }
-
-  // Matches an expected text class name and captures the assumed class-under-test.
-  private static final Pattern EXPECTED_TEST_CLASS_NAME =
-      Pattern.compile("((?:[^.]+\\.)*[^.]+)Test");
 
   private FloggerTestExtension(
       Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
