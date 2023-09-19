@@ -128,7 +128,7 @@ public final class FloggerTestRule extends TestingApi<FloggerTestRule> implement
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        try (var ctx = install(true, extraLogLevels)) {
+        try (var unusedCloseable = install(true, extraLogLevels)) {
           statement.evaluate();
         }
       }

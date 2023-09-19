@@ -89,7 +89,12 @@ public final class DefaultFormatMetadataParser {
         if (value == null) {
           // Give up and just use the value as a string (not ideal, but it retains useful debug
           // information at least).
-          foundProblems = true;
+          Logger.getLogger(DefaultFormatMetadataParser.class.getName())
+              .warning(
+                  "Problems found while parsing unquoted value: '"
+                      + valueString
+                      + "'\n"
+                      + "Results may not be accurate and could affect tests.");
           value = valueString;
         }
       }
@@ -133,7 +138,7 @@ public final class DefaultFormatMetadataParser {
                   + "'\n"
                   + "Unescaped value '"
                   + unescaped
-                  + "' may not be accurate and could affect test results.");
+                  + "' may not be accurate and could affect tests.");
     }
     return unescaped;
   }
