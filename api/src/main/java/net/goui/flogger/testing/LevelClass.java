@@ -33,15 +33,17 @@ import java.util.logging.Level;
  * }</pre>
  *
  * <p>Would be brittle if you moved to a backend which could not distinguish between {@link
- * Level#FINE}, {@link Level#FINER} and {@link Level#FINEST}.
+ * Level#FINER} and {@link Level#FINEST}.
  *
- * <p>However, limiting the available level classes is not unreasonable because the finest log
- * levels are not semantically important for testing and tests which specify levels too precisely
- * are going to be brittle in the face of simple refactoring.
+ * <p>Limiting the available level classes is not unreasonable because the finest log levels are not
+ * semantically important for testing, and tests which specify levels too precisely are going to be
+ * brittle in the face of simple refactoring.
  *
  * <p>Note that the names here reflect the JDK log level names to best match the calling code being
  * testing, and enum entries are explicitly ordered in ascending severity so that {@code
- * x.compareTo(y)} works as expected.
+ * x.compareTo(y)} works as expected. However, for readability in projects which use {@code Log4J},
+ * there are aliased fields for some of the levels (e.g. {@code DEBUG} == {@code FINE}), which match
+ * the mapping used by Flogger to convert between levels.
  */
 public enum LevelClass {
   /**

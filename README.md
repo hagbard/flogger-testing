@@ -213,18 +213,18 @@ While it's tempting to test for the exact contents of a log statement (after all
 "cut & paste" the log message into the test from the code or logs), it's generally a bad idea.
 
 Debug log messages are expected to be human-readable, and you need to be able to update them as
-needed during debugging. If you improve the message in a not-very-readable log statement, you
-don't want to break dozens of tests. You need to test the important information in log
-statements, while avoiding testing grammar or punctuation.
+needed during debugging. You don't want someone who makes a minor change to some log statement to
+break dozens of your tests. You need to test the important information in log statements, while
+avoiding testing precise grammar or punctuation.
 
 You may choose to explicitly avoid testing the details of "fine" log statements in your code, or at
 least test them less. Fine logs exist to provide content to other logs, and they are more likely to
-be added, removed or otherwise modified during debugging. Don't make this break all your existing
-logging tests.
+be added, removed or otherwise modified during debugging. Don't allow changes like these to break
+existing logging tests.
 
-However, it's also important that you execute "fine" log statements in some way during at least
-some tests. Otherwise, you risk discovering that your log statements aren't working (e.g.
-because a `toString()` method is throwing an exception) at exactly the time you need them most.
+However, it's also important that you execute "fine" log statements in some way during at least some
+tests. Otherwise, you risk only discovering that your log statements aren't working (e.g. because
+a `toString()` method is throwing an exception) at the time you need them most.
 
 This principle is supported with the following features:
 
@@ -256,11 +256,18 @@ assertLogged(
 ```
 <!-- @formatter:on -->
 
+Other examples of well targeted testing APIs include:
+
+* Simplifying log site information to avoid brittle testing of synthetic class/method names.
+* No ability to test line numbers of log statements.
+* Encouraging testing the relative order of log entries, rather than using precise indices.
+* Using only log levels common to all supported backends.
+
 #### Annotations to control log level during tests
 
-If you want to ensure that "fine" logs are being testing but don't want to have to deal with 
-their output in every test, use the `@SetLogLevel` annotation on test methods to add additional 
-logging for selected tests:
+If you want to ensure that "fine" logs are being testing but don't want to have to deal with their
+output in every test, use the `@SetLogLevel` annotation on test methods to add additional logging
+for selected tests:
 
 <!-- @formatter:off -->
 ```java
@@ -381,16 +388,16 @@ downsides.
    test is "close" to what will appear in log files.
 
 I think that the difficulty in setting up good logs testing in unit tests is one of the primary
-reasons people chose to inject loggers in their code at all. With a well-designed logs testing
+reasons people choose to inject loggers in their code at all. With a well-designed logs testing
 library, this problem no longer exists, and so injecting loggers _at all_ no longer has any real
 benefits.
 
-This principle is supported by the core design of this library, which is agnostic to the
-underlying logger implementation, and carefully designed to minimize implicit dependencies on
-specific implementation behaviour.
+This principle is supported by the core design of this library, which is agnostic to the underlying
+logger implementation, and carefully designed to minimize implicit dependencies on specific
+implementation behaviour.
 
-If you use this library and wish to migrate your logging (e.g. from Log4J to Flogger, or JUnit4 
-to JUnit5), your tests will remain essentially unchanged.
+If you use this library and wish to migrate your logging (e.g. from Log4J to Flogger, or JUnit4 to
+JUnit5), your tests will remain essentially unchanged.
 
 ## Summary
 
