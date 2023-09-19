@@ -93,17 +93,31 @@ public abstract class LogEntry {
         cause);
   }
 
-  /** Returns the log site's class name, or {@code "<unknown>"} if it could not be determined. */
+  /**
+   * Returns the log site's class name, or {@code "<unknown>"} if it could not be determined.
+   *
+   * <p>If a log statement occurs in an anonymous inner class or lambda, then the inferred class
+   * name is that of the containing (explicitly named) class, which may still be an inner or nested
+   * class. This avoids brittle tests where simple refactorings change the exact (system defined)
+   * class name.
+   */
   public abstract String className();
 
-  /** Returns the log site's method name, or {@code "<unknown>"} if it could not be determined. */
+  /**
+   * Returns the log site's method name, or {@code "<unknown>"} if it could not be determined.
+   *
+   * <p>If a log statement occurs in an anonymous inner class or lambda, then the inferred method
+   * name is that of the containing (explicitly named) method. This avoids brittle tests where
+   * simple refactorings change the exact (system defined) method name.
+   */
   public abstract String methodName();
 
   /**
    * Returns the name of the underlying log level (e.g. {@code "DEBUG"} rather than {@code "FINE"}
-   * in Log4J.
+   * in Log4J). This is deliberately not public, since it is backend specific and is only used as
+   * part of debug strings.
    */
-  public abstract String levelName();
+  abstract String levelName();
 
   /** Returns the equivalence class of the log level (see {@link LevelClass}). */
   public abstract LevelClass levelClass();
@@ -113,7 +127,8 @@ public abstract class LogEntry {
 
   /**
    * A mostly unique identifier for the thread in which logging occurred. This is deliberately not
-   * public, since we only need to compare instances for detecting log entries from the same thread.
+   * public, since we only need to compare instances for detecting log entries from the same thread
+   * and the precise instance used for thread identification may change over time.
    */
   abstract Object threadId();
 
