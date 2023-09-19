@@ -38,6 +38,49 @@ final class ComparativeLogMatcher extends LogMatcher {
     return adapted("inSameThread()", e -> e.hasSameThreadAs(target));
   }
 
+  /**
+   * Returns a derived matcher which additionally requires that log entries be from the same outer
+   * class as the target of this matcher.
+   *
+   * <p>This is the default recommended way to test for logs "from the same source file" as other
+   * logs, and while you can test for exact class matching (distinguishing nested and inner classes)
+   * or even exact method matching, these risk making your tests more brittle than necessary.
+   *
+   * <p>Log entries with unknown class names are never considered equal (even to themselves).
+   */
+  public ComparativeLogMatcher fromSameOuterClass() {
+    return adapted("fromSameOuterClass()", e -> LogFilters.hasSameOuterClass(e, target));
+  }
+
+  /**
+   * Returns a derived matcher which additionally requires that log entries be from the same class
+   * as the target of this matcher. Log statements executed in lambdas or anonymous inner classes
+   * are considered to come from the first non-synthetic (i.e. named) containing class, which can
+   * itself be a nested or inner class.
+   *
+   * <p>Warning: Using this matcher may make some tests more brittle than necessary in the face of
+   * normal refactoring, so you may prefer to use {@link #fromSameOuterClass()} instead.
+   *
+   * <p>Log entries with unknown class names are never considered equal (even to themselves).
+   */
+  public ComparativeLogMatcher fromSameClass() {
+    return adapted("fromSameClass()", e -> LogFilters.hasSameClass(e, target));
+  }
+
+  /**
+   * Returns a derived matcher which additionally requires that log entries be from the same class
+   * and method as the target of this matcher. Log statements executed in lambdas or anonymous inner
+   * classes are considered to come from the first non-synthetic (i.e. named) containing method.
+   *
+   * <p>Warning: Using this matcher may make some tests more brittle than necessary in the face of
+   * normal refactoring, so you may prefer to use {@link #fromSameOuterClass()} instead.
+   *
+   * <p>Log entries with unknown class/method names are never considered equal (even to themselves).
+   */
+  public ComparativeLogMatcher fromSameMethod() {
+    return adapted("fromSameMethod()", e -> LogFilters.hasSameClassAndMethod(e, target));
+  }
+
   private ComparativeLogMatcher adapted(String label, Predicate<LogEntry> predicate) {
     return new ComparativeLogMatcher(
         getLabel() + "." + label,

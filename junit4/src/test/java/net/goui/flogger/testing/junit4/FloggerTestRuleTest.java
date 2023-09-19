@@ -10,6 +10,7 @@
 
 package net.goui.flogger.testing.junit4;
 
+import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.LevelClass.WARNING;
@@ -97,6 +98,50 @@ public class FloggerTestRuleTest {
     logs.assertLog(0).hasMessageContaining("Foo");
     logs.assertLog(1).hasMessageContaining("Bar");
     assertThrows(AssertionError.class, () -> logs.assertLog(0).hasMessageContaining("Bar"));
+  }
+
+  private static void call(Runnable logFn) {
+    logFn.run();
+  }
+
+  private class Inner {
+    void doLogging() {
+      logger.atInfo().log("inner");
+      call(() -> logger.atInfo().log("inner lambda"));
+    }
+  }
+
+  private static class Nested {
+    void doLogging() {
+      logger.atInfo().log("nested");
+      call(() -> logger.atInfo().log("nested lambda"));
+    }
+  }
+
+  // Verifies that nested/inner classes and lambdas behave as expected.
+  @Test
+  public void testLogSiteInformation() {
+    logger.atInfo().log("message");
+    call(() -> logger.atInfo().log("lambda"));
+    new Inner().doLogging();
+    new Nested().doLogging();
+
+    logs.assertLogs().matchCount().isEqualTo(6);
+
+    logs.assertLog(0).hasMessageContaining("message");
+    assertThat(logs.assertLogs().getMatch(0).className()).isEqualTo(getClass().getName());
+    logs.assertLog(1).hasMessageContaining("lambda");
+    assertThat(logs.assertLogs().getMatch(1).className()).isEqualTo(getClass().getName());
+
+    logs.assertLog(2).hasMessageContaining("inner");
+    assertThat(logs.assertLogs().getMatch(2).className()).isEqualTo(Inner.class.getName());
+    logs.assertLog(3).hasMessageContaining("inner lambda");
+    assertThat(logs.assertLogs().getMatch(3).className()).isEqualTo(Inner.class.getName());
+
+    logs.assertLog(4).hasMessageContaining("nested");
+    assertThat(logs.assertLogs().getMatch(4).className()).isEqualTo(Nested.class.getName());
+    logs.assertLog(5).hasMessageContaining("nested lambda");
+    assertThat(logs.assertLogs().getMatch(5).className()).isEqualTo(Nested.class.getName());
   }
 
   @Test

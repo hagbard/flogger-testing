@@ -19,7 +19,9 @@ import com.google.common.collect.ImmutableMap;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -38,6 +40,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @AutoValue
 public abstract class LogEntry {
+  private static final AtomicBoolean hasWarnedUnknownMethodNamingConvention = new AtomicBoolean();
+  private static final AtomicBoolean hasWarnedUnknownClassNamingConvention = new AtomicBoolean();
+
   /**
    * @param className the optional class name of the log site for this entry (not necessarily the
    *     name of the logger which logged it). This is primarily informational, to aid the user in
@@ -77,8 +82,8 @@ public abstract class LogEntry {
       ImmutableMap<String, ImmutableList<Object>> metadata,
       @Nullable Throwable cause) {
     return new AutoValue_LogEntry(
-        className != null ? className : "<unknown>",
-        methodName != null ? methodName : "<unknown>",
+        className != null ? inferClassNameForTesting(className) : "<unknown>",
+        methodName != null ? inferMethodNameForTesting(methodName) : "<unknown>",
         levelName,
         levelClass,
         timestamp,
@@ -137,6 +142,10 @@ public abstract class LogEntry {
   @Nullable
   public abstract Throwable cause();
 
+  /**
+   * Determines whether this log entry and the given log entry were emitted in the same thread
+   * (without revealing the specific mechanism by which thread identity is defined).
+   */
   public boolean hasSameThreadAs(LogEntry entry) {
     return threadId().equals(entry.threadId());
   }
@@ -283,5 +292,46 @@ public abstract class LogEntry {
     }
     // Definitely truncating!
     return message.substring(0, splitIndex) + "...";
+  }
+
+  // Determines class name for testing, ignoring synthetic classes for lambdas etc.
+  // This preserves named nested/inner classes and *DOES NOT* strip the class name
+  // back to its inferred outer class!!
+  private static String inferClassNameForTesting(String name) {
+    // https://stackoverflow.com/questions/34589435/get-the-enclosing-class-of-a-java-lambda-expression
+    // Assume "ClassName$InnerOrNested$$Lambda$N/xxxxxxx" for JDKs earlier than 11. After this, the
+    // lambda name appears as part of the method name, not the class.
+    int suffixStart = name.indexOf("$$");
+    if (suffixStart == -1) {
+      return name;
+    }
+    // Method name is synthetic (for which there's no published specification), tread carefully.
+    if (!name.regionMatches(suffixStart, "$$Lambda$", 0, 9)
+        && hasWarnedUnknownClassNamingConvention.compareAndSet(false, true)) {
+      Logger.getLogger(LogEntry.class.getName())
+          .warning("Unknown synthetic class naming convention: " + name);
+    }
+    return name.substring(0, suffixStart);
+  }
+
+  // Determines method name for testing, ignoring synthetic method names for lambdas etc.
+  private static String inferMethodNameForTesting(String name) {
+    int nameStart = name.indexOf('$') + 1;
+    if (nameStart == 0) {
+      return name;
+    }
+    // Method name is synthetic (for which there's no published specification), tread carefully.
+    // Assume "prefix$name[$suffix]" for now which matches "lambda$methodName$N" (JDK 20), but
+    // ignore trailing '$N' if not present.
+    if (!name.startsWith("lambda$")
+        && hasWarnedUnknownMethodNamingConvention.compareAndSet(false, true)) {
+      Logger.getLogger(LogEntry.class.getName())
+          .warning("Unknown synthetic method naming convention: " + name);
+    }
+    int nameEnd = name.indexOf('$', nameStart);
+    if (nameEnd == -1) {
+      nameEnd = name.length();
+    }
+    return name.substring(nameStart, nameEnd);
   }
 }
