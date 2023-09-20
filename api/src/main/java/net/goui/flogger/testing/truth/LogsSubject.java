@@ -79,14 +79,21 @@ import net.goui.flogger.testing.truth.LogMatcher.LogEntryFilter;
 @CheckReturnValue
 public final class LogsSubject extends Subject {
   private final ImmutableList<LogEntry> logs;
+  private final boolean allowEmptyMatch;
 
-  private LogsSubject(FailureMetadata metadata, ImmutableList<LogEntry> logs) {
+  private LogsSubject(
+      FailureMetadata metadata, ImmutableList<LogEntry> logs, boolean allowEmptyMatch) {
     super(metadata, logs);
     this.logs = logs;
+    this.allowEmptyMatch = allowEmptyMatch;
   }
 
   public static Factory<LogsSubject, ImmutableList<LogEntry>> logSequences() {
-    return LogsSubject::new;
+    return (m, l) -> new LogsSubject(m, l, /* allowEmptyMatch= */ false);
+  }
+
+  private static Factory<LogsSubject, ImmutableList<LogEntry>> maybeEmptylogSequences() {
+    return (m, l) -> new LogsSubject(m, l, /* allowEmptyMatch= */ true);
   }
 
   /** Starts a fluent assertion about the current sequence of captured logs. */
@@ -224,18 +231,59 @@ public final class LogsSubject extends Subject {
         .that(filter(logs, e -> e.hasMetadataKey(key)));
   }
 
-  /** Allows a following assertion to be applied to every matched log entry. */
+  /**
+   * Modifies this logs subject to permit trivial assertions against empty sequences of log entries.
+   * In general, you should avoid this method unless it is absolutely necessary, since it can create
+   * misleading tests which appear to verify events that may never actually occur.
+   *
+   * <p>This permits occasionally useful assertions about logs which might not appear for certain
+   * reasons. For example:
+   *
+   * <pre>{@code
+   * // The code under test should recover from low memory and emit this warning (but we cannot
+   * // reliably cause it to occur).
+   * logs.assertLogs()
+   *     .withLevel(SEVERE)
+   *     .withMessageContaining("Low Memory")
+   *     .allowingNoMatches()
+   *     .always()
+   *     .hasCause(OutOfMemoryError.class);
+   * }</pre>
+   */
+  public LogsSubject allowingNoMatches() {
+    return check("allowingNoMatches()").about(maybeEmptylogSequences()).that(logs);
+  }
+
+  /**
+   * Allows a following assertion to be applied to every currently matched log entry.
+   *
+   * <p>>Note: Unless {@link #allowingNoMatches()} is used prior to calling this method, this method
+   * will fail if there are no matched log entries.
+   */
   public MatchedLogsSubject always() {
+    checkForEmptyLogs();
     return check("always()").about(allMatchedLogs()).that(logs);
   }
 
-  /** Allows a following assertion to be applied to every matched log entry in a negative sense. */
+  /**
+   * Allows a following assertion to be applied to every matched log entry in a negative sense.
+   *
+   * <p>>Note: Unless {@link #allowingNoMatches()} is used prior to calling this method, this method
+   * will fail if there are no matched log entries.
+   */
   public MatchedLogsSubject never() {
+    checkForEmptyLogs();
     return check("never()").about(noMatchedLogs()).that(logs);
   }
 
-  /** Asserts about the number of matched logs. */
+  /**
+   * Asserts about the number of matched logs.
+   *
+   * <p>>Note: Unless {@link #allowingNoMatches()} is used prior to calling this method, this method
+   * will fail if there are no matched log entries.
+   */
   public IntegerSubject matchCount() {
+    checkForEmptyLogs();
     return check("matchCount()").that(logs.size());
   }
 
@@ -275,6 +323,14 @@ public final class LogsSubject extends Subject {
   /** Returns the list of current matches without making any assertions. */
   public ImmutableList<LogEntry> getAllMatches() {
     return logs;
+  }
+
+  private void checkForEmptyLogs() {
+    if (!allowEmptyMatch && logs.isEmpty()) {
+      failWithoutActual(
+          simpleFact(
+              "no log entries were matched (to test potentially empty sequences, use 'allowingNoMatches()')"));
+    }
   }
 
   private static String quoteIfString(Object value) {
