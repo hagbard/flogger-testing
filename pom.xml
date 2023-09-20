@@ -18,7 +18,7 @@
 
     <artifactId>flogger-testing</artifactId>
     <name>Flogger Testing API</name>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>pom</packaging>
     <url>https://github.com/hagbard/flogger-testing</url>
 
