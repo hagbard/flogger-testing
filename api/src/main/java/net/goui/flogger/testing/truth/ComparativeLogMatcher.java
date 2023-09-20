@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import net.goui.flogger.testing.LogEntry;
 
 /** Log matcher with reference to a specific target log entry against which matching can occur. */
-final class ComparativeLogMatcher extends LogMatcher {
+public final class ComparativeLogMatcher extends LogMatcher {
   private final LogEntry target;
 
   // Instances are created from static factory methods in LogMatcher.
