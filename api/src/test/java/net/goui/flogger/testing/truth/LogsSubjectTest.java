@@ -171,6 +171,24 @@ public class LogsSubjectTest {
     assertThrows(IllegalArgumentException.class, () -> assertThat(logs).getMatch(-1));
   }
 
+  @Test
+  public void testAllowingNoMatches() {
+    ImmutableList<LogEntry> logs = ImmutableList.of(log(INFO, "not matched"));
+
+    // This matches no log entries, so allowing always()/never() can be confusing.
+    var warnings = assertThat(logs).withLevel(WARNING);
+    AssertionError fail1 =
+        assertThrows(AssertionError.class, () -> warnings.always().haveMessageMatching("<No log>"));
+    Truth.assertThat(fail1).hasMessageThat().contains("no log entries were matched");
+    AssertionError fail2 =
+        assertThrows(AssertionError.class, () -> warnings.never().haveMessageMatching("<No log>"));
+    Truth.assertThat(fail2).hasMessageThat().contains("no log entries were matched");
+
+    // By calling allowingNoMatches() we can permit testing of empty sequences in rare cases.
+    warnings.allowingNoMatches().always().haveMessageMatching("<No such log>");
+    warnings.allowingNoMatches().never().haveMessageMatching("<No such log>");
+  }
+
   private static void assertMatched(LogsSubject subject, LogEntry... logs) {
     Truth.assertThat(subject.getAllMatches()).containsExactlyElementsIn(logs).inOrder();
     subject.matchCount().isEqualTo(logs.length);
