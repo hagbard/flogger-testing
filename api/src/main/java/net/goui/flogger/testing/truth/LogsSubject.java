@@ -329,7 +329,8 @@ public final class LogsSubject extends Subject {
     if (!allowEmptyMatch && logs.isEmpty()) {
       failWithoutActual(
           simpleFact(
-              "no log entries were matched (to test potentially empty sequences, use 'allowingNoMatches()')"));
+              "no log entries were matched"
+                  + " (to test potentially empty sequences, use 'allowingNoMatches()')"));
     }
   }
 
