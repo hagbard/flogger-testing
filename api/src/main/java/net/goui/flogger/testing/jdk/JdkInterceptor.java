@@ -62,12 +62,19 @@ public final class JdkInterceptor implements LogInterceptor {
   public Recorder attachTo(
       String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
     CapturingHandler handler = new CapturingHandler(collector, testId);
-    handler.setLevel(level.toJdkLogLevel());
+    Level jdkLogLevel = level.toJdkLogLevel();
+    handler.setLevel(jdkLogLevel);
     Logger jdkLogger = Logger.getLogger(loggerName);
+    Level oldJdkLevel = jdkLogger.getLevel();
+    if (jdkLogLevel.intValue() < oldJdkLevel.intValue()) {
+      jdkLogger.setLevel(jdkLogLevel);
+    }
     jdkLogger.addHandler(handler);
     return () -> {
       try {
+        // This is thread safe in the JDK.
         jdkLogger.removeHandler(handler);
+        jdkLogger.setLevel(oldJdkLevel);
       } catch (RuntimeException e) {
         // Ignored on close().
       }

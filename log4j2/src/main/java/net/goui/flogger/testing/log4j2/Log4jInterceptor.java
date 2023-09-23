@@ -14,6 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.math.BigDecimal;
@@ -109,15 +110,18 @@ public final class Log4jInterceptor implements LogInterceptor {
     LoggerContext context = (LoggerContext) LogManager.getContext(false);
     // The existing config for the logger name might be a parent config.
     LoggerConfig oldConfig = context.getConfiguration().getLoggerConfig(loggerName);
+    // Don't "turn off" existing logging in the logger itself (higher value == more verbose).
+    Level oldLog4JLevel = oldConfig.getLevel();
+    Level newLevel = Comparators.max(oldLog4JLevel, log4JLevel);
     // Add a new logger config or use the existing one.
     LoggerConfig config =
         loggerName.equals(oldConfig.getName())
             ? oldConfig
-            : new LoggerConfig(loggerName, log4JLevel, true);
+            : new LoggerConfig(loggerName, null, true);
     // Actually adds an AppenderRef
     config.addAppender(appender, null, null);
-    // Sets the level of the LoggerConfig
-    config.setLevel(log4JLevel);
+    // Sets the level of the LoggerConfig (either one).
+    config.setLevel(newLevel);
     context.getConfiguration().addLogger(loggerName, config);
     context.updateLoggers();
     return () -> {

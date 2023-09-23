@@ -21,6 +21,7 @@ import static net.goui.flogger.testing.SetLogLevel.Scope.UNDEFINED;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Closeable;
@@ -38,6 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,6 +111,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   private final ConcurrentLinkedQueue<LogEntry> logs = new ConcurrentLinkedQueue<>();
   private ImmutableList<LogEntry> logsSnapshot = ImmutableList.of();
   private Consumer<LogsSubject> verification;
+  private final List<LogsExpectation> expectations = new ArrayList<>();
   private final Set<LogEntry> excluded = new HashSet<>();
 
   protected TestingApi(Map<String, LevelClass> levelMap, @Nullable LogInterceptor interceptor) {
@@ -236,6 +239,38 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   }
 
   /**
+   * Adds a new expectation for the log entries matched by the given assertion, excluding any
+   * matched entries from post-test verification. The order in which expectations are applied is not
+   * important.
+   *
+   * <p>This method can be called at any point in a test, but is typically expected to occur
+   * <em>before</em> logging occurs, and applies to all the log entries captured during the test.
+   * Broadly speaking this mimics how expectations would be attached to mock logger instances.
+   *
+   * <p>Using the method is not the preferred way to use this logs testing API, since it mimics (and
+   * has many of the downside of) using mock loggers. It is easy to write overly brittle logs tests
+   * using this API and increase the maintenance burden of your tests, which in turn may end up
+   * discouraging people from adding new log statements to your code.
+   *
+   * <p>For example, it can be very tempting to write tests like:
+   *
+   * <pre>{@code
+   * logs.verify(LogsSubject::doNotOccur);
+   *
+   * // Now list, and implicitly allow, the following log statements.
+   * logs.expect(log -> log.withLevel(INFO).withMessageContaining("hello", "world").atLeast(1);
+   * logs.expect(log -> log.withLevel(WARNING).withCause(IllegalStateException.class).once();
+   * }</pre>
+   *
+   * <p>But such a test may break every time a log statement in the code-under-test is added or
+   * modified. Where possible, prefer to make assertions about log statements, and reserve
+   * "verification" for classes of log statements which should never occur (e.g. no "SEVERE").
+   */
+  public LogsExpectation expectLogs(UnaryOperator<LogsSubject> assertion) {
+    return new LogsExpectation(assertion);
+  }
+
+  /**
    * Adds a post-test assertion, run automatically after the current test case finishes.
    *
    * <p>This method can be called either when the test API is created (e.g. when a JUnit rule or
@@ -301,6 +336,57 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     this.verification = s -> {};
   }
 
+  void addExpectation(LogsExpectation expectation) {
+    this.expectations.add(expectation);
+  }
+
+  /** An expectation API which permits matched log entries to be excluded from verification. */
+  public final class LogsExpectation {
+    private final UnaryOperator<LogsSubject> assertion;
+    // This is mutable, but it should be safe since the method which sets this field returns void,
+    // so there's no way users can accidentally set the validator twice.
+    private Consumer<IntegerSubject> countValidator = null;
+
+    private LogsExpectation(UnaryOperator<LogsSubject> assertion) {
+      this.assertion = checkNotNull(assertion);
+    }
+
+    /** Sets this expectation to accept a single occurrence of the matched log. */
+    public void once() {
+      times(1);
+    }
+
+    /** Sets this expectation to accept exactly N occurrences of the matched log. */
+    public void times(int n) {
+      countValidator = s -> s.isEqualTo(n);
+      TestingApi.this.addExpectation(this);
+    }
+
+    /** Sets this expectation to accept at-least N occurrences of the matched log. */
+    public void atLeast(int n) {
+      countValidator = s -> s.isAtLeast(n);
+      TestingApi.this.addExpectation(this);
+    }
+
+    /** Sets this expectation to accept at-most N occurrences of the matched log. */
+    public void atMost(int n) {
+      countValidator = s -> s.isAtMost(n);
+      TestingApi.this.addExpectation(this);
+    }
+
+    /** Sets this expectation to accept more-than N occurrences of the matched log. */
+    public void moreThan(int n) {
+      countValidator = s -> s.isGreaterThan(n);
+      TestingApi.this.addExpectation(this);
+    }
+
+    /** Sets this expectation to accept fewer-than N occurrences of the matched log. */
+    public void fewerThan(int n) {
+      countValidator = s -> s.isLessThan(n);
+      TestingApi.this.addExpectation(this);
+    }
+  }
+
   protected final ApiHook install(
       boolean useTestId, ImmutableMap<String, LevelClass> extraLevelMap) {
     return new ApiHook(useTestId, extraLevelMap);
@@ -337,6 +423,11 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       recorders.forEach(Recorder::close);
       TestId.release(testId);
       LogsSubject subject = TestingApi.this.assertLogs();
+      for (LogsExpectation expectation : expectations) {
+        LogsSubject expected = expectation.assertion.apply(subject);
+        expectation.countValidator.accept(expected.matchCount());
+        excluded.addAll(expected.getAllMatches());
+      }
       if (!excluded.isEmpty()) {
         subject =
             subject.matching(
