@@ -239,6 +239,28 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   }
 
   /**
+   * Adds a post-test assertion, run automatically after the current test case finishes.
+   *
+   * <p>This method can be called either when the test API is created (e.g. when a JUnit rule or
+   * extension is initialized) or during a test. Assertions are combined, in the order they were
+   * added, and executed immediately after the test exits.
+   *
+   * <p>For example:
+   *
+   * <pre>{@code
+   * @Rule
+   * public final FloggerTestRule logs =
+   *     FloggerTestRule.forClassUnderTest(INFO)
+   *         .verify(logs -> logs.atOrAbove(WARNING).doNotOccur());
+   * }</pre>
+   */
+  @CanIgnoreReturnValue
+  public final ApiT verify(Consumer<LogsSubject> assertion) {
+    this.verification = this.verification.andThen(checkNotNull(assertion));
+    return api();
+  }
+
+  /**
    * Adds a new expectation for the log entries matched by the given assertion, excluding any
    * matched entries from post-test verification. Expectations are best used to "make allowances"
    * for logs which violate a logging policy expressed via {@link #verify(Consumer)}, but which are
@@ -277,49 +299,33 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   }
 
   /**
-   * Adds a post-test assertion, run automatically after the current test case finishes.
+   * Excludes one or more expected log entries from any post-test log verification. This method is
+   * useful when you have a common logging policy (e.g. no warning logs) which is violated in a
+   * small number of tests.
    *
-   * <p>This method can be called either when the test API is created (e.g. when a JUnit rule or
-   * extension is initialized) or during a test. Assertions are combined, in the order they were
-   * added, and executed immediately after the test exits.
-   *
-   * <p>For example:
-   *
-   * <pre>{@code
-   * @Rule
-   * public final FloggerTestRule logs =
-   *     FloggerTestRule.forClassUnderTest(INFO)
-   *         .verify(logs -> logs.atOrAbove(WARNING).doNotOccur());
-   * }</pre>
-   */
-  @CanIgnoreReturnValue
-  public final ApiT verify(Consumer<LogsSubject> assertion) {
-    this.verification = this.verification.andThen(checkNotNull(assertion));
-    return api();
-  }
-
-  /**
-   * Excludes one or more log entries from any post-test log verification. This method is useful
-   * when you have a common logging policy (e.g. no warning logs) which you are deliberately
-   * violating in a small number of cases.
+   * <p>Unlike {@link #expectLogs(UnaryOperator)}, this method can only be called once logs are
+   * available for making assertions on, so must come after the code-under-test.
    *
    * <p>Once a log entry is removed from verification, it cannot be reinstated, but you can still
    * make assertions on it within the test.
    */
-  public final void excludeFromVerification(LogEntry entry, LogEntry... rest) {
+  public final void expect(LogEntry entry, LogEntry... rest) {
     excluded.add(entry);
     excluded.addAll(asList(rest));
   }
 
   /**
-   * Excludes a sequence of log entries from any post-test log verification. This method is useful
-   * when you have a common logging policy (e.g. no warning logs) which you are deliberately
-   * violating in a small number of cases.
+   * Excludes a sequence of expected log entries from any post-test log verification. This method is
+   * useful when you have a common logging policy (e.g. no warning logs) which is violated in a
+   * small number of tests.
+   *
+   * <p>Unlike {@link #expectLogs(UnaryOperator)}, this method can only be called once logs are
+   * available for making assertions on, so must come after the code-under-test.
    *
    * <p>Once a log entry is removed from verification, it cannot be reinstated, but you can still
    * make assertions on it within the test.
    */
-  public final void excludeFromVerification(Iterable<LogEntry> entries) {
+  public final void expect(Iterable<LogEntry> entries) {
     entries.forEach(excluded::add);
   }
 
@@ -329,14 +335,13 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    * was called has exited.
    *
    * <p>Often, when only a small number of expected log entries are going to fail verification (e.g.
-   * an explicitly expected warning log) it is better to call {@link
-   * #excludeFromVerification(LogEntry, LogEntry...)} to avoid accidentally allowing other,
-   * unexpected logs to go unverified.
+   * an explicitly expected warning log) it is better to call {@link #expect(LogEntry, LogEntry...)}
+   * to avoid accidentally allowing other, unexpected logs to go unverified.
    *
    * <p>This method will NOT remove any log entries from the "excluded" list, and any such entries
    * will also be ignored for any new post-test verification that's added. In general, it is not
-   * recommended to use both {@link #excludeFromVerification}() and {@code clearVerification()} in
-   * the same test as it is likely to make tests less readable.
+   * recommended to use both {@link #expectLogs}() and {@code clearVerification()} in the same test
+   * as it is likely to make tests less readable.
    */
   public final void clearVerification() {
     this.verification = s -> {};
