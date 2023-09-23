@@ -290,6 +290,31 @@ public class TestingApiTest {
   }
 
   @Test
+  public void testAssertLogs_expectations() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      // Assert there are no unaccounted for logs once all expectations are accounted for.
+      logs.verify(LogsSubject::doNotOccur);
+
+      // Expectations can be applied before the logging occurs and are verified after the test.
+      // This is a generally discouraged approach to logs testing, but it is supported to help
+      // existing code switch to this API.
+      //
+      // NOTE: This is exactly why using "expectations" over log entries is brittle. It's basically
+      // the same as having a mocked logger, and encourages the sort of testing which has to isolate
+      // exactly where log statements are. In this case the test API does its own bit of logging
+      // before/after everything else, which we must also make an expectation for. This leaks the
+      // existence of these other log statements (which no other test cares about) into this test.
+      logs.expectLogs(log -> log.withMessageContaining("anything")).atLeast(1);
+      // Note that "foobar" is covered by both of the following expectations.
+      logs.expectLogs(log -> log.withMessageContaining("foo")).atLeast(1);
+      logs.expectLogs(log -> log.withMessageContaining("bar")).atLeast(1);
+
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+    }
+  }
+
+  @Test
   public void testGuessClassUnderTest() {
     // a.b.XxxTest.class --> "a.b.Xxx"
     assertThat(guessClassUnderTest(TestingApiTest.class)).isEqualTo(TestingApi.class.getName());
