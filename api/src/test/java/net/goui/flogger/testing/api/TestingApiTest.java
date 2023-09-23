@@ -302,7 +302,7 @@ public class TestingApiTest {
       //
       // NOTE: This is exactly why using "expectations" over log entries is brittle. It's basically
       // the same as having a mocked logger, and encourages the sort of testing which has to isolate
-      // exactly where log statements are. In this case the test API does its own bit of logging
+      // exactly where log statements are. In this case, the test API does its own bit of logging
       // before/after everything else, which we must also make an expectation for. This leaks the
       // existence of these other log statements (which no other test cares about) into this test.
       logs.expectLogs(log -> log.withMessageContaining("anything")).atLeast(1);

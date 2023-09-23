@@ -240,17 +240,22 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
 
   /**
    * Adds a new expectation for the log entries matched by the given assertion, excluding any
-   * matched entries from post-test verification. The order in which expectations are applied is not
-   * important.
+   * matched entries from post-test verification. Expectations are best used to "make allowances"
+   * for logs which violate a logging policy expressed via {@link #verify(Consumer)}, but which are
+   * not the subject of the current test.
    *
    * <p>This method can be called at any point in a test, but is typically expected to occur
    * <em>before</em> logging occurs, and applies to all the log entries captured during the test.
-   * Broadly speaking this mimics how expectations would be attached to mock logger instances.
+   * Broadly speaking this mimics how expectations would be attached to mock logger instances, but
+   * the order in which expectations are applied is not important.
    *
-   * <p>Using the method is not the preferred way to use this logs testing API, since it mimics (and
-   * has many of the downside of) using mock loggers. It is easy to write overly brittle logs tests
-   * using this API and increase the maintenance burden of your tests, which in turn may end up
-   * discouraging people from adding new log statements to your code.
+   * <p>Using this method to make assertions about the "log statements under test" is not the
+   * preferred way to use this API, since it mimics (and has many of the downside of) using mock
+   * loggers.
+   *
+   * <p>It is easy to write overly brittle logs tests using this API and increase the maintenance
+   * burden of your tests, which in turn may end up discouraging people from adding new log
+   * statements to your code.
    *
    * <p>For example, it can be very tempting to write tests like:
    *
@@ -264,7 +269,8 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
    *
    * <p>But such a test may break every time a log statement in the code-under-test is added or
    * modified. Where possible, prefer to make assertions about log statements, and reserve
-   * "verification" for classes of log statements which should never occur (e.g. no "SEVERE").
+   * "verification" for classes of log statements which should never occur (e.g. "WARNING" or
+   * "SEVERE" logs).
    */
   public LogsExpectation expectLogs(UnaryOperator<LogsSubject> assertion) {
     return new LogsExpectation(assertion);
