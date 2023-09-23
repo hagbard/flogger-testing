@@ -10,7 +10,6 @@
 
 package net.goui.flogger.testing.api;
 
-
 import net.goui.flogger.testing.api.LogInterceptor.Support;
 
 /**

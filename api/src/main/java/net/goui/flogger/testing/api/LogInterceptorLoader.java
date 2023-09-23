@@ -34,8 +34,7 @@ final class LogInterceptorLoader {
             "Multiple log interceptors found; using first available service: "
                 + factory.getClass().getName());
       } else {
-        logger.info(
-            "Using log interceptor factory: " + factory.getClass().getName());
+        logger.info("Using log interceptor factory: " + factory.getClass().getName());
       }
       return factory;
     }
