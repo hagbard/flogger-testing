@@ -238,59 +238,7 @@ public class TestingApiTest {
   }
 
   @Test
-  public void testVerification_exclude() {
-    TestApi logs = TestApi.create();
-    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
-
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
-
-      LogEntry warning =
-          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getOnlyMatch();
-
-      // Without this, the warning would cause verification failure when the api is closed.
-      logs.excludeFromVerification(warning);
-    }
-  }
-
-  @Test
-  public void testVerification_excludedLogsAreUniqueInstances_fail() {
-    TestApi logs = TestApi.create();
-    boolean testFailed = false;
-    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
-
-      // The logs here have identical contents but are not considered equal.
-      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
-
-      LogEntry firstWarning =
-          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getMatch(0);
-
-      // Only excluding the first warning means that the second one causes verification to fail.
-      logs.excludeFromVerification(firstWarning);
-    } catch (AssertionError expected) {
-      testFailed = true;
-    }
-    assertThat(testFailed).isTrue();
-  }
-
-  @Test
-  public void testVerification_excludedLogsAreUniqueInstances_pass() {
-    TestApi logs = TestApi.create();
-    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
-
-      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
-
-      LogsSubject warnings = logs.assertLogs().withLevel(WARNING).withMessageContaining("warning");
-
-      // Excluding all warnings makes the verification pass.
-      logs.excludeFromVerification(warnings.getAllMatches());
-    }
-  }
-
-  @Test
-  public void testAssertLogs_expectations() {
+  public void testAssertLogs_expectLogs() {
     TestApi logs = TestApi.create();
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Assert there are no unaccounted for logs once all expectations are accounted for.
@@ -311,6 +259,58 @@ public class TestingApiTest {
       logs.expectLogs(log -> log.withMessageContaining("bar")).atLeast(1);
 
       logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+    }
+  }
+
+  @Test
+  public void testVerification_expectedLogsAreNotVerified() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+
+      LogEntry warning =
+          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getOnlyMatch();
+
+      // Without this, the warning would cause verification failure when the api is closed.
+      logs.expect(warning);
+    }
+  }
+
+  @Test
+  public void testVerification_expectedLogsAreUniqueInstances_fail() {
+    TestApi logs = TestApi.create();
+    boolean testFailed = false;
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      // The logs here have identical contents but are not considered equal.
+      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+
+      LogEntry firstWarning =
+          logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getMatch(0);
+
+      // Only excluding the first warning means that the second one causes verification to fail.
+      logs.expect(firstWarning);
+    } catch (AssertionError expected) {
+      testFailed = true;
+    }
+    assertThat(testFailed).isTrue();
+  }
+
+  @Test
+  public void testVerification_expectedLogsAreUniqueInstances_pass() {
+    TestApi logs = TestApi.create();
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
+
+      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+
+      LogsSubject warnings = logs.assertLogs().withLevel(WARNING).withMessageContaining("warning");
+
+      // Excluding all warnings makes the verification pass.
+      logs.expect(warnings.getAllMatches());
     }
   }
 
