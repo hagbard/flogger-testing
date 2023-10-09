@@ -76,7 +76,7 @@
                     <groupId>com.google.flogger</groupId>
                     <artifactId>flogger-grpc-context</artifactId>
                     <version>0.7.4</version>
-                    <scope>test</scope>
+                    <scope>runtime</scope>
                 </dependency>
             </dependencies>
         </profile>
