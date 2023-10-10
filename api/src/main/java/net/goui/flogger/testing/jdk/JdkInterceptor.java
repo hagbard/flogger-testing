@@ -65,8 +65,9 @@ public final class JdkInterceptor implements LogInterceptor {
     Level jdkLogLevel = level.toJdkLogLevel();
     handler.setLevel(jdkLogLevel);
     Logger jdkLogger = Logger.getLogger(loggerName);
+    // The old level can be null (implying it's inherited) but isLoggable() does the right thing.
     Level oldJdkLevel = jdkLogger.getLevel();
-    if (jdkLogLevel.intValue() < oldJdkLevel.intValue()) {
+    if (!jdkLogger.isLoggable(jdkLogLevel)) {
       jdkLogger.setLevel(jdkLogLevel);
     }
     jdkLogger.addHandler(handler);
