@@ -28,7 +28,7 @@ final class LogFilters {
 
   private static int offsetOfFragment(String message, String fragment, int offset) {
     checkArgument(!fragment.isEmpty(), "message fragments must not be empty");
-    if (offset >= -1) {
+    if (offset != -1) {
       int start = message.indexOf(fragment, offset);
       offset = start >= 0 ? start + fragment.length() : -1;
     }

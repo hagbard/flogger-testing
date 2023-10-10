@@ -27,6 +27,7 @@ public class LogFiltersTest extends TestCase {
     assertThat(containsAllFragmentsInOrder("hello world", "hello")).isTrue();
     assertThat(containsAllFragmentsInOrder("hello world", "hello", "world")).isTrue();
 
+    assertThat(containsAllFragmentsInOrder("hello world", "goodbye", "world")).isFalse();
     assertThat(containsAllFragmentsInOrder("hello world", "world", "hello")).isFalse();
     assertThat(containsAllFragmentsInOrder("hello world", "hello", "hello")).isFalse();
 
