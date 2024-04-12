@@ -41,13 +41,13 @@ best out of your debug logging.
 <dependency>
     <groupId>com.google.flogger</groupId>
     <artifactId>flogger-xxx-backend</artifactId>  <!-- xxx = "log4j2" or "system" -->
-    <version>0.7.4</version>
+    <version>0.8</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/com.google.flogger/flogger-grpc-context -->
 <dependency>
     <groupId>com.google.flogger</groupId>
     <artifactId>flogger-grpc-context</artifactId>
-    <version>0.7.4</version>
+    <version>0.8</version>
 </dependency>
 ```
 <!-- @formatter:on -->
