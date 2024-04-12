@@ -23,6 +23,8 @@ import static net.goui.flogger.testing.LevelClass.INFO;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.backend.LoggerBackend;
+import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.backend.system.AbstractLogRecord;
 import com.google.common.flogger.context.LogLevelMap;
 import com.google.common.flogger.context.ScopedLoggingContexts;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
@@ -47,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class FloggerBinding {
   // Tag label for a unique ID set for tests to support parallel testing with Flogger.
   private static final String TEST_ID = "test_id";
-  private static final String EXPECTED_LOGGER_NAME = FloggerBinding.class.getName();
+  private static final String LOGGING_CLASS_NAME = FloggerBinding.class.getName();
 
   @Nullable private static final FloggerBinding INSTANCE = determineInstance();
 
@@ -90,21 +93,41 @@ public final class FloggerBinding {
   }
 
   Support testSupportLevel(AbstractLogInterceptorFactory factory) {
-    factory.configureUnderlyingLoggerForInfoLogging(EXPECTED_LOGGER_NAME);
+    // Not static fields to avoid triggering class loader in cases where Flogger is not available.
+    FluentLogger logger = FluentLogger.forEnclosingClass();
+    // This should be the same (or at least equivalent) backend as used by 'logger'.
+    LoggerBackend backend = Platform.getBackend(LOGGING_CLASS_NAME);
+    // From which we can extract the backend's real name (not always the same as the logging class).
+    String underlyingLoggerName = backend.getLoggerName();
+    if (!underlyingLoggerName.startsWith("net.goui.flogger")) {
+      // The backend is not associated with the logging class, or even in the project namespace.
+      // This means it is unsafe to assume we can change the log level programmatically in order to
+      // test logging support, so if logging isn't enabled for INFO, we shouldn't try and change it.
+      if (!backend.isLoggable(Level.INFO)) {
+        return Support.UNKNOWN;
+      }
+    }
+    factory.configureUnderlyingLoggerForInfoLogging(underlyingLoggerName);
     LogInterceptor interceptor = factory.get();
     RuntimeException testCause = new RuntimeException();
     List<LogEntry> logged = new ArrayList<>();
+    // Attach using the user facing logging class name (not the underlying name).
     try (LogInterceptor.Recorder r =
-        interceptor.attachTo(EXPECTED_LOGGER_NAME, FINE, logged::add, "DUMMY_TEST_ID")) {
-      Lazy.logger.atInfo().withCause(testCause).log("<<enabled message>>");
-      Lazy.logger.atFine().log("<<forced message>>");
-      Lazy.logger.atFinest().log("<<disabled log>>");
+        interceptor.attachTo(LOGGING_CLASS_NAME, FINE, logged::add, "DUMMY_TEST_ID")) {
+      logger.atInfo().withCause(testCause).log("<<enabled message>>");
+      logger.atFine().log("<<forced message>>");
+      logger.atFinest().log("<<disabled log>>");
     }
     if (logged.isEmpty()) {
       return Support.NONE;
     }
-    // Support can only go down as checks fail.
+    // Support can only go down as checks fail. Start
     Support support = Support.FULL;
+    if (!underlyingLoggerName.equals(LOGGING_CLASS_NAME)) {
+      // We got some logs, but the backend name mapping does not preserve class names. This is
+      // partial support because it prevents testing for "class-under-test" etc. reliably.
+      support = min(support, Support.PARTIAL);
+    }
     LogEntry enabledLog = logged.get(0);
     support = min(support, testBasicSupport(enabledLog, INFO, "<<enabled message>>", testCause));
     if (logged.size() == 2) {
@@ -116,6 +139,7 @@ public final class FloggerBinding {
         support = min(support, Support.PARTIAL);
       }
     } else {
+      // We got more logs than we expected (also bad).
       support = min(support, Support.PARTIAL);
     }
     return support;
@@ -154,7 +178,7 @@ public final class FloggerBinding {
       return Support.NONE;
     }
     boolean fullSupport =
-        e.className().equals(EXPECTED_LOGGER_NAME)
+        e.className().equals(LOGGING_CLASS_NAME)
             && e.methodName().equals("getSupportLevel")
             && e.levelClass() == levelClass
             && Objects.equals(e.cause(), cause);
@@ -167,9 +191,5 @@ public final class FloggerBinding {
     } catch (ClassNotFoundException e) {
       return null;
     }
-  }
-
-  private static final class Lazy {
-    static final FluentLogger logger = FluentLogger.forEnclosingClass();
   }
 }
