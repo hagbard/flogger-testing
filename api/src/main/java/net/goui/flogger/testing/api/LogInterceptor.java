@@ -47,6 +47,17 @@ public interface LogInterceptor {
     PARTIAL,
 
     /**
+     * It cannot be determined if this interceptor implementation is supported, and tests were not
+     * carried out. This can be due to logging configuration and custom Flogger implementations
+     * which do not create logging backends with expected behaviour. Unlike cases where {@link
+     * Support#NONE} is returned, returning {@code UNKNOWN} support will produce a different user
+     * message.
+     *
+     * <p>An interceptor with unknown support will only be used if not better option is available.
+     */
+    UNKNOWN,
+
+    /**
      * This interceptor implementation is not supported and extracts little or no data from the
      * underlying log system.
      *
