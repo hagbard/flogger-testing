@@ -98,8 +98,8 @@ public final class FloggerBinding {
     // This should be the same (or at least equivalent) backend as used by 'logger'.
     LoggerBackend backend = Platform.getBackend(LOGGING_CLASS_NAME);
     // From which we can extract the backend's real name (not always the same as the logging class).
-    String underlyingLoggerName = backend.getLoggerName();
-    if (!underlyingLoggerName.startsWith("net.goui.flogger")) {
+    String backendName = backend.getLoggerName();
+    if (!backendName.startsWith("net.goui.flogger")) {
       // The backend is not associated with the logging class, or even in the project namespace.
       // This means it is unsafe to assume we can change the log level programmatically in order to
       // test logging support, so if logging isn't enabled for INFO, we shouldn't try and change it.
@@ -107,13 +107,12 @@ public final class FloggerBinding {
         return Support.UNKNOWN;
       }
     }
-    factory.configureUnderlyingLoggerForInfoLogging(underlyingLoggerName);
+    factory.configureUnderlyingLoggerForInfoLogging(backendName);
     LogInterceptor interceptor = factory.get();
     RuntimeException testCause = new RuntimeException();
     List<LogEntry> logged = new ArrayList<>();
-    // Attach using the user facing logging class name (not the underlying name).
-    try (LogInterceptor.Recorder r =
-        interceptor.attachTo(LOGGING_CLASS_NAME, FINE, logged::add, "DUMMY_TEST_ID")) {
+
+    try (LogInterceptor.Recorder r = interceptor.attachTo(backendName, FINE, logged::add)) {
       logger.atInfo().withCause(testCause).log("<<enabled message>>");
       logger.atFine().log("<<forced message>>");
       logger.atFinest().log("<<disabled log>>");
@@ -123,7 +122,7 @@ public final class FloggerBinding {
     }
     // Support can only go down as checks fail. Start
     Support support = Support.FULL;
-    if (!underlyingLoggerName.equals(LOGGING_CLASS_NAME)) {
+    if (!backendName.equals(LOGGING_CLASS_NAME)) {
       // We got some logs, but the backend name mapping does not preserve class names. This is
       // partial support because it prevents testing for "class-under-test" etc. reliably.
       support = min(support, Support.PARTIAL);

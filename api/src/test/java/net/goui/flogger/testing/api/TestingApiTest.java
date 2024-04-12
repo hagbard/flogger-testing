@@ -10,7 +10,7 @@
 
 package net.goui.flogger.testing.api;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.FINE;
 import static net.goui.flogger.testing.LevelClass.INFO;
@@ -31,7 +31,6 @@ import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.context.Tags;
 import com.google.common.truth.Truth;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -54,33 +53,36 @@ public class TestingApiTest {
 
   private static class TestInterceptor implements LogInterceptor {
     private final HashMap<String, LevelClass> attached = new HashMap<>();
-    private Consumer<LogEntry> logCollector = null;
+    private final HashMap<String, Consumer<LogEntry>> logCollectors = new HashMap<>();
 
     @Override
-    public Recorder attachTo(
-        String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
-      if (logCollector == null) {
-        logCollector = checkNotNull(collector);
-      }
+    public Recorder attachTo(String loggerName, LevelClass level, Consumer<LogEntry> collector) {
+      checkState(logCollectors.put(loggerName, collector) == null,
+          "The same logger name should not be attached multiple times: %s", loggerName);
       attached.put(loggerName, level);
-      logCollector.accept(log(INFO, "attach: " + loggerName));
+      collector.accept(log(loggerName, INFO, "attach: " + loggerName));
       return () -> {
-        logCollector.accept(log(INFO, "detach: " + loggerName));
+        collector.accept(log(loggerName, INFO, "detach: " + loggerName));
         attached.remove(loggerName);
       };
     }
 
     void addLogs(LogEntry... entries) {
-      Arrays.stream(entries).forEach(logCollector);
+      for (LogEntry e : entries) {
+        Consumer<LogEntry> collector = logCollectors.get(e.className());
+        if (collector != null) {
+          collector.accept(e);
+        }
+      }
     }
   }
 
   private static class TestApi extends TestingApi<TestApi> {
     // Most tests only need the simplest test API constructed.
-    static TestApi create() {
+    static TestApi create(String className) {
       TestInterceptor interceptor = new TestInterceptor();
       // Level map must have at least one entry to cause the injector to be attached.
-      ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of("<anything>", INFO);
+      ImmutableMap<String, LevelClass> levelMap = ImmutableMap.of(className, INFO);
       return new TestApi(levelMap, interceptor);
     }
 
@@ -114,7 +116,7 @@ public class TestingApiTest {
 
       // Sneaky look behind the scenes to make sure a test ID was added in this context.
       Tags tags = Platform.getContextDataProvider().getTags();
-      assertThat(tags.asMap()).containsKey(TestingApi.TEST_ID);
+      assertThat(tags.asMap()).containsKey("test_id");
     }
     assertThat(interceptor.attached).isEmpty();
 
@@ -160,9 +162,13 @@ public class TestingApiTest {
 
   @Test
   public void testAssertLogs_basicApi() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "foobar"));
 
       logs.assertLogs().withMessageContaining("foo").matchCount().isEqualTo(2);
       logs.assertLogs().withMessageContaining("bar").matchCount().isEqualTo(2);
@@ -176,9 +182,13 @@ public class TestingApiTest {
 
   @Test
   public void testAssertLogs_failureMessages() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "foobar"));
 
       assertFailureContains(
           () -> logs.assertLogs().withMessageContaining("foo").doNotOccur(),
@@ -199,24 +209,29 @@ public class TestingApiTest {
 
   @Test
   public void testVerification_pass() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
       // No warning logs, so verification passes.
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"));
+      logs.addTestLogs(log(className, INFO, "foo"), log(className, INFO, "bar"));
     }
   }
 
   @Test
   public void testVerification_fail() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     boolean testFailed = false;
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
       // Adding a warning log makes verification fail.
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "warning"));
     } catch (AssertionError expected) {
       testFailed = true;
     }
@@ -225,11 +240,15 @@ public class TestingApiTest {
 
   @Test
   public void testVerification_clearVerification() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "warning"));
 
       // Without this, the warning would cause verification failure when the api is closed, but no
       // other logs are verified either.
@@ -239,7 +258,8 @@ public class TestingApiTest {
 
   @Test
   public void testAssertLogs_expectLogs() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       // Assert there are no unaccounted for logs once all expectations are accounted for.
       logs.verify(LogsSubject::doNotOccur);
@@ -253,22 +273,30 @@ public class TestingApiTest {
       // exactly where log statements are. In this case, the test API does its own bit of logging
       // before/after everything else, which we must also make an expectation for. This leaks the
       // existence of these other log statements (which no other test cares about) into this test.
-      logs.expectLogs(log -> log.withMessageContaining("anything")).atLeast(1);
+      logs.expectLogs(log -> log.withMessageContaining("attach")).atLeast(1);
+      logs.expectLogs(log -> log.withMessageContaining("detach")).atLeast(1);
       // Note that "foobar" is covered by both of the following expectations.
       logs.expectLogs(log -> log.withMessageContaining("foo")).atLeast(1);
       logs.expectLogs(log -> log.withMessageContaining("bar")).atLeast(1);
 
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "foobar"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "foobar"));
     }
   }
 
   @Test
   public void testVerification_expectedLogsAreNotVerified() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
-      logs.addTestLogs(log(INFO, "foo"), log(INFO, "bar"), log(WARNING, "warning"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, INFO, "bar"),
+          log(className, WARNING, "warning"));
 
       LogEntry warning =
           logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getOnlyMatch();
@@ -280,13 +308,17 @@ public class TestingApiTest {
 
   @Test
   public void testVerification_expectedLogsAreUniqueInstances_fail() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     boolean testFailed = false;
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
       // The logs here have identical contents but are not considered equal.
-      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, WARNING, "warning"),
+          log(className, WARNING, "warning"));
 
       LogEntry firstWarning =
           logs.assertLogs().withLevel(WARNING).withMessageContaining("warning").getMatch(0);
@@ -301,11 +333,15 @@ public class TestingApiTest {
 
   @Test
   public void testVerification_expectedLogsAreUniqueInstances_pass() {
-    TestApi logs = TestApi.create();
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
       logs.verify(anyLogs -> anyLogs.withLevelAtLeast(WARNING).doNotOccur());
 
-      logs.addTestLogs(log(INFO, "foo"), log(WARNING, "warning"), log(WARNING, "warning"));
+      logs.addTestLogs(
+          log(className, INFO, "foo"),
+          log(className, WARNING, "warning"),
+          log(className, WARNING, "warning"));
 
       LogsSubject warnings = logs.assertLogs().withLevel(WARNING).withMessageContaining("warning");
 
@@ -383,9 +419,9 @@ public class TestingApiTest {
     }
   }
 
-  private static LogEntry log(LevelClass level, String message) {
+  private static LogEntry log(String className, LevelClass level, String message) {
     return LogEntry.of(
-        "class",
+        className,
         "method",
         level.name(),
         level,

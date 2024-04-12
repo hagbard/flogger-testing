@@ -77,33 +77,11 @@ public final class Log4jInterceptor implements LogInterceptor {
   }
 
   @Override
-  public Recorder attachTo(
-      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
+  public Recorder attachTo(String loggerName, LevelClass level, Consumer<LogEntry> collector) {
     // WARNING: Log4J is unintuitive with log level ordering (compared to JDK). A "high" level means
     // high verbosity (i.e. what most people call "low level logging").
     Level log4JLevel = toLog4JLevel(level);
-    LevelRangeFilter specifiedLevelAndAbove =
-        LevelRangeFilter.createFilter(
-            /* minLevel (null ==> max) */ null,
-            /* maxLevel */ log4JLevel,
-            /* onMatch (null ==> accept) */ Result.NEUTRAL,
-            /* onMismatch (null ==> deny) */ Result.DENY);
-
-    Appender appender =
-        new AbstractAppender(
-            "CapturingAppender",
-            specifiedLevelAndAbove,
-            /* layout */ null,
-            /* ignoreExceptions */ true,
-            EMPTY_ARRAY) {
-          @Override
-          public void append(LogEvent event) {
-            MessageAndMetadata mm = metadataExtractor.extract(event);
-            if (LogInterceptor.shouldCollect(mm, testId)) {
-              collector.accept(toLogEntry(event, mm));
-            }
-          }
-        };
+    Appender appender = getAppender(collector, log4JLevel);
 
     // If the call to configureUnderlyingLoggerForInfoLogging() succeeded, we should be
     // able to cast the context instance.
@@ -130,6 +108,26 @@ public final class Log4jInterceptor implements LogInterceptor {
         context.updateLoggers();
       } catch (RuntimeException e) {
         // Ignored on close().
+      }
+    };
+  }
+
+  private Appender getAppender(Consumer<LogEntry> collector, Level log4JLevel) {
+    LevelRangeFilter specifiedLevelAndAbove =
+        LevelRangeFilter.createFilter(
+            /* minLevel (null ==> max) */ null,
+            /* maxLevel */ log4JLevel,
+            /* onMatch (null ==> accept) */ Result.NEUTRAL,
+            /* onMismatch (null ==> deny) */ Result.DENY);
+    return new AbstractAppender(
+        "CapturingAppender",
+        specifiedLevelAndAbove,
+        /* layout */ null,
+        /* ignoreExceptions */ true,
+        EMPTY_ARRAY) {
+      @Override
+      public void append(LogEvent event) {
+        collector.accept(toLogEntry(event, metadataExtractor.extract(event)));
       }
     };
   }
