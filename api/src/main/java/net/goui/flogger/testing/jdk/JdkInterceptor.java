@@ -59,12 +59,11 @@ public final class JdkInterceptor implements LogInterceptor {
   }
 
   @Override
-  public Recorder attachTo(
-      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId) {
-    CapturingHandler handler = new CapturingHandler(collector, testId);
+  public Recorder attachTo(String backendName, LevelClass level, Consumer<LogEntry> collector) {
+    CapturingHandler handler = new CapturingHandler(collector);
     Level jdkLogLevel = level.toJdkLogLevel();
     handler.setLevel(jdkLogLevel);
-    Logger jdkLogger = Logger.getLogger(loggerName);
+    Logger jdkLogger = Logger.getLogger(backendName);
     // The old level can be null (implying it's inherited) but isLoggable() does the right thing.
     Level oldJdkLevel = jdkLogger.getLevel();
     if (!jdkLogger.isLoggable(jdkLogLevel)) {
@@ -84,32 +83,28 @@ public final class JdkInterceptor implements LogInterceptor {
 
   private class CapturingHandler extends Handler {
     private final Consumer<LogEntry> collector;
-    private final String testId;
 
-    private CapturingHandler(Consumer<LogEntry> collector, String testId) {
+    private CapturingHandler(Consumer<LogEntry> collector) {
       this.collector = collector;
-      this.testId = testId;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void publish(LogRecord record) {
       Level level = record.getLevel();
       MessageAndMetadata mm = metadataParser.extract(record.getMessage());
-      if (LogInterceptor.shouldCollect(mm, testId)) {
-        collector.accept(
-            LogEntry.of(
-                record.getSourceClassName(),
-                record.getSourceMethodName(),
-                level.getName(),
-                levelClassOf(level),
-                FloggerBinding.getBestTimestamp(record),
-                // Cannot use "getLongThreadId()" until supported JDK bumped to 16.
-                record.getThreadID(),
-                mm.message(),
-                mm.metadata(),
-                record.getThrown()));
-      }
+      LogEntry entry =
+          LogEntry.of(
+              record.getSourceClassName(),
+              record.getSourceMethodName(),
+              level.getName(),
+              levelClassOf(level),
+              FloggerBinding.getBestTimestamp(record),
+              // Cannot use "getLongThreadId()" until supported JDK bumped to 16.
+              record.getThreadID(),
+              mm.message(),
+              mm.metadata(),
+              record.getThrown());
+      collector.accept(entry);
     }
 
     @Override

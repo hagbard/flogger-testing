@@ -20,6 +20,7 @@ import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
+import net.goui.flogger.testing.api.RecorderSpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,8 +44,7 @@ public class JdkInterceptorTest {
 
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder =
-        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add)) {
       assertThat(logged).isEmpty();
       jdkLogger.info("Log message");
       childLogger.info("Child message");
@@ -64,8 +64,7 @@ public class JdkInterceptorTest {
     Logger jdkLogger = logger("foo.bar.Baz");
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder =
-        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add)) {
       jdkLogger.warning("Message [CONTEXT foo=true ]");
       jdkLogger.warning("Message [CONTEXT bar=1234 ]");
       jdkLogger.warning("Message [CONTEXT bar=1.23e6 ]");
@@ -85,8 +84,7 @@ public class JdkInterceptorTest {
     Logger jdkLogger = logger("foo.bar.Baz");
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder =
-        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add)) {
       jdkLogger.warning(
           "Message [CONTEXT foo=true foo=1234 foo=1.23e6 foo=\"\\tline1\\n\\t\\\"line2\\\"\" ]");
 
@@ -97,17 +95,30 @@ public class JdkInterceptorTest {
 
   @Test
   public void testTestIdFiltering() {
+    String className = "foo.bar.Baz";
     Logger jdkLogger = logger("foo.bar.Baz");
 
     LogInterceptor interceptor = JdkInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
+    RecorderSpec spec = RecorderSpec.of("foo.bar.Baz", LevelClass.INFO);
     try (Recorder recorder =
-        interceptor.attachTo("foo.bar.Baz", LevelClass.INFO, logged::add, TEST_ID)) {
+        interceptor.attachTo(
+            "foo.bar.Baz", spec.getMinLevel(), spec.wrapCollector(logged::add, TEST_ID))) {
       assertThat(logged).isEmpty();
-      jdkLogger.info("No test ID");
-      jdkLogger.info("Valid test ID [CONTEXT test_id=\"" + TEST_ID + "\" ]");
-      jdkLogger.info("Multiple test IDs [CONTEXT test_id=\"" + TEST_ID + "\" test_id=\"xxx\" ]");
-      jdkLogger.info("Unmatched test ID [CONTEXT test_id=\"xxx\" ]");
+
+      jdkLogger.logp(Level.INFO, className, "methodName", "No test ID");
+      jdkLogger.logp(
+          Level.INFO,
+          className,
+          "methodName",
+          "Valid test ID [CONTEXT test_id=\"" + TEST_ID + "\" ]");
+      jdkLogger.logp(
+          Level.INFO,
+          className,
+          "methodName",
+          "Multiple test IDs [CONTEXT test_id=\"" + TEST_ID + "\" test_id=\"xxx\" ]");
+      jdkLogger.logp(
+          Level.INFO, className, "methodName", "Unmatched test ID [CONTEXT test_id=\"xxx\" ]");
 
       assertThat(logged).hasSize(3);
       assertThat(logged.get(0).message()).isEqualTo("No test ID");

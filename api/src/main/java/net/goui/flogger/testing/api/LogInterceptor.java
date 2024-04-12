@@ -89,7 +89,7 @@ public interface LogInterceptor {
   }
 
   /**
-   * Attach this interceptor to an underlying logger with the given name, to capture logs at or
+   * Attach this interceptor to an underlying backend with the given name, to capture logs at or
    * above the specified level. Only one call to attach should be made per logger name, and an
    * interceptor is permitted (but not required) to fail (throwing an {@link IllegalStateException}
    * if an attempt is made to attach the same logger name twice).
@@ -97,16 +97,11 @@ public interface LogInterceptor {
    * @return a closeable "recorder" which encapsulated the attachment to the specific logger and
    *     which will be removed once testing is complete.
    */
-  Recorder attachTo(
-      String loggerName, LevelClass level, Consumer<LogEntry> collector, String testId);
-
-  static boolean shouldCollect(MessageAndMetadata mm, String testId) {
-    return TestingApi.hasMatchingTestId(mm, testId);
-  }
+  Recorder attachTo(String backendName, LevelClass level, Consumer<LogEntry> collector);
 
   /**
    * Detaches the interceptor from the logger for which the original {@link #attachTo(String,
-   * LevelClass, Consumer, String)} call was made.
+   * LevelClass, Consumer)} call was made.
    */
   interface Recorder extends AutoCloseable {
     @Override

@@ -14,19 +14,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static net.goui.flogger.testing.LevelClass.INFO;
 import static net.goui.flogger.testing.truth.LogSubject.assertThat;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
+import net.goui.flogger.testing.LevelClass;
 import net.goui.flogger.testing.LogEntry;
 import net.goui.flogger.testing.api.LogInterceptor;
 import net.goui.flogger.testing.api.LogInterceptor.Recorder;
-import net.goui.flogger.testing.junit4.FloggerTestRule;
+import net.goui.flogger.testing.api.RecorderSpec;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,11 +33,6 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class Log4jInterceptorTest {
   private static final String TEST_ID = "Test ID";
-
-  @Rule
-  public final FloggerTestRule logs =
-      FloggerTestRule.create(
-          ImmutableMap.of(Log4jInterceptorTest.class.getName(), INFO), Log4jInterceptor.create());
 
   Logger logger(String name) {
     Logger logger = (Logger) LogManager.getLogger(name);
@@ -57,7 +51,7 @@ public class Log4jInterceptorTest {
 
     LogInterceptor interceptor = Log4jInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add)) {
 
       assertThat(logged).isEmpty();
 
@@ -80,7 +74,7 @@ public class Log4jInterceptorTest {
 
     LogInterceptor interceptor = Log4jInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add)) {
       logger.error("Message: Error");
       logger.warn("Message: Warn");
       logger.info("Message: Info");
@@ -96,11 +90,16 @@ public class Log4jInterceptorTest {
 
   @Test
   public void testIdFiltering() {
-    Logger logger = logger("foo.bar.Baz");
+    // To test class name filtering with a Log4J logger, use the real class name to match.
+    String testClassName = Log4jInterceptorTest.class.getName();
+    Logger logger = logger(testClassName);
 
     LogInterceptor interceptor = Log4jInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    RecorderSpec spec = RecorderSpec.of(testClassName, LevelClass.INFO);
+    try (Recorder recorder =
+        interceptor.attachTo(
+            testClassName, spec.getMinLevel(), spec.wrapCollector(logged::add, TEST_ID))) {
       assertThat(logged).isEmpty();
       logger.info("No test ID");
       logger.info("Valid test ID [CONTEXT test_id=\"" + TEST_ID + "\" ]");
@@ -123,7 +122,7 @@ public class Log4jInterceptorTest {
 
     LogInterceptor interceptor = Log4jInterceptor.create();
     List<LogEntry> logged = new ArrayList<>();
-    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add, TEST_ID)) {
+    try (Recorder recorder = interceptor.attachTo("foo.bar.Baz", INFO, logged::add)) {
       logger.info("With one MDC");
 
       // And values added between log statements must be captured.

@@ -102,9 +102,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @CheckReturnValue
 public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
-  // Tag label for a unique ID set for tests to support parallel testing with Flogger.
-  @VisibleForTesting static final String TEST_ID = "test_id";
-
   private final ImmutableMap<String, LevelClass> defaultLevelMap;
   private LogInterceptor interceptor;
   // Captured logs (thread safe).
@@ -415,8 +412,13 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       // Empty string is a safe no-op value for the test ID.
       testId = useTestId ? TestId.claim() : "";
       Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extraLevelMap);
-      levelMap.forEach(
-          (name, level) -> recorders.add(interceptor.attachTo(name, level, logs::add, testId)));
+      Map<String, RecorderSpec> specs = RecorderSpec.getRecorderSpecs(levelMap);
+      specs.forEach(
+          (name, spec) -> {
+            recorders.add(
+                interceptor.attachTo(
+                    name, spec.getMinLevel(), spec.wrapCollector(logs::add, testId)));
+          });
       context = FloggerBinding.maybeInstallFloggerContext(levelMap, testId);
     }
 
@@ -446,19 +448,6 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       }
       verification.accept(subject);
     }
-  }
-
-  /**
-   * Determines if the test ID of a log entry matches the given value. This is used to filter log
-   * entries when tests are run in parallel to avoid capturing entries for the wrong tests.
-   *
-   * <p>Called from {@link LogInterceptor}, so as not to be part of this class's public API.
-   */
-  static boolean hasMatchingTestId(MessageAndMetadata mm, String testId) {
-    ImmutableList<Object> values = mm.metadata().get(TEST_ID);
-    // Assume logs without a detected test ID should still be collected (this may get interesting
-    // in multi-threaded parallel tests, but it prevents in tagged logs being ignored).
-    return values == null || values.contains(testId);
   }
 
   // Matches an expected text class name and captures the assumed class-under-test.
