@@ -17,12 +17,12 @@
     <parent>
         <groupId>net.goui.flogger-testing</groupId>
         <artifactId>flogger-testing</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
     </parent>
 
     <artifactId>api</artifactId>
     <name>Flogger Testing API</name>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
     <url>${base.url}/${project.artifactId}</url>
 
