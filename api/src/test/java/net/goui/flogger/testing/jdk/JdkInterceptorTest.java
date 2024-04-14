@@ -103,7 +103,7 @@ public class JdkInterceptorTest {
     RecorderSpec spec = RecorderSpec.of("foo.bar.Baz", LevelClass.INFO);
     try (Recorder recorder =
         interceptor.attachTo(
-            "foo.bar.Baz", spec.getMinLevel(), spec.wrapCollector(logged::add, TEST_ID))) {
+            "foo.bar.Baz", spec.getMinLevel(), spec.applyFilter(logged::add, TEST_ID))) {
       assertThat(logged).isEmpty();
 
       jdkLogger.logp(Level.INFO, className, "methodName", "No test ID");

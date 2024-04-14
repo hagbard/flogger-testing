@@ -21,6 +21,8 @@ import static net.goui.flogger.testing.SetLogLevel.Scope.UNDEFINED;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.flogger.backend.Platform;
 import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -28,8 +30,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -411,13 +413,15 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       }
       // Empty string is a safe no-op value for the test ID.
       testId = useTestId ? TestId.claim() : "";
+      // Iteration order of both levelMap and specs is retained to ensure consistency.
       Map<String, LevelClass> levelMap = mergeLevelMaps(defaultLevelMap, extraLevelMap);
-      Map<String, RecorderSpec> specs = RecorderSpec.getRecorderSpecs(levelMap);
+      Map<String, RecorderSpec> specs =
+          RecorderSpec.getRecorderSpecs(levelMap, TestingApi::getBackendName);
       specs.forEach(
           (name, spec) -> {
             recorders.add(
                 interceptor.attachTo(
-                    name, spec.getMinLevel(), spec.wrapCollector(logs::add, testId)));
+                    name, spec.getMinLevel(), spec.applyFilter(logs::add, testId)));
           });
       context = FloggerBinding.maybeInstallFloggerContext(levelMap, testId);
     }
@@ -433,7 +437,7 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
         context = null;
       }
       // Recorders are defined to catch/ignore their own exceptions on close.
-      recorders.forEach(Recorder::close);
+      Lists.reverse(recorders).forEach(Recorder::close);
       TestId.release(testId);
       LogsSubject subject = TestingApi.this.assertLogs();
       for (LogsExpectation expectation : expectations) {
@@ -448,6 +452,10 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
       }
       verification.accept(subject);
     }
+  }
+
+  private static String getBackendName(String loggingClassName) {
+    return Platform.getBackend(loggingClassName).getLoggerName();
   }
 
   // Matches an expected text class name and captures the assumed class-under-test.
@@ -524,6 +532,10 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     return targetName.replace('$', '.');
   }
 
+  /**
+   * Merges the given level maps, overriding any level settings of the default map with the extra
+   * map. Iteration order is retained as this is used for attaching recorders to handlers.
+   */
   private static Map<String, LevelClass> mergeLevelMaps(
       ImmutableMap<String, LevelClass> defaultMap, ImmutableMap<String, LevelClass> extraMap) {
     if (extraMap.isEmpty()) {
@@ -533,7 +545,10 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
     if (defaultMap.isEmpty()) {
       return ImmutableMap.copyOf(extraMap);
     }
-    HashMap<String, LevelClass> map = new HashMap<>();
+    // Merging has no obviously natural order, but it's probably a good idea to make it consistent,
+    // since it determines the attach/detach ordering of recorders. LinkedHashMap preserves initial
+    // order of duplicate entries, so the default map order is always preserved.
+    LinkedHashMap<String, LevelClass> map = new LinkedHashMap<>();
     map.putAll(defaultMap);
     map.putAll(extraMap);
     return map;
@@ -552,14 +567,19 @@ public abstract class TestingApi<ApiT extends TestingApi<ApiT>> {
   /** A thread safe generator for short, unique test IDs. */
   @VisibleForTesting
   static class TestId {
+    // Range is 65536, so limiting the max number to 1/16 of that (~4000) makes it unlikely the
+    // ID generation loop will spin too often.
+    private static final int TEST_ID_RANGE = 0x10000;
+    private static final int MAX_TEST_IDS = TEST_ID_RANGE / 16;
+
     private static final ConcurrentSkipListSet<String> ids = new ConcurrentSkipListSet<>();
     private static final AtomicBoolean hasWarned = new AtomicBoolean();
 
     static String claim() {
       String id = "";
-      if (ids.size() < 0x4000) {
+      if (ids.size() < MAX_TEST_IDS) {
         do {
-          int n = ThreadLocalRandom.current().nextInt(0x10000);
+          int n = ThreadLocalRandom.current().nextInt(TEST_ID_RANGE);
           id = String.format("%04X", n);
         } while (!ids.add(id));
       } else if (hasWarned.compareAndSet(false, true)) {

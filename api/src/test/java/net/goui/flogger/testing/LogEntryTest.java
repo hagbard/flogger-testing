@@ -131,6 +131,103 @@ public class LogEntryTest {
   }
 
   @Test
+  public void testInferredClassAndMethodNames() {
+    // Pre Java 11, lambdas appeared in the class name.
+    LogEntry lambdaInClassName = LogEntry.of(
+        "ClassName$$Lambda$123/xyz",
+        "methodName",
+        "<info>",
+        LevelClass.INFO,
+        TIMESTAMP,
+        THREAD_ID,
+        "<message>",
+        ImmutableMap.of(),
+        null);
+    assertThat(lambdaInClassName.className()).isEqualTo("ClassName");
+    assertThat(lambdaInClassName.methodName()).isEqualTo("methodName");
+
+    // Recently lambdas appeared in the method name (more sensible).
+    LogEntry lambdaInMethodName = LogEntry.of(
+        "ClassName",
+        "lambda$methodName$123",
+        "<info>",
+        LevelClass.INFO,
+        TIMESTAMP,
+        THREAD_ID,
+        "<message>",
+        ImmutableMap.of(),
+        null);
+    assertThat(lambdaInMethodName.className()).isEqualTo("ClassName");
+    assertThat(lambdaInMethodName.methodName()).isEqualTo("methodName");
+  }
+
+  @Test
+  public void testInferredClassAndMethodNames_unexpected() {
+    // Unexpected trailing class/method names should work, but cause warnings.
+    LogEntry lambdaInClassName = LogEntry.of(
+        "ClassName$$unexpected",
+        "methodName",
+        "<info>",
+        LevelClass.INFO,
+        TIMESTAMP,
+        THREAD_ID,
+        "<message>",
+        ImmutableMap.of(),
+        null);
+    assertThat(lambdaInClassName.className()).isEqualTo("ClassName");
+    assertThat(lambdaInClassName.methodName()).isEqualTo("methodName");
+
+    LogEntry lambdaInMethodName = LogEntry.of(
+        "ClassName",
+        "unexpected$methodName",
+        "<info>",
+        LevelClass.INFO,
+        TIMESTAMP,
+        THREAD_ID,
+        "<message>",
+        ImmutableMap.of(),
+        null);
+    assertThat(lambdaInMethodName.className()).isEqualTo("ClassName");
+    assertThat(lambdaInMethodName.methodName()).isEqualTo("methodName");
+  }
+
+  @Test
+  public void testSnippet() {
+    // Shorter messages are emitted as is.
+    LogEntry entry = snippetEntry("log message");
+    assertThat(entry.snippet()).isEqualTo("<info>(INFO): \"log message\"");
+
+    // Multiline messages use only the first line (but show truncation).
+    LogEntry multiLine = snippetEntry("log message\nsecond line");
+    assertThat(multiLine.snippet()).isEqualTo("<info>(INFO): \"log message...\"");
+
+    // Handle other newline representations.
+    LogEntry windows = snippetEntry("log message\r\nsecond line");
+    assertThat(windows.snippet()).isEqualTo("<info>(INFO): \"log message...\"");
+
+    // Longer messages are trimmed.
+    LogEntry longMessage = snippetEntry("log message long enough to need to be trimmed");
+    assertThat(longMessage.snippet()).isEqualTo("<info>(INFO): \"log message long enough to nee...\"");
+
+    // Edge case where surrogate pair straddles the max message length (30 chars).
+    LogEntry trailingSurrogate = snippetEntry("<10 chars><10 chars><9 chars>\uD801\uDC37");
+    assertThat(trailingSurrogate.snippet()).isEqualTo("<info>(INFO): \"<10 chars><10 chars><9 chars>...\"");
+  }
+
+  private static LogEntry snippetEntry(String message) {
+    return LogEntry.of(
+        "<unused in snippet>",
+        "<unused in snippet>",
+        "<info>",
+        LevelClass.INFO,
+        TIMESTAMP,
+        THREAD_ID,
+        message,
+        ImmutableMap.of(),
+        null);
+  }
+
+  @Test
   public void testToString() {
     ImmutableMap<String, ImmutableList<Object>> metadata =
         ImmutableMap.of("foo", ImmutableList.of("bar"));

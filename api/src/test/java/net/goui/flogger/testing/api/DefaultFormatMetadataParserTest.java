@@ -45,6 +45,9 @@ public class DefaultFormatMetadataParserTest {
   public void parse_extractsMetadata_success() {
     assertMetadata("ignored [CONTEXT foo ]", "foo", null);
     assertMetadata("ignored [CONTEXT foo=true ]", "foo", true);
+    assertMetadata("ignored [CONTEXT foo=false ]", "foo", false);
+    assertMetadata("ignored [CONTEXT foo=1234 ]", "foo", 1234L);
+    assertMetadata("ignored [CONTEXT foo=12.34 ]", "foo", 12.34D);
     assertMetadata(
         "ignored [CONTEXT foo=true bar=10 baz=3.1415926 ]",
         "foo",
@@ -55,6 +58,19 @@ public class DefaultFormatMetadataParserTest {
         3.1415926D);
     assertMetadata("ignored [CONTEXT foo=\"true\" ]", "foo", "true");
     assertMetadata("ignored [CONTEXT foo=\"xxx\\\\yyy\\nzzz\" ]", "foo", "xxx\\yyy\nzzz");
+  }
+
+  @Test
+  public void parse_extractsMetadata_badValues() {
+    // Unquoted value that cannot be parsed as boolean, double or long.
+    assertMetadata("ignored [CONTEXT foo=truX ]", "foo", "truX");
+    // Only \n, \r and \t are allowed for quoting but other "quoted" values are handled leniently..
+    assertMetadata("ignored [CONTEXT foo=\"foo \\x bar\" ]", "foo", "foo x bar");
+
+    // Drop remaining keys because of unquoted trailing backslash in JSON string.
+    assertNoMetadataKeys("ignored [CONTEXT foo=\"trailing backslash\\\" bar=1 ]", "foo", "bar");
+    // Drop remaining keys because of missing closing quote.
+    assertNoMetadataKeys("ignored [CONTEXT foo=\"no closing quote bar=1 ]", "foo", "bar");
   }
 
   private void assertMessage(String message, String expected) {
@@ -72,6 +88,14 @@ public class DefaultFormatMetadataParserTest {
       if (expected != null) {
         assertThat(values).contains(expected);
       }
+    }
+  }
+
+  private void assertNoMetadataKeys(String message, String... keys) {
+    ImmutableMap<String, ImmutableList<Object>> metadata =
+        DefaultFormatMetadataParser.parse(message).metadata();
+    for (String key : keys) {
+      assertThat(metadata.keySet()).doesNotContain(key);
     }
   }
 }
