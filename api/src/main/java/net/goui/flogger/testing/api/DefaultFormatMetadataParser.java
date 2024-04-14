@@ -43,7 +43,7 @@ public final class DefaultFormatMetadataParser {
   // Non-quoted values are from tag values boolean, long or double and can be reparsed.
   // Quoted values are JSON escaped (\\, \", \n, \r, \t) and need unescaping.
   private static final Pattern KEY_VALUE_PAIR =
-      Pattern.compile("([^\\s=]+)(?:=([^\"]\\S*|\"(?:[^\"\\\\]|\\\\[\\\\nrt\"])+\"))?");
+      Pattern.compile("([^\\s=]+)(?:=([^\"]\\S*|\"(?:[^\"\\\\]|\\\\.)+\"))?");
   private static final Pattern CONTEXT =
       Pattern.compile("(?:^|[ \\n])\\[CONTEXT ((?:" + KEY_VALUE_PAIR.pattern() + " )+)]$");
 
@@ -112,8 +112,9 @@ public final class DefaultFormatMetadataParser {
     int start = 0;
     do {
       if (end == lastIndex) {
+        // This *should* be unreachable as the regex demands a character after a '\' in JSON
+        // strings. However, for safety, break out and add the final chunk.
         foundProblems = true;
-        // This still adds the final chunk (with the trailing backslash in).
         break;
       }
       buf.append(jsonString, start, end);

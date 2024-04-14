@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @AutoValue
 public abstract class LogEntry {
+  private static final int TRIMMED_MESSAGE_LENGTH = 30;
   private static final AtomicBoolean hasWarnedUnknownMethodNamingConvention = new AtomicBoolean();
   private static final AtomicBoolean hasWarnedUnknownClassNamingConvention = new AtomicBoolean();
 
@@ -292,13 +293,9 @@ public abstract class LogEntry {
     return levelString + ": \"" + shortSnippet(message()) + "\"";
   }
 
-  // Rough and ready trim of the log message to no more than 30 chars.
+  // Rough and ready trim of the log message to no more than TRIMMED_MESSAGE_LENGTH chars.
   private static String shortSnippet(String message) {
-    int splitIndex = message.indexOf('\n');
-    if (splitIndex == -1) {
-      splitIndex = message.length();
-    }
-    splitIndex = Math.min(30, splitIndex);
+    int splitIndex = findSplit(message);
     if (splitIndex == message.length()) {
       return message;
     }
@@ -307,6 +304,11 @@ public abstract class LogEntry {
     }
     // Definitely truncating!
     return message.substring(0, splitIndex) + "...";
+  }
+
+  private static int findSplit(String msg) {
+    return Math.toIntExact(
+        msg.chars().limit(TRIMMED_MESSAGE_LENGTH).takeWhile(c -> c != '\n' && c != '\r').count());
   }
 
   // Determines class name for testing, ignoring synthetic classes for lambdas etc.

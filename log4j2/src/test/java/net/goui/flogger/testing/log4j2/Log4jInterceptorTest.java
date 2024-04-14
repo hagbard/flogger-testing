@@ -99,7 +99,7 @@ public class Log4jInterceptorTest {
     RecorderSpec spec = RecorderSpec.of(testClassName, LevelClass.INFO);
     try (Recorder recorder =
         interceptor.attachTo(
-            testClassName, spec.getMinLevel(), spec.wrapCollector(logged::add, TEST_ID))) {
+            testClassName, spec.getMinLevel(), spec.applyFilter(logged::add, TEST_ID))) {
       assertThat(logged).isEmpty();
       logger.info("No test ID");
       logger.info("Valid test ID [CONTEXT test_id=\"" + TEST_ID + "\" ]");
