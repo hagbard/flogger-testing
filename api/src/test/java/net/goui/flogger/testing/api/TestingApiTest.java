@@ -324,7 +324,7 @@ public class TestingApiTest {
   }
 
   @Test
-  public void testAssertLogs_expectLogs() {
+  public void testExpectLogs() {
     String className = "SomeClass";
     TestApi logs = TestApi.create(className);
     try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
@@ -350,6 +350,23 @@ public class TestingApiTest {
           log(className, INFO, "foo"),
           log(className, INFO, "bar"),
           log(className, WARNING, "foobar"));
+    }
+  }
+
+  @Test
+  public void testExpectLogs_allowingNoMatches() {
+    String className = "SomeClass";
+    TestApi logs = TestApi.create(className);
+    try (var unused = logs.install(/* useTestId= */ true, ImmutableMap.of())) {
+      // Verify later that the expectations below covered all the logs emitted by this test.
+      logs.verify(LogsSubject::doNotOccur);
+
+      logs.expectLogs(log -> log.withMessageContaining("foo")).atLeast(1);
+      // In some cases a log to be verified might not be reliably generated. In these cases, allow
+      // an empty sequence of matched logs to satisfy the expectation.
+      logs.expectLogs(log -> log.allowingNoMatches().withMessageContaining("bar")).atMost(1);
+
+      logs.addTestLogs(log(className, INFO, "foo"));
     }
   }
 
