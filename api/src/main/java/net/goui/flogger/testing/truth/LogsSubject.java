@@ -88,12 +88,20 @@ public final class LogsSubject extends Subject {
     this.allowEmptyMatch = allowEmptyMatch;
   }
 
+  /** Returns a factory for a logs subject about the complete set of captured logs. */
   public static Factory<LogsSubject, ImmutableList<LogEntry>> logSequences() {
-    return (m, l) -> new LogsSubject(m, l, /* allowEmptyMatch= */ false);
+    return logSequences(/* allowEmptyMatch */ false);
   }
 
-  private static Factory<LogsSubject, ImmutableList<LogEntry>> maybeEmptylogSequences() {
-    return (m, l) -> new LogsSubject(m, l, /* allowEmptyMatch= */ true);
+  /** Returns a factory about the current set of filtered logs, inheriting configuration. */
+  private Factory<LogsSubject, ImmutableList<LogEntry>> currentLogs() {
+    return logSequences(allowEmptyMatch);
+  }
+
+  /** Returns a factory with the specified behaviour configuration. */
+  private static Factory<LogsSubject, ImmutableList<LogEntry>> logSequences(
+      boolean allowEmptyMatch) {
+    return (m, l) -> new LogsSubject(m, l, allowEmptyMatch);
   }
 
   /** Starts a fluent assertion about the current sequence of captured logs. */
@@ -116,7 +124,7 @@ public final class LogsSubject extends Subject {
     LogEntryFilter combined =
         Arrays.stream(matchers).map(LogMatcher::getFilter).reduce(x -> x, LogEntryFilter::combine);
     return check(label)
-        .about(logSequences())
+        .about(currentLogs())
         .that(combined.apply(logs.stream()).collect(toImmutableList()));
   }
 
@@ -136,7 +144,7 @@ public final class LogsSubject extends Subject {
    */
   public LogsSubject withMessageContaining(String fragment, String... rest) {
     return check("withMessageContaining(%s)", joinFragments(fragment, rest))
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> containsAllFragmentsInOrder(e.message(), fragment, rest)));
   }
 
@@ -147,55 +155,55 @@ public final class LogsSubject extends Subject {
   public LogsSubject withMessageMatching(String regex) {
     Predicate<String> regexPredicate = Pattern.compile(regex).asPredicate();
     return check("withMessageMatching('%s')", regex)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> regexPredicate.test(e.message())));
   }
 
   /** Matches the subsequence of captured logs at the specified level. */
   public LogsSubject withLevel(LevelClass level) {
     return check("withLevel(%s)", level)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.levelClass() == level));
   }
 
   /** Matches the subsequence of captured logs strictly above the specified level. */
   public LogsSubject withLevelGreaterThan(LevelClass level) {
     return check("withLevelGreaterThan(%s)", level)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.levelClass().compareTo(level) > 0));
   }
 
   /** Matches the subsequence of captured logs at or above the specified level. */
   public LogsSubject withLevelAtLeast(LevelClass level) {
     return check("withLevelAtLeast(%s)", level)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.levelClass().compareTo(level) >= 0));
   }
 
   /** Matches the subsequence of captured logs strictly below the specified level. */
   public LogsSubject withLevelLessThan(LevelClass level) {
     return check("withLevelLessThan(%s)", level)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.levelClass().compareTo(level) < 0));
   }
 
   /** Matches the subsequence of captured logs at or below the specified level. */
   public LogsSubject withLevelAtMost(LevelClass level) {
     return check("withLevelAtMost(%s)", level)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.levelClass().compareTo(level) <= 0));
   }
 
   /** Matches the subsequence of captured logs with a cause of the specified type. */
   public LogsSubject withCause(Class<? extends Throwable> clazz) {
     return check("withCause(%s)", clazz.getName())
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> clazz.isInstance(e.cause())));
   }
 
   /** Matches the subsequence of captured logs with a cause of any type. */
   public LogsSubject withCause() {
-    return check("withCause()").about(logSequences()).that(filter(logs, e -> e.cause() != null));
+    return check("withCause()").about(currentLogs()).that(filter(logs, e -> e.cause() != null));
   }
 
   /** Matches the subsequence of captured logs with the specified metadata key-value pair. */
@@ -220,14 +228,14 @@ public final class LogsSubject extends Subject {
 
   private LogsSubject withMetadataImpl(String key, @Nullable Object value) {
     return check("withMetadata('%s', %s)", key, quoteIfString(value))
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.hasMetadata(key, value)));
   }
 
   /** Matches the subsequence of captured logs with the specified metadata key. */
   public LogsSubject withMetadataKey(String key) {
     return check("withMetadataKey('%s')", key)
-        .about(logSequences())
+        .about(currentLogs())
         .that(filter(logs, e -> e.hasMetadataKey(key)));
   }
 
@@ -251,7 +259,7 @@ public final class LogsSubject extends Subject {
    * }</pre>
    */
   public LogsSubject allowingNoMatches() {
-    return check("allowingNoMatches()").about(maybeEmptylogSequences()).that(logs);
+    return check("allowingNoMatches()").about(logSequences(/* allowEmptyMatch= */ true)).that(logs);
   }
 
   /**
