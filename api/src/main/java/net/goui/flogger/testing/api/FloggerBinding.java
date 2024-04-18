@@ -17,12 +17,11 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static net.goui.flogger.testing.LevelClass.FINE;
-import static net.goui.flogger.testing.LevelClass.FINEST;
 import static net.goui.flogger.testing.LevelClass.INFO;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.LogSite;
 import com.google.common.flogger.backend.LoggerBackend;
 import com.google.common.flogger.backend.Platform;
 import com.google.common.flogger.backend.system.AbstractLogRecord;
@@ -51,7 +50,7 @@ public final class FloggerBinding {
   // Tag label for a unique ID set for tests to support parallel testing with Flogger.
   private static final String TEST_ID = "test_id";
   private static final String LOGGING_CLASS_NAME = FloggerBinding.class.getName();
-
+  private static final String LOGGING_METHOD_NAME = "someMethod";
   @Nullable private static final FloggerBinding INSTANCE = determineInstance();
 
   /** Returns whether Flogger is available at runtime. */
@@ -93,8 +92,6 @@ public final class FloggerBinding {
   }
 
   Support testSupportLevel(AbstractLogInterceptorFactory factory) {
-    // Not static fields to avoid triggering class loader in cases where Flogger is not available.
-    FluentLogger logger = FluentLogger.forEnclosingClass();
     // This should be the same (or at least equivalent) backend as used by 'logger'.
     LoggerBackend backend = Platform.getBackend(LOGGING_CLASS_NAME);
     // From which we can extract the backend's real name (not always the same as the logging class).
@@ -112,26 +109,23 @@ public final class FloggerBinding {
     RuntimeException testCause = new RuntimeException();
     List<LogEntry> logged = new ArrayList<>();
 
+    LogSite logSite = LogSite.injectedLogSite(LOGGING_CLASS_NAME, LOGGING_METHOD_NAME, -1, "");
+
     try (LogInterceptor.Recorder r = interceptor.attachTo(backendName, FINE, logged::add)) {
-      logger.atInfo().withCause(testCause).log("<<enabled message>>");
-      logger.atFine().log("<<forced message>>");
-      logger.atFinest().log("<<disabled log>>");
+      backend.log(new SimpleLogData(backendName, logSite, Level.INFO, "<<enabled message>>", testCause, false));
+      backend.log(new SimpleLogData(backendName, logSite, Level.FINE, "<<forced message>>", null, true));
+      backend.log(new SimpleLogData(backendName, logSite, Level.FINEST, "<<disabled log>>", null, false));
     }
     if (logged.isEmpty()) {
       return Support.NONE;
     }
-    // Support can only go down as checks fail. Start
+    // Support can only go down as checks fail.
     Support support = Support.FULL;
-    if (!backendName.equals(LOGGING_CLASS_NAME)) {
-      // We got some logs, but the backend name mapping does not preserve class names. This is
-      // partial support because it prevents testing for "class-under-test" etc. reliably.
-      support = min(support, Support.PARTIAL);
-    }
     LogEntry enabledLog = logged.get(0);
     support = min(support, testBasicSupport(enabledLog, INFO, "<<enabled message>>", testCause));
     if (logged.size() == 2) {
       LogEntry forcedLog = logged.get(1);
-      support = min(support, testBasicSupport(forcedLog, FINEST, "<<forced message>>", null));
+      support = min(support, testBasicSupport(forcedLog, FINE, "<<forced message>>", null));
       // As well as basic support, test for the expected "forced=true" metadata.
       ImmutableList<Object> values = forcedLog.metadata().get("forced");
       if (values == null || !values.contains(TRUE)) {
@@ -178,7 +172,7 @@ public final class FloggerBinding {
     }
     boolean fullSupport =
         e.className().equals(LOGGING_CLASS_NAME)
-            && e.methodName().equals("getSupportLevel")
+            && e.methodName().equals(LOGGING_METHOD_NAME)
             && e.levelClass() == levelClass
             && Objects.equals(e.cause(), cause);
     return fullSupport ? Support.FULL : Support.PARTIAL;
