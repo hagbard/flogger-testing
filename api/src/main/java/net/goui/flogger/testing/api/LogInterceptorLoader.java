@@ -47,8 +47,10 @@ final class LogInterceptorLoader {
       switch (factory.getSupportLevel()) {
         case FULL:
           fullSupport.add(factory);
+          break;
         case PARTIAL:
           partialSupport.add(factory);
+          break;
         default:
           break;
       }

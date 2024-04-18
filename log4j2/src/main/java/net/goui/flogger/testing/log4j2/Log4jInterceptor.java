@@ -92,19 +92,29 @@ public final class Log4jInterceptor implements LogInterceptor {
     Level oldLog4JLevel = oldConfig.getLevel();
     Level newLevel = Comparators.max(oldLog4JLevel, log4JLevel);
     // Add a new logger config or use the existing one.
-    LoggerConfig config =
-        loggerName.equals(oldConfig.getName())
-            ? oldConfig
-            : new LoggerConfig(loggerName, null, true);
+    LoggerConfig config = oldConfig;
+    boolean addedNewConfig = !loggerName.equals(oldConfig.getName());
+    if (addedNewConfig) {
+      config = new LoggerConfig(loggerName, null, true);
+      context.getConfiguration().addLogger(loggerName, config);
+    }
     // Actually adds an AppenderRef
     config.addAppender(appender, null, null);
-    // Sets the level of the LoggerConfig (either one).
+    appender.start();
+    // Sets the level of the LoggerConfig (either old or new).
     config.setLevel(newLevel);
-    context.getConfiguration().addLogger(loggerName, config);
     context.updateLoggers();
     return () -> {
       try {
-        context.getConfiguration().removeLogger(loggerName);
+        appender.stop();
+        if (addedNewConfig) {
+          // Remove the whole config for the logger which we added.
+          context.getConfiguration().removeLogger(loggerName);
+        } else {
+          // Try and reset the old configuration to its previous state.
+          oldConfig.removeAppender(appender.getName());
+          oldConfig.setLevel(oldLog4JLevel);
+        }
         context.updateLoggers();
       } catch (RuntimeException e) {
         // Ignored on close().

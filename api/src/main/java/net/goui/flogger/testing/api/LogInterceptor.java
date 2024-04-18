@@ -26,25 +26,18 @@ import net.goui.flogger.testing.LogEntry;
 public interface LogInterceptor {
   /**
    * The support level of an interceptor implementation as determined via {@link
-   * Factory#getSupportLevel()}.
+   * Factory#getSupportLevel()}, ordering from least to most supported.
    */
   enum Support {
     /**
-     * This interceptor implementation extracts all possible data for creating {@code LogEntry}
-     * instances for testing. Log messages contain the logged values, metadata is extracted, class
-     * and method names of the call-site are correct.
-     */
-    FULL,
-
-    /**
-     * This interceptor implementation extracts basic information (log message) but may omit
-     * additional information such as call-site information or even metadata. If an interceptor with
-     * partial support is used, some logging tests are likely to start failing spuriously.
+     * This interceptor implementation is not supported and extracts little or no data from the
+     * underlying log system.
      *
-     * <p>A partially supported log interceptor will only be used if no fully supported instances
-     * can be found (and logging will alert the user to the risk of test failure).
+     * <p>The only time an interceptor with no support will be used is if there are no other options
+     * and the default JDK interceptor does not work either. Logging will warn the user of likely
+     * test failure and tell them to install a supported interceptor.
      */
-    PARTIAL,
+    NONE,
 
     /**
      * It cannot be determined if this interceptor implementation is supported, and tests were not
@@ -58,14 +51,21 @@ public interface LogInterceptor {
     UNKNOWN,
 
     /**
-     * This interceptor implementation is not supported and extracts little or no data from the
-     * underlying log system.
+     * This interceptor implementation extracts basic information (log message) but may omit
+     * additional information such as call-site information or even metadata. If an interceptor with
+     * partial support is used, some logging tests are likely to start failing spuriously.
      *
-     * <p>The only time an interceptor with no support will be used is if there are no other options
-     * and the default JDK interceptor does not work either. Logging will warn the user of likely
-     * test failure and tell them to install a supported interceptor.
+     * <p>A partially supported log interceptor will only be used if no fully supported instances
+     * can be found (and logging will alert the user to the risk of test failure).
      */
-    NONE
+    PARTIAL,
+
+    /**
+     * This interceptor implementation extracts all possible data for creating {@code LogEntry}
+     * instances for testing. Log messages contain the logged values, metadata is extracted, class
+     * and method names of the call-site are correct.
+     */
+    FULL,
   }
 
   /**
