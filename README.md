@@ -7,9 +7,9 @@ A powerful fluent API for testing Flogger log statements, and more.
 <!-- @formatter:off -->
 ```xml
 <dependency>
-    <groupId>net.goui.flogger-testing</groupId>
+    <groupId>net.goui.flogger.testing</groupId>
     <artifactId>junit4</artifactId>  <!-- or "junit5" -->
-    <version>1.0.8</version>
+    <version>1.0.12</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -19,9 +19,9 @@ And if you are using `Log4J2`:
 <!-- @formatter:off -->
 ```xml
 <dependency>
-    <groupId>net.goui.flogger-testing</groupId>
+    <groupId>net.goui.flogger.testing</groupId>
     <artifactId>log4j</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.12</version>
     <scope>test</scope>
 </dependency>
 ```
