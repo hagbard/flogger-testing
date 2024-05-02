@@ -15,9 +15,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.goui.flogger-testing</groupId>
+    <groupId>net.goui.flogger.testing</groupId>
 
-    <artifactId>flogger-testing</artifactId>
+    <artifactId>root</artifactId>
     <name>Flogger Testing API</name>
     <version>1.0.12</version>
     <packaging>pom</packaging>
@@ -30,7 +30,7 @@
     <developers>
         <developer>
             <name>David Beaumont</name>
-            <email>david.beaumont+sonatype@gmail.com</email>
+            <email>david.beaumont+flogger@gmail.com</email>
         </developer>
     </developers>
 
@@ -152,7 +152,6 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>net.goui.flogger.testing:*
                                 </dependencySourceInclude>
@@ -185,27 +184,16 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <!-- Matches server ID in .m2/settings.xml-->
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 </project>

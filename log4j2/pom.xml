@@ -16,8 +16,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.goui.flogger-testing</groupId>
-        <artifactId>flogger-testing</artifactId>
+        <groupId>net.goui.flogger.testing</groupId>
+        <artifactId>root</artifactId>
         <version>1.0.12</version>
     </parent>
 
@@ -84,7 +84,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.goui.flogger-testing</groupId>
+            <groupId>net.goui.flogger.testing</groupId>
             <artifactId>api</artifactId>
             <version>1.0.12</version>
         </dependency>
@@ -106,9 +106,9 @@
             <artifactId>guava</artifactId>
             <version>33.0.0-jre</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/net.goui.flogger-testing/junit4 -->
+        <!-- https://mvnrepository.com/artifact/net.goui.flogger.testing/junit4 -->
         <dependency>
-            <groupId>net.goui.flogger-testing</groupId>
+            <groupId>net.goui.flogger.testing</groupId>
             <artifactId>junit4</artifactId>
             <version>1.0.12</version>
             <scope>test</scope>
